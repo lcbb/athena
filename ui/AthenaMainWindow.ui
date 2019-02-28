@@ -17,7 +17,10 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Athena</string>
+  </property>
+  <property name="statusTip">
+   <string extracomment="asdf"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -94,13 +97,6 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="statusLabel">
-      <property name="text">
-       <string>Ready.</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -114,7 +110,7 @@
    </property>
    <widget class="QMenu" name="menuAthena">
     <property name="title">
-     <string>Athena</string>
+     <string>File</string>
     </property>
    </widget>
    <addaction name="menuAthena"/>

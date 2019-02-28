@@ -2,7 +2,7 @@
 import sys
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar
 from PySide2.QtCore import QFile
 
 class AthenaWindow(QMainWindow):
@@ -15,7 +15,9 @@ class AthenaWindow(QMainWindow):
         self.ui = ui_loader.load(ui_file)
         ui_file.close()
 
-        self.statusLabel = self.ui.findChild(QLabel, "statusLabel")
+        self.statusMsg = QLabel("Ready.")
+        self.ui.statusBar().addWidget(self.statusMsg)
+
         self.ui.show()
 
 if __name__ == '__main__':
