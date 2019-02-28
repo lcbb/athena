@@ -20,7 +20,7 @@
    <string>Athena</string>
   </property>
   <property name="statusTip">
-   <string extracomment="asdf"/>
+   <string/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -60,7 +60,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinimumSize</enum>
         </property>
@@ -81,6 +81,30 @@
           <property name="text">
            <string>Command:</string>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox">
+          <item>
+           <property name="text">
+            <string>PERDIX</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TALOS</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DAEDALUS</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>METIS</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
