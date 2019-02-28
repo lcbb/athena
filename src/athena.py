@@ -9,11 +9,12 @@ class UiLoader(QUiLoader):
     '''
     This works around a dumbness in QUiLoader: it doesn't provide
     a means to apply a ui into a given, existing object (except
-    by the Qt Designer "promoted widgets" method, which does
-    not work for QMainWindow)
+    by the Qt Designer "promoted widgets" method, which in turn
+    does not work for QMainWindow)
 
-    This is simply a QUiLoader that uses a given object instance
-    as the default object for any un-parented widget in the loaded UI.
+    This extended QUiLoader uses a given object instance
+    as the default object for any un-parented widget in the loaded UI,
+    allowing us to populate a pre-constructed widget from a ui file.
     '''
     def __init__(self, baseInstance, *args, **kwargs):
         super(UiLoader, self).__init__(*args, **kwargs)
@@ -26,15 +27,20 @@ class UiLoader(QUiLoader):
         else:
             return super(UiLoader,self).createWidget(className, parent, name)
 
-class AthenaWindow(QMainWindow):
-    def __init__( self, ui_file_path ):
-        super( AthenaWindow, self).__init__(None)
-        ui_file = QFile( ui_file_path )
-        ui_file.open( QFile.ReadOnly)
+    @staticmethod
+    def populateUI( parent, filepath ):
+        ui_file = QFile( filepath )
+        ui_file.open( QFile.ReadOnly )
+        try:
+            ui_loader = UiLoader( parent )
+            ui_loader.load( ui_file )
+        finally:
+            ui_file.close()
 
-        ui_loader = UiLoader(self)
-        ui_loader.load(ui_file)
-        ui_file.close()
+class AthenaWindow(QMainWindow):
+    def __init__( self, ui_filepath ):
+        super( AthenaWindow, self).__init__(None)
+        UiLoader.populateUI( self, ui_filepath )
 
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
