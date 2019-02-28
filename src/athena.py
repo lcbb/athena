@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 import sys
+import subprocess
+import os
+import os.path
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar
@@ -37,6 +40,15 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
+def runPERDIX(input_filepath, args):
+    athena_path = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) )
+    wd = os.path.join( athena_path, "tools", "PERDIX-Mac" )
+    tool = "./PERDIX-Terminal"
+    perdix_call = [tool, input_filepath] + args.split()
+    print("Calling PERDIX as follows:", perdix_call)
+    return subprocess.run(perdix_call, cwd=wd)
+
+
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
         super( AthenaWindow, self).__init__(None)
@@ -46,6 +58,17 @@ class AthenaWindow(QMainWindow):
         self.statusBar().addWidget(self.statusMsg)
 
         self.show()
+
+        self.runButton.clicked.connect(self.runCmd)
+
+    def updateStatus( self, msg ):
+        self.statusMsg.setText( msg )
+
+    def runCmd( self ):
+        command = self.cmdInput.text()
+        cmd_args = command.split()
+        result = runPERDIX(command[0], " ".join(command[1:]))
+        self.updateStatus("Ran " + command + ", result: " + str(result.returncode) )
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
