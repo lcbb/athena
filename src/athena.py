@@ -42,10 +42,10 @@ class UiLoader(QUiLoader):
 
 def runPERDIX(input_filepath, args):
     athena_path = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) )
-    wd = os.path.join( athena_path, "tools", "PERDIX-Mac" )
-    tool = "./PERDIX-Terminal"
+    wd = os.path.join( athena_path, "tools", "PERDIX-Win-MCR" )
+    tool = os.path.join( wd, "PERDIX.exe" )
     perdix_call = [tool, input_filepath] + args.split()
-    print("Calling PERDIX as follows:", perdix_call)
+    print("Calling PERDIX as follows:", perdix_call, "cwd=", wd)
     return subprocess.run(perdix_call, cwd=wd)
 
 
