@@ -46,7 +46,8 @@ def runPERDIX(input_filepath, args):
     tool = os.path.join( wd, "PERDIX.exe" )
     perdix_call = [tool, input_filepath] + args.split()
     print("Calling PERDIX as follows:", perdix_call, "cwd=", wd)
-    return subprocess.run(perdix_call, cwd=wd)
+    return subprocess.run(perdix_call, cwd=wd, stdout=subprocess.DEVNULL, 
+                                               stderr=subprocess.DEVNULL)
 
 
 class AthenaWindow(QMainWindow):
