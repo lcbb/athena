@@ -6,5 +6,6 @@ How to run the project from a working directory:
 
 > virtualenv env
 > source env/activate
-> pip install PySide2
+> pip install -r requirements.txt
 > python src/athena.py
+> ./build_win.bat <any additional arg for pyinstaller, e.g. --onefile>
