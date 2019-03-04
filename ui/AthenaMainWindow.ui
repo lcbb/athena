@@ -84,7 +84,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="toolChooser">
           <item>
            <property name="text">
             <string>PERDIX</string>
@@ -93,16 +93,6 @@
           <item>
            <property name="text">
             <string>TALOS</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>DAEDALUS</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>METIS</string>
            </property>
           </item>
          </widget>

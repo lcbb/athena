@@ -3,20 +3,33 @@ import sys
 import subprocess
 import os
 import os.path
+import platform
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
+# Set ATHENA_DIR, the base project path, relative to which files and tools will be found
 if getattr(sys, 'frozen', False):
+    # We're inside a PyInstaller bundle of some kind
     ATHENA_DIR = sys._MEIPASS
 else:
+    # Not bundled, __file__ is within src/
     ATHENA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Depending on platform, choose tool suffixes, e.g. PERDIX-Mac
+if platform.system() == 'Windows':
+    ATHENA_TOOL_SUFFIX = '-Win-MCR'
+elif platform.system() == 'Darwin':
+    ATHENA_TOOL_SUFFIX = '-Mac'
+else:
+    print( "WARNING: Unknown platform {}, tools may not work".format(platform.system()))
+    ATHENA_TOOL_SUFFIX = ""
 
 class UiLoader(QUiLoader):
     '''
-    This works around a dumbness in QUiLoader: it doesn't provide
+    This works around a shortcoming in QUiLoader: it doesn't provide
     a means to apply a ui into a given, existing object (except
     by the Qt Designer "promoted widgets" method, which in turn
     does not work for QMainWindow)
@@ -47,7 +60,7 @@ class UiLoader(QUiLoader):
             ui_file.close()
 
 def runPERDIX(input_filepath, args):
-    wd = os.path.join( ATHENA_DIR, "tools", "PERDIX-Win-MCR" )
+    wd = os.path.join( ATHENA_DIR, "tools", "PERDIX"+ATHENA_TOOL_SUFFIX )
     tool = os.path.join( wd, "PERDIX.exe" )
     perdix_call = [tool, input_filepath] + args.split()
     print("Calling PERDIX as follows:", perdix_call, "cwd=", wd)
