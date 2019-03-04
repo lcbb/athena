@@ -7,6 +7,12 @@ import os.path
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar
 from PySide2.QtCore import QFile
+import PySide2.QtXml #Temporary pyinstaller workaround
+
+if getattr(sys, 'frozen', False):
+    ATHENA_DIR = sys._MEIPASS
+else:
+    ATHENA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class UiLoader(QUiLoader):
     '''
@@ -41,13 +47,12 @@ class UiLoader(QUiLoader):
             ui_file.close()
 
 def runPERDIX(input_filepath, args):
-    athena_path = os.path.dirname( os.path.dirname( os.path.realpath(__file__) ) )
-    wd = os.path.join( athena_path, "tools", "PERDIX-Win-MCR" )
+    wd = os.path.join( ATHENA_DIR, "tools", "PERDIX-Win-MCR" )
     tool = os.path.join( wd, "PERDIX.exe" )
     perdix_call = [tool, input_filepath] + args.split()
     print("Calling PERDIX as follows:", perdix_call, "cwd=", wd)
-    return subprocess.run(perdix_call, cwd=wd, stdout=subprocess.DEVNULL, 
-                                               stderr=subprocess.DEVNULL)
+    return subprocess.run(perdix_call, cwd=wd, ) #stdout=subprocess.DEVNULL, 
+                                                 #stderr=subprocess.DEVNULL)
 
 
 class AthenaWindow(QMainWindow):
@@ -73,5 +78,5 @@ class AthenaWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = AthenaWindow('ui/AthenaMainWindow.ui')
+    window = AthenaWindow( os.path.join( ATHENA_DIR, 'ui', 'AthenaMainWindow.ui'))
     sys.exit(app.exec_())
