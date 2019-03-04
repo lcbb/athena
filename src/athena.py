@@ -20,9 +20,11 @@ else:
 
 # Depending on platform, choose tool suffixes, e.g. PERDIX-Mac
 if platform.system() == 'Windows':
-    ATHENA_TOOL_SUFFIX = '-Win-MCR'
+    ATHENA_TOOLDIR_SUFFIX = '-Win'
+    ATHENA_TOOL_SUFFIX = '.exe'
 elif platform.system() == 'Darwin':
-    ATHENA_TOOL_SUFFIX = '-Mac'
+    ATHENA_TOOLDIR_SUFFIX = '-Mac'
+    ATHENA_TOOL_SUFFIX = '-Terminal'
 else:
     print( "WARNING: Unknown platform {}, tools may not work".format(platform.system()))
     ATHENA_TOOL_SUFFIX = ""
@@ -59,14 +61,22 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
-def runPERDIX(input_filepath, args):
-    wd = os.path.join( ATHENA_DIR, "tools", "PERDIX"+ATHENA_TOOL_SUFFIX )
-    tool = os.path.join( wd, "PERDIX.exe" )
-    perdix_call = [tool, input_filepath] + args.split()
+def runPERDIX(args):
+    tooldir = "PERDIX"+ATHENA_TOOLDIR_SUFFIX
+    if ( ATHENA_TOOLDIR_SUFFIX == '-Win' ):
+        tooldir += '-MCR'
+    wd = os.path.join( ATHENA_DIR, "tools", tooldir )
+    tool = os.path.join( wd, "PERDIX"+ATHENA_TOOL_SUFFIX )
+    perdix_call = [tool] + args.split()
     print("Calling PERDIX as follows:", perdix_call, "cwd=", wd)
-    return subprocess.run(perdix_call, cwd=wd, ) #stdout=subprocess.DEVNULL, 
-                                                 #stderr=subprocess.DEVNULL)
+    return subprocess.run(perdix_call, cwd=wd, )
 
+def runTALOS(args):
+    wd = os.path.join( ATHENA_DIR, "tools", "TALOS"+ATHENA_TOOLDIR_SUFFIX )
+    tool = os.path.join( wd, "TALOS"+ATHENA_TOOL_SUFFIX )
+    talos_call = [tool] + args.split()
+    print("Calling TALOS as follows:", talos_call, "cwd=", wd)
+    return subprocess.run(talos_call, cwd=wd, )
 
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
@@ -84,10 +94,11 @@ class AthenaWindow(QMainWindow):
         self.statusMsg.setText( msg )
 
     def runCmd( self ):
-        command = self.cmdInput.text()
-        cmd_args = command.split()
-        result = runPERDIX(command[0], " ".join(command[1:]))
-        self.updateStatus("Ran " + command + ", result: " + str(result.returncode) )
+        tool_func = [runPERDIX, runTALOS] [ self.toolChooser.currentIndex() ]
+        tool_args = self.cmdInput.text()
+        result = tool_func( tool_args )
+        self.updateStatus("Ran " + self.toolChooser.currentText() + " "
+                           + tool_args + ", result: " + str(result.returncode) )
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
