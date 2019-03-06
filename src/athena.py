@@ -18,17 +18,6 @@ else:
     # Not bundled, __file__ is within src/
     ATHENA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Depending on platform, choose tool suffixes, e.g. PERDIX-Mac
-if platform.system() == 'Windows':
-    ATHENA_TOOLDIR_SUFFIX = '-Win'
-    ATHENA_TOOL_SUFFIX = '.exe'
-elif platform.system() == 'Darwin':
-    ATHENA_TOOLDIR_SUFFIX = '-Mac'
-    ATHENA_TOOL_SUFFIX = '-Terminal'
-else:
-    print( "WARNING: Unknown platform {}, tools may not work".format(platform.system()))
-    ATHENA_TOOL_SUFFIX = ""
-
 class UiLoader(QUiLoader):
     '''
     This works around a shortcoming in QUiLoader: it doesn't provide
@@ -61,22 +50,31 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
-def runPERDIX(args):
-    tooldir = "PERDIX"+ATHENA_TOOLDIR_SUFFIX
-    if ( ATHENA_TOOLDIR_SUFFIX == '-Win' ):
-        tooldir += '-MCR'
-    wd = os.path.join( ATHENA_DIR, "tools", tooldir )
-    tool = os.path.join( wd, "PERDIX"+ATHENA_TOOL_SUFFIX )
-    perdix_call = [tool] + args.split()
-    print("Calling PERDIX as follows:", perdix_call, "cwd=", wd)
-    return subprocess.run(perdix_call, cwd=wd, )
+def runLCBBTool( toolname, p3_input_file, p1_input_dir='input', p2_output_dir='output',
+                 p4_scaffold='m13', p5_edge_sections=1, p6_vertex_design=1, p7_edge_number=0,
+                 p8_edge_length=38, p9_mesh_spacing=0.0, p10_runmode='s' ):
+    tooldir = toolname
+    if platform.system() ==  'Windows':
+        tool = 'designer-win-{}.exe'.format(toolname)
+    elif platform.system() == 'Darwin':
+        tool = 'designer-mac-{}'.format(toolname)
+    else:
+        print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
+        tool = 'designer-{}'.format(toolname)
+    wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
+    toolpath = os.path.join( wd, tool )
+    tool_call = [toolpath, p1_input_dir, p2_output_dir, p3_input_file, p4_scaffold, p5_edge_sections,
+                           p6_vertex_design, p7_edge_number, p8_edge_length, p9_mesh_spacing, p10_runmode]
+    tool_call_str = [str(x) for x in tool_call]
 
-def runTALOS(args):
-    wd = os.path.join( ATHENA_DIR, "tools", "TALOS"+ATHENA_TOOLDIR_SUFFIX )
-    tool = os.path.join( wd, "TALOS"+ATHENA_TOOL_SUFFIX )
-    talos_call = [tool] + args.split()
-    print("Calling TALOS as follows:", talos_call, "cwd=", wd)
-    return subprocess.run(talos_call, cwd=wd, )
+    print('Calling {} as follows'.format(tool), tool_call_str, "cwd=", wd )
+    return subprocess.run(tool_call_str, cwd=wd, )
+
+def runPERDIX(input_file):
+    return runLCBBTool( 'PERDIX', p3_input_file=input_file )
+
+def runTALOS(input_file):
+    return runLCBBTool( 'TALOS', p3_input_file=input_file, p8_edge_length=42 )
 
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
