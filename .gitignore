@@ -1,5 +1,4 @@
-# Binary tools for athena
-tools
+tools/*/output
 #
 # Byte-compiled / optimized / DLL files
 __pycache__/
