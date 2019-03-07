@@ -7,6 +7,7 @@ import platform
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog
+from PySide2.QtGui import QKeySequence
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
@@ -83,6 +84,10 @@ class AthenaWindow(QMainWindow):
 
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
+
+        # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
+        # so do that here.
+        self.actionOpen.setShortcut( QKeySequence.StandardKey.Open )
 
         self.show()
 
