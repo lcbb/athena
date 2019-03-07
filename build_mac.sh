@@ -1,2 +1,2 @@
 #! /bin/sh
-pyinstaller ./src/athena.py --add-data "ui:ui" --add-data "tools:tools" $*
+pyinstaller ./src/athena.py --add-data "ui:ui" --add-data "tools:tools" --add-data "sample_inputs:sample_inputs" $*
