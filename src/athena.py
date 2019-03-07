@@ -88,12 +88,14 @@ class AthenaWindow(QMainWindow):
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
         # so do that here.
         self.actionOpen.setShortcut( QKeySequence.StandardKey.Open )
+        self.actionQuit.setShortcut( QKeySequence.StandardKey.Quit )
 
         self.show()
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.actionOpen.triggered.connect(self.selectGeometryFile)
+        self.actionQuit.triggered.connect(self.close)
 
     def selectGeometryFile( self ):
         fileName = QFileDialog.getOpenFileName( self, "Open geometry file", ATHENA_DIR, "Geometry files (*.ply)")
