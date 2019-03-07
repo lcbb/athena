@@ -53,7 +53,7 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
-def runLCBBTool( toolname, p3_input_file, p1_input_dir='.', p2_output_dir='output',
+def runLCBBTool( toolname, p3_input_file, p1_input_dir='.', p2_output_dir='athena_tmp_output',
                  p4_scaffold='m13', p5_edge_sections=1, p6_vertex_design=1, p7_edge_number=0,
                  p8_edge_length=38, p9_mesh_spacing=0.0, p10_runmode='s' ):
     tooldir = toolname
