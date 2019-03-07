@@ -128,7 +128,7 @@ class AthenaWindow(QMainWindow):
         process = runLCBBTool('TALOS',
                               p1_input_dir=infile_dir,
                               p3_input_file=infile_name,
-                              p5_edge_sections=self.talosEdgeSectionBox.currentIndex()+1,
+                              p5_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p6_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
                               p8_edge_length=self.talosEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)

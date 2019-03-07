@@ -127,11 +127,6 @@
          <widget class="QComboBox" name="talosEdgeSectionBox">
           <item>
            <property name="text">
-            <string>DX</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>6HB - Inner</string>
            </property>
           </item>
