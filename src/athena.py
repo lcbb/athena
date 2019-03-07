@@ -98,7 +98,10 @@ class AthenaWindow(QMainWindow):
         self.actionQuit.triggered.connect(self.close)
 
     def selectGeometryFile( self ):
-        fileName = QFileDialog.getOpenFileName( self, "Open geometry file", ATHENA_DIR, "Geometry files (*.ply)")
+        fileName = QFileDialog.getOpenFileName( self, 
+                                               "Open geometry file", 
+                                               os.path.join(ATHENA_DIR, 'sample_inputs'),
+                                               "Geometry files (*.ply)")
         self.filenameInput.setText(fileName[0])
 
     def updateStatus( self, msg ):
