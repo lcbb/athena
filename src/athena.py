@@ -6,7 +6,7 @@ import os.path
 import platform
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
@@ -63,6 +63,9 @@ def runLCBBTool( toolname, p3_input_file, p1_input_dir='.', p2_output_dir='outpu
     else:
         print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
         tool = 'designer-{}'.format(toolname)
+    # lcbb tools require a trailing path separator for directory arguments
+    if not p1_input_dir.endswith(os.sep): p1_input_dir += os.sep
+    if not p2_output_dir.endswith(os.sep): p2_output_dir += os.sep
     wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
     toolpath = os.path.join( wd, tool )
     tool_call = [toolpath, p1_input_dir, p2_output_dir, p3_input_file, p4_scaffold, p5_edge_sections,
@@ -85,6 +88,11 @@ class AthenaWindow(QMainWindow):
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
+        self.actionOpen.triggered.connect(self.selectGeometryFile)
+
+    def selectGeometryFile( self ):
+        fileName = QFileDialog.getOpenFileName( self, "Open geometry file", ATHENA_DIR, "Geometry files (*.ply)")
+        self.filenameInput.setText(fileName[0])
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
@@ -118,7 +126,7 @@ class AthenaWindow(QMainWindow):
 
     def runCmd( self ):
         tool_func = [runPERDIX, runTALOS] [ self.toolChooser.currentIndex() ]
-        tool_args = self.cmdInput.text()
+        tool_args = self.filenameInput.text()
         result = tool_func( tool_args )
         self.updateStatus("Ran " + self.toolChooser.currentText() + " "
                            + tool_args + ", result: " + str(result.returncode) )
