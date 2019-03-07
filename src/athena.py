@@ -10,6 +10,8 @@ from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
+print("My CWD is", os.getcwd())
+
 # Set ATHENA_DIR, the base project path, relative to which files and tools will be found
 if getattr(sys, 'frozen', False):
     # We're inside a PyInstaller bundle of some kind
@@ -50,7 +52,7 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
-def runLCBBTool( toolname, p3_input_file, p1_input_dir='input', p2_output_dir='output',
+def runLCBBTool( toolname, p3_input_file, p1_input_dir='.', p2_output_dir='output',
                  p4_scaffold='m13', p5_edge_sections=1, p6_vertex_design=1, p7_edge_number=0,
                  p8_edge_length=38, p9_mesh_spacing=0.0, p10_runmode='s' ):
     tooldir = toolname
@@ -67,14 +69,9 @@ def runLCBBTool( toolname, p3_input_file, p1_input_dir='input', p2_output_dir='o
                            p6_vertex_design, p7_edge_number, p8_edge_length, p9_mesh_spacing, p10_runmode]
     tool_call_str = [str(x) for x in tool_call]
 
-    print('Calling {} as follows'.format(tool), tool_call_str, "cwd=", wd )
-    return subprocess.run(tool_call_str, cwd=wd, )
+    print('Calling {} as follows'.format(tool), tool_call_str)
+    return subprocess.run(tool_call_str, stdout=subprocess.DEVNULL, stderr=None)
 
-def runPERDIX(input_file):
-    return runLCBBTool( 'PERDIX', p3_input_file=input_file )
-
-def runTALOS(input_file):
-    return runLCBBTool( 'TALOS', p3_input_file=input_file, p8_edge_length=42 )
 
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
@@ -86,10 +83,38 @@ class AthenaWindow(QMainWindow):
 
         self.show()
 
-        self.runButton.clicked.connect(self.runCmd)
+        self.perdixRunButton.clicked.connect(self.runPERDIX)
+        self.talosRunButton.clicked.connect(self.runTALOS)
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
+
+    def runPERDIX( self ):
+        self.updateStatus('Running PERDIX...')
+        infile = self.filenameInput.text()
+        infile_dir = os.path.abspath( os.path.dirname(infile) )
+        infile_name = os.path.basename(infile)
+        process = runLCBBTool ('PERDIX',
+                               p1_input_dir=infile_dir,
+                               p3_input_file=infile_name,
+                               p8_edge_length=self.perdixEdgeLengthSpinner.value(),
+                               p9_mesh_spacing=self.perdixMeshSpacingSpinner.value())
+        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.updateStatus('PERDIX returned {}.'.format(human_retval))
+
+    def runTALOS( self ):
+        self.updateStatus('Running TALOS...')
+        infile = self.filenameInput.text()
+        infile_dir = os.path.abspath( os.path.dirname(infile) )
+        infile_name = os.path.basename(infile)
+        process = runLCBBTool('TALOS',
+                              p1_input_dir=infile_dir,
+                              p3_input_file=infile_name,
+                              p5_edge_sections=self.talosEdgeSectionBox.currentIndex()+1,
+                              p6_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
+                              p8_edge_length=self.talosEdgeLengthSpinner.value())
+        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.updateStatus('TALOS returned {}.'.format(human_retval))
 
     def runCmd( self ):
         tool_func = [runPERDIX, runTALOS] [ self.toolChooser.currentIndex() ]
