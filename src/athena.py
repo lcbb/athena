@@ -53,24 +53,23 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
-def runLCBBTool( toolname, p3_input_file, p1_input_dir='.', p2_output_dir='athena_tmp_output',
-                 p4_scaffold='m13', p5_edge_sections=1, p6_vertex_design=1, p7_edge_number=0,
-                 p8_edge_length=38, p9_mesh_spacing=0.0, p10_runmode='s' ):
+def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
+                 p3_scaffold='m13', p4_edge_sections=1, p5_vertex_design=1, p6_edge_number=0,
+                 p7_edge_length=42, p8_mesh_spacing=0.0, p9_runmode='s' ):
     tooldir = toolname
     if platform.system() ==  'Windows':
-        tool = 'designer-win-{}.exe'.format(toolname)
+        tool = '{}.exe'.format(toolname)
     elif platform.system() == 'Darwin':
-        tool = 'designer-mac-{}'.format(toolname)
+        tool = toolname
     else:
         print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
-        tool = 'designer-{}'.format(toolname)
+        tool = toolname
     # lcbb tools require a trailing path separator for directory arguments
-    if not p1_input_dir.endswith(os.sep): p1_input_dir += os.sep
-    if not p2_output_dir.endswith(os.sep): p2_output_dir += os.sep
+    if not p1_output_dir.endswith(os.sep): p1_output_dir += os.sep
     wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
     toolpath = os.path.join( wd, tool )
-    tool_call = [toolpath, p1_input_dir, p2_output_dir, p3_input_file, p4_scaffold, p5_edge_sections,
-                           p6_vertex_design, p7_edge_number, p8_edge_length, p9_mesh_spacing, p10_runmode]
+    tool_call = [toolpath, p1_output_dir, p2_input_file, p3_scaffold, p4_edge_sections,
+                           p5_vertex_design, p6_edge_number, p7_edge_length, p8_mesh_spacing, p9_runmode]
     tool_call_str = [str(x) for x in tool_call]
 
     print('Calling {} as follows'.format(tool), tool_call_str)
@@ -110,27 +109,23 @@ class AthenaWindow(QMainWindow):
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
         infile = self.filenameInput.text()
-        infile_dir = os.path.abspath( os.path.dirname(infile) )
-        infile_name = os.path.basename(infile)
+        infile_path = os.path.abspath( infile )
         process = runLCBBTool ('PERDIX',
-                               p1_input_dir=infile_dir,
-                               p3_input_file=infile_name,
-                               p8_edge_length=self.perdixEdgeLengthSpinner.value(),
-                               p9_mesh_spacing=self.perdixMeshSpacingSpinner.value())
+                               p2_input_file=infile_path,
+                               p7_edge_length=self.perdixEdgeLengthSpinner.value(),
+                               p8_mesh_spacing=self.perdixMeshSpacingSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('PERDIX returned {}.'.format(human_retval))
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
         infile = self.filenameInput.text()
-        infile_dir = os.path.abspath( os.path.dirname(infile) )
-        infile_name = os.path.basename(infile)
+        infile_path = os.path.abspath( infile )
         process = runLCBBTool('TALOS',
-                              p1_input_dir=infile_dir,
-                              p3_input_file=infile_name,
-                              p5_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
-                              p6_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
-                              p8_edge_length=self.talosEdgeLengthSpinner.value())
+                              p2_input_file=infile_path,
+                              p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
+                              p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
+                              p7_edge_length=self.talosEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('TALOS returned {}.'.format(human_retval))
 
