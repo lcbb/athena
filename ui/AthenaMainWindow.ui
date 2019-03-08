@@ -68,7 +68,10 @@
            <number>38</number>
           </property>
           <property name="maximum">
-           <number>999</number>
+           <number>126</number>
+          </property>
+          <property name="value">
+           <number>42</number>
           </property>
          </widget>
         </item>
@@ -174,7 +177,7 @@
            <number>42</number>
           </property>
           <property name="maximum">
-           <number>840</number>
+           <number>126</number>
           </property>
           <property name="singleStep">
            <number>21</number>
