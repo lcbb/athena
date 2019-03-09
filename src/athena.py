@@ -4,6 +4,7 @@ import subprocess
 import os
 import os.path
 import platform
+from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog
@@ -89,12 +90,31 @@ class AthenaWindow(QMainWindow):
         self.actionOpen.setShortcut( QKeySequence.StandardKey.Open )
         self.actionQuit.setShortcut( QKeySequence.StandardKey.Quit )
 
+        self.setupToolDefaults()
+
         self.show()
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.actionOpen.triggered.connect(self.selectGeometryFile)
         self.actionQuit.triggered.connect(self.close)
+
+    def setupToolDefaults( self ):
+        def pretty_name( input_path ):
+            # make words from the file stem, capitalize them, omit a leading number if possible
+            # e.g. path/to/06_rhombic_tiling -> 'Rhombic Tiling'
+            words = input_path.stem.split('_')
+            if len(words) > 1 and words[0].isdigit(): words = words[1:]
+            return ' '.join( word.capitalize() for word in words )
+
+        perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "PERDIX")
+        for ply in perdix_inputs.glob('*.ply'):
+            self.perdixGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
+
+        talos_inputs = Path(ATHENA_DIR, "sample_inputs", "TALOS")
+        for ply in talos_inputs.glob("*.ply"):
+            self.talosGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
+
 
     def selectGeometryFile( self ):
         fileName = QFileDialog.getOpenFileName( self, 
@@ -108,8 +128,7 @@ class AthenaWindow(QMainWindow):
 
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
-        infile = self.filenameInput.text()
-        infile_path = os.path.abspath( infile )
+        infile_path = self.perdixGeometryChooser.currentData()
         process = runLCBBTool ('PERDIX',
                                p2_input_file=infile_path,
                                p7_edge_length=self.perdixEdgeLengthSpinner.value(),
@@ -119,8 +138,7 @@ class AthenaWindow(QMainWindow):
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
-        infile = self.filenameInput.text()
-        infile_path = os.path.abspath( infile )
+        infile_path = self.talosGeometryChooser.currentData()
         process = runLCBBTool('TALOS',
                               p2_input_file=infile_path,
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
