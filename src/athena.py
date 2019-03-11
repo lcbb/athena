@@ -124,8 +124,9 @@ class AthenaWindow(QMainWindow):
                                                    os.path.join(ATHENA_DIR, 'sample_inputs'),
                                                    "Geometry files (*.ply)")
             filepath = Path(fileName[0])
-            combobox.addItem( filepath.name, filepath )
-            combobox.setCurrentIndex( combobox.count()-1 )
+            if( filepath.is_file() ):
+                combobox.addItem( filepath.name, filepath )
+                combobox.setCurrentIndex( combobox.count()-1 )
         return selection_slot
 
     def updateStatus( self, msg ):
