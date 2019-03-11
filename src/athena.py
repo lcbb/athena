@@ -84,6 +84,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         super(AthenaGeomView, self).__init__()
 
         self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
+        self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.camera().lens().setPerspectiveProjection(45, 16/9, .01, 1000)
         self.camera().setPosition( vec3d( 5, 5, 5 ) )
