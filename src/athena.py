@@ -7,9 +7,12 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog
-from PySide2.QtGui import QKeySequence
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
+from PySide2.QtGui import QKeySequence, QColor
 from PySide2.QtCore import QFile
+from PySide2.Qt3DCore import Qt3DCore
+from PySide2.Qt3DRender import Qt3DRender
+from PySide2.Qt3DExtras import Qt3DExtras
 import PySide2.QtXml #Temporary pyinstaller workaround
 
 print("My CWD is", os.getcwd())
@@ -76,6 +79,12 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
     print('Calling {} as follows'.format(tool), tool_call_str)
     return subprocess.run(tool_call_str, stdout=subprocess.DEVNULL, stderr=None)
 
+class AthenaGeomView(Qt3DExtras.Qt3DWindow):
+    def __init__(self):
+        super(AthenaGeomView, self).__init__()
+        self.rootEntity = Qt3DCore.QEntity()
+        self.setRootEntity(self.rootEntity)
+        self.defaultFrameGraph().setClearColor( QColor('darkBlue') )
 
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
@@ -92,6 +101,10 @@ class AthenaWindow(QMainWindow):
 
         self.setupToolDefaults()
 
+        self.geomView = AthenaGeomView()
+        self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
+        self.verticalLayout.insertWidget( 0, self.geomViewWidget )
+        self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
         self.show()
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
