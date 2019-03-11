@@ -8,8 +8,8 @@ from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
-from PySide2.QtGui import QKeySequence, QColor
-from PySide2.QtCore import QFile
+from PySide2.QtGui import QKeySequence, QColor, QVector3D as vec3d
+from PySide2.QtCore import QFile, QUrl
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DExtras import Qt3DExtras
@@ -82,9 +82,28 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
 class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
         super(AthenaGeomView, self).__init__()
+
+        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
+
+        self.camera().lens().setPerspectiveProjection(45, 16/9, .01, 1000)
+        self.camera().setPosition( vec3d( 5, 5, 5 ) )
+        self.camera().setUpVector( vec3d( 0, 0, 1 ) )
+        self.camera().setViewCenter( vec3d( 0, 0, 0) )
+
         self.rootEntity = Qt3DCore.QEntity()
+
+        self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
+
+        self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
+        self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
+        self.meshEntity.addComponent( self.displayMesh )
+        self.meshEntity.addComponent( self.material )
         self.setRootEntity(self.rootEntity)
-        self.defaultFrameGraph().setClearColor( QColor('darkBlue') )
+
+    def reloadGeom(self, filepath):
+        self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
+        print(self.displayMesh.meshName(), self.displayMesh.status() )
+
 
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
@@ -110,6 +129,8 @@ class AthenaWindow(QMainWindow):
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.perdixOpenButton.clicked.connect(self.addFileToComboBox_action(self.perdixGeometryChooser))
+        self.perdixGeometryChooser.currentIndexChanged.connect(self.newMesh)
+        self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh)
         self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
         self.actionQuit.triggered.connect(self.close)
 
@@ -141,6 +162,12 @@ class AthenaWindow(QMainWindow):
                 combobox.addItem( filepath.name, filepath )
                 combobox.setCurrentIndex( combobox.count()-1 )
         return selection_slot
+
+    def newMesh( self ):
+        # Determine which mesh is displaying
+        chooser = [self.perdixGeometryChooser, self.talosGeometryChooser][ self.tabWidget.currentIndex() ]
+        selection = chooser.currentData()
+        self.geomView.reloadGeom( selection )
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
