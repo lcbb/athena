@@ -75,7 +75,7 @@
            <widget class="QComboBox" name="perdixGeometryChooser"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="perdixOpenButton">
             <property name="text">
              <string>Open...</string>
             </property>
@@ -235,7 +235,7 @@
            <widget class="QComboBox" name="talosGeometryChooser"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="talosOpenButton">
             <property name="text">
              <string>Open...</string>
             </property>
@@ -429,56 +429,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
-        </property>
-        <property name="leftMargin">
-         <number>2</number>
-        </property>
-        <property name="topMargin">
-         <number>2</number>
-        </property>
-        <property name="rightMargin">
-         <number>2</number>
-        </property>
-        <property name="bottomMargin">
-         <number>2</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Input file:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="filenameInput"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Scaffold:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="scaffoldBox">
-          <item>
-           <property name="text">
-            <string>m13</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Choose other...</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
     </item>
    </layout>
@@ -504,6 +454,9 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Open...</string>
    </property>

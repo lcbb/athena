@@ -96,7 +96,8 @@ class AthenaWindow(QMainWindow):
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
-        self.actionOpen.triggered.connect(self.selectGeometryFile)
+        self.perdixOpenButton.clicked.connect(self.addFileToComboBox_action(self.perdixGeometryChooser))
+        self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
         self.actionQuit.triggered.connect(self.close)
 
     def setupToolDefaults( self ):
@@ -116,12 +117,16 @@ class AthenaWindow(QMainWindow):
             self.talosGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
 
 
-    def selectGeometryFile( self ):
-        fileName = QFileDialog.getOpenFileName( self, 
-                                               "Open geometry file", 
-                                               os.path.join(ATHENA_DIR, 'sample_inputs'),
-                                               "Geometry files (*.ply)")
-        self.filenameInput.setText(fileName[0])
+    def addFileToComboBox_action( self, combobox ):
+        def selection_slot():
+            fileName = QFileDialog.getOpenFileName( self,
+                                                   "Open geometry file",
+                                                   os.path.join(ATHENA_DIR, 'sample_inputs'),
+                                                   "Geometry files (*.ply)")
+            filepath = Path(fileName[0])
+            combobox.addItem( filepath.name, filepath )
+            combobox.setCurrentIndex( combobox.count()-1 )
+        return selection_slot
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
