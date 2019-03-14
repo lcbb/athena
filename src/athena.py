@@ -8,12 +8,11 @@ from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
-from PySide2.QtGui import QKeySequence, QColor, QVector3D as vec3d
-from PySide2.QtCore import QFile, QUrl, Qt
-from PySide2.Qt3DCore import Qt3DCore
-from PySide2.Qt3DRender import Qt3DRender
-from PySide2.Qt3DExtras import Qt3DExtras
+from PySide2.QtGui import QKeySequence, QColor
+from PySide2.QtCore import QFile, Qt
 import PySide2.QtXml #Temporary pyinstaller workaround
+
+import geomview
 
 print("My CWD is", os.getcwd())
 
@@ -80,49 +79,6 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
     return subprocess.run(tool_call_str, stdout=subprocess.DEVNULL, stderr=None)
 
 
-class AthenaGeomView(Qt3DExtras.Qt3DWindow):
-    def __init__(self):
-        super(AthenaGeomView, self).__init__()
-
-        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
-        self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
-
-        self.camera().lens().setPerspectiveProjection(45, 16/9, .01, 1000)
-        self.camera().setPosition( vec3d( 5, 5, 5 ) )
-        self.camera().setUpVector( vec3d( 0, 1, 0 ) )
-        self.camera().setViewCenter( vec3d( 0, 0, 0) )
-
-        self.rootEntity = Qt3DCore.QEntity()
-
-        self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
-
-        self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
-        self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
-        self.meshEntity.addComponent( self.displayMesh )
-        self.meshEntity.addComponent( self.material )
-        self.setRootEntity(self.rootEntity)
-
-        self.lastpos = None
-
-    def reloadGeom(self, filepath):
-        self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
-        print(self.displayMesh.meshName(), self.displayMesh.status() )
-        self.camera().viewAll()
-
-    def mouseMoveEvent(self, event):
-        if( self.lastpos ):
-            delta = event.pos()-self.lastpos
-            if( event.buttons() == Qt.LeftButton ):
-                self.camera().panAboutViewCenter( -delta.x() )
-                self.camera().tiltAboutViewCenter( delta.y() )
-        self.lastpos = event.pos()
-
-    def wheelEvent( self, event ):
-        delta = event.angleDelta() / 25
-        fov = self.camera().fieldOfView()
-        self.camera().setFieldOfView( fov - delta.y() )
-
-
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
         super( AthenaWindow, self).__init__(None)
@@ -138,7 +94,7 @@ class AthenaWindow(QMainWindow):
 
         self.setupToolDefaults()
 
-        self.geomView = AthenaGeomView()
+        self.geomView = geomview.AthenaGeomView()
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
         self.verticalLayout.insertWidget( 0, self.geomViewWidget )
         self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
