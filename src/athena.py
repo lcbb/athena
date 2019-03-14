@@ -117,6 +117,11 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
                 self.camera().tiltAboutViewCenter( delta.y() )
         self.lastpos = event.pos()
 
+    def wheelEvent( self, event ):
+        delta = event.angleDelta() / 25
+        fov = self.camera().fieldOfView()
+        self.camera().setFieldOfView( fov - delta.y() )
+
 
 class AthenaWindow(QMainWindow):
     def __init__( self, ui_filepath ):
