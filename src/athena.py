@@ -74,16 +74,15 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     else:
         print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
         tool = toolname
-    # lcbb tools require a trailing path separator for directory arguments
-    p1_output_dir = str(p1_output_dir) + os.sep
+    p1_output_dir = str(p1_output_dir)
     wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
     toolpath = os.path.join( wd, tool )
     tool_call = [toolpath, p1_output_dir, p2_input_file, p3_scaffold, p4_edge_sections,
                            p5_vertex_design, p6_edge_number, p7_edge_length, p8_mesh_spacing, p9_runmode]
-    tool_call_str = [str(x) for x in tool_call]
+    tool_call_strs = [str(x) for x in tool_call]
 
-    print('Calling {} as follows'.format(tool), tool_call_str)
-    return subprocess.run(tool_call_str, stdout=subprocess.DEVNULL, stderr=None)
+    print('Calling {} as follows'.format(tool), tool_call_strs)
+    return subprocess.run(tool_call_strs, stdout=subprocess.DEVNULL, stderr=None)
 
 
 class AthenaWindow(QMainWindow):
@@ -160,8 +159,9 @@ class AthenaWindow(QMainWindow):
         self.updateStatus('Running PERDIX...')
         infile_path = self.perdixGeometryChooser.currentData()
         infile_name = self.perdixGeometryChooser.currentText()
+        outfile_name = infile_name.replace(' ', '_')
         process = runLCBBTool ('PERDIX',
-                               p1_output_dir=ATHENA_OUTPUT_DIR / "PERDIX" / infile_name,
+                               p1_output_dir=ATHENA_OUTPUT_DIR / "PERDIX" / outfile_name,
                                p2_input_file=infile_path,
                                p7_edge_length=self.perdixEdgeLengthSpinner.value(),
                                p8_mesh_spacing=self.perdixMeshSpacingSpinner.value())
@@ -172,8 +172,9 @@ class AthenaWindow(QMainWindow):
         self.updateStatus('Running TALOS...')
         infile_path = self.talosGeometryChooser.currentData()
         infile_name = self.talosGeometryChooser.currentText()
+        outfile_name = infile_name.replace(' ', '_')
         process = runLCBBTool('TALOS',
-                              p1_output_dir=ATHENA_OUTPUT_DIR / "TALOS" / infile_name,
+                              p1_output_dir=ATHENA_OUTPUT_DIR / "TALOS" / outfile_name,
                               p2_input_file=infile_path,
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
