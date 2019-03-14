@@ -41,7 +41,13 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
     def reset2DCamera( self ):
         self.camera_3d = False
-        self.camera().lens().setOrthographicProjection( -100, 100, -100, 100, -100, 100)
+        ratio = self.width() / self.height()
+        x = 100 * ratio
+        self.camera().lens().setOrthographicProjection( -x, x, -100, 100, -100, 100 )
+        self.camera().setPosition( vec3d( 0, 0, 0 ) )
+        self.camera().setViewCenter( vec3d( 0, 0, -100) )
+        self.camera().rightVector = vec3d( 1, 0, 0 )
+        self.orientCamera()
 
     def reset3DCamera( self ):
         self.camera_3d = True
@@ -70,12 +76,22 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.camera().rightVector = rotateAround( right, up, -delta_x )
         self.orientCamera()
 
+    def moveCamera( self, delta_x, delta_y ):
+        self.camera().translateWorld( vec3d( -delta_x/3., delta_y/3., 0 ), self.camera().TranslateViewCenter )
+        #ctr = self.camera().viewCenter()
+        #self.camera().setViewCenter( ctr + vec3d( -delta_x, delta_y, 0 ) )
+        #pos = self.camera().position()
+        #self.camera().setPosition( pos + vec3d( -delta_x, delta_y, 0 ) )
+
 
     def mouseMoveEvent(self, event):
         if( self.lastpos ):
             delta = event.pos()-self.lastpos
             if( event.buttons() == Qt.LeftButton ):
-                self.rotateCamera( delta.x(), delta.y() )
+                if self.camera_3d :
+                    self.rotateCamera( delta.x(), delta.y() )
+                else:
+                    self.moveCamera( delta.x(), delta.y() )
         self.lastpos = event.pos()
 
     def wheelEvent( self, event ):
@@ -89,4 +105,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def resizeEvent( self, event ):
         newsize = event.size()
         ratio = newsize.width() / newsize.height()
-        self.camera().setAspectRatio( ratio )
+        if self.camera_3d:
+            self.camera().setAspectRatio( ratio )
+        else:
+            self.reset2DCamera()
