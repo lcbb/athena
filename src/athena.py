@@ -79,6 +79,7 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
     print('Calling {} as follows'.format(tool), tool_call_str)
     return subprocess.run(tool_call_str, stdout=subprocess.DEVNULL, stderr=None)
 
+
 class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
         super(AthenaGeomView, self).__init__()
@@ -92,6 +93,9 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.camera().setViewCenter( vec3d( 0, 0, 0) )
 
         self.rootEntity = Qt3DCore.QEntity()
+
+        self.camControl = Qt3DExtras.QOrbitCameraController(self.rootEntity)
+        self.camControl.setCamera(self.camera())
 
         self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
 
