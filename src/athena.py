@@ -7,11 +7,12 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
 from PySide2.QtGui import QKeySequence
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
+import geomview
 
 # Set ATHENA_DIR, the base project path, relative to which files and tools will be found
 # and ATHENA_OUTPUT_HOME, the path where an ouput directory will be created
@@ -100,13 +101,21 @@ class AthenaWindow(QMainWindow):
 
         self.setupToolDefaults()
 
-        self.show()
+        self.geomView = geomview.AthenaGeomView()
+        self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
+        self.verticalLayout.insertWidget( 0, self.geomViewWidget )
+        self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.perdixOpenButton.clicked.connect(self.addFileToComboBox_action(self.perdixGeometryChooser))
+        self.perdixGeometryChooser.currentIndexChanged.connect(self.newMesh)
+        self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh)
         self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
         self.actionQuit.triggered.connect(self.close)
+
+        self.newMesh()
+        self.show()
 
     def setupToolDefaults( self ):
         def pretty_name( input_path ):
@@ -136,6 +145,13 @@ class AthenaWindow(QMainWindow):
                 combobox.addItem( filepath.name, filepath )
                 combobox.setCurrentIndex( combobox.count()-1 )
         return selection_slot
+
+    def newMesh( self ):
+        # Determine which mesh is displaying
+        chooser = [self.perdixGeometryChooser, self.talosGeometryChooser][ self.tabWidget.currentIndex() ]
+        selection = chooser.currentData()
+        mesh_3d = True if self.tabWidget.currentIndex() != 0 else False
+        self.geomView.reloadGeom( selection, mesh_3d )
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
