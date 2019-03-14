@@ -15,12 +15,20 @@ import PySide2.QtXml #Temporary pyinstaller workaround
 print("My CWD is", os.getcwd())
 
 # Set ATHENA_DIR, the base project path, relative to which files and tools will be found
+# and ATHENA_OUTPUT_HOME, the path where an ouput directory will be created
 if getattr(sys, 'frozen', False):
     # We're inside a PyInstaller bundle of some kind
     ATHENA_DIR = sys._MEIPASS
+    ATHENA_OUTPUT_HOME = os.path.dirname( sys.executable )
 else:
     # Not bundled, __file__ is within src/
     ATHENA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ATHENA_OUTPUT_HOME = '.'
+
+# Set ATHENA_OUTPUT_DIR, the directory where all tools outputs will be written.
+# The program will halt here if no such directory can be created
+ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_outputs")
+ATHENA_OUTPUT_DIR.mkdir( parents=False, exist_ok=True )
 
 class UiLoader(QUiLoader):
     '''
@@ -54,7 +62,7 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
-def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
+def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'),
                  p3_scaffold='m13', p4_edge_sections=1, p5_vertex_design=1, p6_edge_number=0,
                  p7_edge_length=42, p8_mesh_spacing=0.0, p9_runmode='s' ):
     tooldir = toolname
@@ -66,7 +74,7 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir='athena_tmp_output',
         print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
         tool = toolname
     # lcbb tools require a trailing path separator for directory arguments
-    if not p1_output_dir.endswith(os.sep): p1_output_dir += os.sep
+    p1_output_dir = str(p1_output_dir) + os.sep
     wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
     toolpath = os.path.join( wd, tool )
     tool_call = [toolpath, p1_output_dir, p2_input_file, p3_scaffold, p4_edge_sections,
@@ -135,7 +143,9 @@ class AthenaWindow(QMainWindow):
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
         infile_path = self.perdixGeometryChooser.currentData()
+        infile_name = self.perdixGeometryChooser.currentText()
         process = runLCBBTool ('PERDIX',
+                               p1_output_dir=ATHENA_OUTPUT_DIR / "PERDIX" / infile_name,
                                p2_input_file=infile_path,
                                p7_edge_length=self.perdixEdgeLengthSpinner.value(),
                                p8_mesh_spacing=self.perdixMeshSpacingSpinner.value())
@@ -145,7 +155,9 @@ class AthenaWindow(QMainWindow):
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
         infile_path = self.talosGeometryChooser.currentData()
+        infile_name = self.talosGeometryChooser.currentText()
         process = runLCBBTool('TALOS',
+                              p1_output_dir=ATHENA_OUTPUT_DIR / "TALOS" / infile_name,
                               p2_input_file=infile_path,
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
