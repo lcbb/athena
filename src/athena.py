@@ -8,8 +8,8 @@ from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
-from PySide2.QtGui import QKeySequence, QColor
-from PySide2.QtCore import QFile, Qt
+from PySide2.QtGui import QKeySequence
+from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
 import geomview
@@ -141,7 +141,8 @@ class AthenaWindow(QMainWindow):
         # Determine which mesh is displaying
         chooser = [self.perdixGeometryChooser, self.talosGeometryChooser][ self.tabWidget.currentIndex() ]
         selection = chooser.currentData()
-        self.geomView.reloadGeom( selection )
+        mesh_3d = True if self.tabWidget.currentIndex() != 0 else False
+        self.geomView.reloadGeom( selection, mesh_3d )
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
