@@ -12,7 +12,6 @@ from PySide2.QtGui import QKeySequence
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-print("My CWD is", os.getcwd())
 
 # Set ATHENA_DIR, the base project path, relative to which files and tools will be found
 # and ATHENA_OUTPUT_HOME, the path where an ouput directory will be created
@@ -29,6 +28,7 @@ else:
 # The program will halt here if no such directory can be created
 ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_outputs")
 ATHENA_OUTPUT_DIR.mkdir( parents=False, exist_ok=True )
+print("Athena's output directory will be", ATHENA_OUTPUT_DIR)
 
 class UiLoader(QUiLoader):
     '''
