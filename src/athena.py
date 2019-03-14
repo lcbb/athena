@@ -9,7 +9,7 @@ from pathlib import Path
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
 from PySide2.QtGui import QKeySequence, QColor, QVector3D as vec3d
-from PySide2.QtCore import QFile, QUrl
+from PySide2.QtCore import QFile, QUrl, Qt
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DExtras import Qt3DExtras
@@ -89,13 +89,10 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         self.camera().lens().setPerspectiveProjection(45, 16/9, .01, 1000)
         self.camera().setPosition( vec3d( 5, 5, 5 ) )
-        self.camera().setUpVector( vec3d( 0, 0, 1 ) )
+        self.camera().setUpVector( vec3d( 0, 1, 0 ) )
         self.camera().setViewCenter( vec3d( 0, 0, 0) )
 
         self.rootEntity = Qt3DCore.QEntity()
-
-        self.camControl = Qt3DExtras.QOrbitCameraController(self.rootEntity)
-        self.camControl.setCamera(self.camera())
 
         self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
 
@@ -105,9 +102,20 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.meshEntity.addComponent( self.material )
         self.setRootEntity(self.rootEntity)
 
+        self.lastpos = None
+
     def reloadGeom(self, filepath):
         self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
         print(self.displayMesh.meshName(), self.displayMesh.status() )
+        self.camera().viewAll()
+
+    def mouseMoveEvent(self, event):
+        if( self.lastpos ):
+            delta = event.pos()-self.lastpos
+            if( event.buttons() == Qt.LeftButton ):
+                self.camera().panAboutViewCenter( -delta.x() )
+                self.camera().tiltAboutViewCenter( delta.y() )
+        self.lastpos = event.pos()
 
 
 class AthenaWindow(QMainWindow):
