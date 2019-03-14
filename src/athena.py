@@ -98,7 +98,6 @@ class AthenaWindow(QMainWindow):
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
         self.verticalLayout.insertWidget( 0, self.geomViewWidget )
         self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
-        self.show()
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
@@ -107,6 +106,9 @@ class AthenaWindow(QMainWindow):
         self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh)
         self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
         self.actionQuit.triggered.connect(self.close)
+
+        self.newMesh()
+        self.show()
 
     def setupToolDefaults( self ):
         def pretty_name( input_path ):
