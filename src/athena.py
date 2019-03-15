@@ -19,7 +19,7 @@ import geomview
 if getattr(sys, 'frozen', False):
     # We're inside a PyInstaller bundle of some kind
     ATHENA_DIR = sys._MEIPASS
-    ATHENA_OUTPUT_HOME = os.path.dirname( sys.executable )
+    ATHENA_OUTPUT_HOME = Path( sys.executable ).parent.relative_to(Path.cwd())
 else:
     # Not bundled, __file__ is within src/
     ATHENA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
