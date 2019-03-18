@@ -406,7 +406,7 @@
         <item>
          <widget class="QLabel" name="label_23">
           <property name="text">
-           <string>DAEDALUS2: </string>
+           <string>3D wireframe DNA origami with DX edges</string>
           </property>
          </widget>
         </item>
@@ -549,7 +549,7 @@
         <item>
          <widget class="QLabel" name="label_28">
           <property name="text">
-           <string>METIS:</string>
+           <string>2D wireframe DNA origami with 6HB edges</string>
           </property>
          </widget>
         </item>
