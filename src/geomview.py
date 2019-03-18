@@ -32,10 +32,10 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         self.lastpos = None
 
-    def reloadGeom(self, filepath, mesh_3d):
+    def reloadGeom(self, filepath, mesh_3d, cam_distance = None):
         self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
         if (mesh_3d):
-            self.reset3DCamera()
+            self.reset3DCamera(cam_distance)
         else:
             self.reset2DCamera()
 
@@ -49,11 +49,12 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.camera().rightVector = vec3d( 1, 0, 0 )
         self.orientCamera()
 
-    def reset3DCamera( self ):
+    def reset3DCamera( self, cam_distance ):
+        if cam_distance == None: cam_distance = 5
         self.camera_3d = True
         ratio = self.width() / self.height()
         self.camera().lens().setPerspectiveProjection(45, ratio, .01, 1000)
-        self.camera().setPosition( vec3d( 50, 0, 0 ) )
+        self.camera().setPosition( vec3d( cam_distance, 0, 0 ) )
         self.camera().setViewCenter( vec3d( 0, 0, 0) )
         self.camera().rightVector = vec3d( 0, 1, 0 )
         self.orientCamera()

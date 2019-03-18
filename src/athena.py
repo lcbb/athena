@@ -107,14 +107,19 @@ class AthenaWindow(QMainWindow):
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
+        self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
+        self.metisRunButton.clicked.connect(self.runMETIS)
+
         self.perdixOpenButton.clicked.connect(self.addFileToComboBox_action(self.perdixGeometryChooser))
         self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
         self.daedalusOpenButton.clicked.connect(self.addFileToComboBox_action(self.daedalusGeometryChooser))
         self.metisOpenButton.clicked.connect(self.addFileToComboBox_action(self.metisGeometryChooser))
+
         self.perdixGeometryChooser.currentIndexChanged.connect(self.newMesh(2))
         self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh(3))
         self.daedalusGeometryChooser.currentIndexChanged.connect(self.newMesh(3))
         self.metisGeometryChooser.currentIndexChanged.connect(self.newMesh(2))
+
         self.actionQuit.triggered.connect(self.close)
 
         self.newMesh(2)()
@@ -164,7 +169,8 @@ class AthenaWindow(QMainWindow):
                        self.daedalusGeometryChooser, self.metisGeometryChooser][ self.tabWidget.currentIndex() ]
             selection = chooser.currentData()
             mesh_3d = True if dimension == 3 else False
-            self.geomView.reloadGeom( selection, mesh_3d )
+            dist = 50 if chooser == self.daedalusGeometryChooser else None
+            self.geomView.reloadGeom( selection, mesh_3d, dist )
         return newMesh_slot
 
     def updateStatus( self, msg ):
@@ -199,14 +205,30 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('TALOS returned {}.'.format(human_retval))
 
-    #def runDAEDALUS2( self ):
+    def runDAEDALUS2( self ):
+        self.updateStatus('Running DAEDALUS2...')
+        infile_path, outfile_dir_path = self._toolFilenames( 'DAEDALUS2', self.daedalusGeometryChooser )
+        process = runLCBBTool('DAEDALUS2',
+                              p1_output_dir=outfile_dir_path,
+                              p2_input_file=infile_path,
+                              p4_edge_sections=1, p5_vertex_design=2,
+                              p7_edge_length=self.daedalusEdgeLengthSpinner.value())
+        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.updateStatus('DAEDALUS2 returned {}.'.format(human_retval))
 
-    def runCmd( self ):
-        tool_func = [runPERDIX, runTALOS] [ self.toolChooser.currentIndex() ]
-        tool_args = self.filenameInput.text()
-        result = tool_func( tool_args )
-        self.updateStatus("Ran " + self.toolChooser.currentText() + " "
-                           + tool_args + ", result: " + str(result.returncode) )
+
+    def runMETIS( self ):
+        self.updateStatus('Running METIS...')
+        infile_path, outfile_dir_path = self._toolFilenames( 'METIS', self.metisGeometryChooser )
+        process = runLCBBTool ('METIS',
+                               p1_output_dir=outfile_dir_path,
+                               p2_input_file=infile_path,
+                               p4_edge_sections=3, p5_vertex_design=2,
+                               p7_edge_length=self.metisEdgeLengthSpinner.value(),
+                               p8_mesh_spacing=self.metisMeshSpacingSpinner.value())
+        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.updateStatus('METIS returned {}.'.format(human_retval))
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
