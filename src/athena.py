@@ -132,6 +132,14 @@ class AthenaWindow(QMainWindow):
         for ply in talos_inputs.glob("*.ply"):
             self.talosGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
 
+        daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
+        for ply in daedalus_inputs.glob("*.ply"):
+            self.daedalusGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
+
+        metis_inputs = Path(ATHENA_DIR, "sample_inputs", "METIS" )
+        for ply in metis_inputs.glob("*.ply"):
+            self.metisGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
+
 
     def addFileToComboBox_action( self, combobox ):
         def selection_slot():
@@ -155,13 +163,17 @@ class AthenaWindow(QMainWindow):
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
 
+    def _toolFilenames( self, toolname, activeComboBox ):
+        infile_path = activeComboBox.currentData()
+        infile_name = activeComboBox.currentText()
+        outfile_dir_path = ATHENA_OUTPUT_DIR / toolname / infile_name
+        return infile_path, outfile_dir_path
+
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
-        infile_path = self.perdixGeometryChooser.currentData()
-        infile_name = self.perdixGeometryChooser.currentText()
-        outfile_name = infile_name.replace(' ', '_')
+        infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX', self.perdixGeometryChooser )
         process = runLCBBTool ('PERDIX',
-                               p1_output_dir=ATHENA_OUTPUT_DIR / "PERDIX" / outfile_name,
+                               p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
                                p7_edge_length=self.perdixEdgeLengthSpinner.value(),
                                p8_mesh_spacing=self.perdixMeshSpacingSpinner.value())
@@ -170,17 +182,17 @@ class AthenaWindow(QMainWindow):
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
-        infile_path = self.talosGeometryChooser.currentData()
-        infile_name = self.talosGeometryChooser.currentText()
-        outfile_name = infile_name.replace(' ', '_')
+        infile_path, outfile_dir_path = self._toolFilenames( 'TALOS', self.talosGeometryChooser )
         process = runLCBBTool('TALOS',
-                              p1_output_dir=ATHENA_OUTPUT_DIR / "TALOS" / outfile_name,
+                              p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
                               p7_edge_length=self.talosEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('TALOS returned {}.'.format(human_retval))
+
+    #def runDAEDALUS2( self ):
 
     def runCmd( self ):
         tool_func = [runPERDIX, runTALOS] [ self.toolChooser.currentIndex() ]
