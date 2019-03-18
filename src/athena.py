@@ -108,12 +108,16 @@ class AthenaWindow(QMainWindow):
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.perdixOpenButton.clicked.connect(self.addFileToComboBox_action(self.perdixGeometryChooser))
-        self.perdixGeometryChooser.currentIndexChanged.connect(self.newMesh)
-        self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh)
         self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
+        self.daedalusOpenButton.clicked.connect(self.addFileToComboBox_action(self.daedalusGeometryChooser))
+        self.metisOpenButton.clicked.connect(self.addFileToComboBox_action(self.metisGeometryChooser))
+        self.perdixGeometryChooser.currentIndexChanged.connect(self.newMesh(2))
+        self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh(3))
+        self.daedalusGeometryChooser.currentIndexChanged.connect(self.newMesh(3))
+        self.metisGeometryChooser.currentIndexChanged.connect(self.newMesh(2))
         self.actionQuit.triggered.connect(self.close)
 
-        self.newMesh()
+        self.newMesh(2)()
         self.show()
 
     def setupToolDefaults( self ):
@@ -153,12 +157,15 @@ class AthenaWindow(QMainWindow):
                 combobox.setCurrentIndex( combobox.count()-1 )
         return selection_slot
 
-    def newMesh( self ):
+    def newMesh( self, dimension ):
         # Determine which mesh is displaying
-        chooser = [self.perdixGeometryChooser, self.talosGeometryChooser][ self.tabWidget.currentIndex() ]
-        selection = chooser.currentData()
-        mesh_3d = True if self.tabWidget.currentIndex() != 0 else False
-        self.geomView.reloadGeom( selection, mesh_3d )
+        def newMesh_slot():
+            chooser = [self.perdixGeometryChooser, self.talosGeometryChooser, 
+                       self.daedalusGeometryChooser, self.metisGeometryChooser][ self.tabWidget.currentIndex() ]
+            selection = chooser.currentData()
+            mesh_3d = True if dimension == 3 else False
+            self.geomView.reloadGeom( selection, mesh_3d )
+        return newMesh_slot
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )

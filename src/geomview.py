@@ -53,7 +53,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.camera_3d = True
         ratio = self.width() / self.height()
         self.camera().lens().setPerspectiveProjection(45, ratio, .01, 1000)
-        self.camera().setPosition( vec3d( 5, 0, 0 ) )
+        self.camera().setPosition( vec3d( 50, 0, 0 ) )
         self.camera().setViewCenter( vec3d( 0, 0, 0) )
         self.camera().rightVector = vec3d( 0, 1, 0 )
         self.orientCamera()
