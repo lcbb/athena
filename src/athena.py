@@ -100,6 +100,7 @@ class AthenaWindow(QMainWindow):
 
         self.setupToolDefaults()
 
+
         self.geomView = geomview.AthenaGeomView()
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
         self.verticalLayout.insertWidget( 0, self.geomViewWidget )

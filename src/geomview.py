@@ -3,6 +3,7 @@ from PySide2.QtCore import QUrl, Qt
 from PySide2.Qt3DExtras import Qt3DExtras
 from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DCore import Qt3DCore
+from PySide2.QtQml import QQmlEngine, QQmlComponent
 
 ATHENA_GEOM_UP = vec3d(0, 0, 1)
 
@@ -21,8 +22,14 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         self.rootEntity = Qt3DCore.QEntity()
 
-        self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
-        self.material.setDiffuse( QColor(200, 200, 200) )
+        #self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
+        #self.material.setDiffuse( QColor(200, 200, 200) )
+
+        self.eee = QQmlEngine()
+        self.ccc = QQmlComponent(self.eee, "file:///Users/sjackso/athena/src/qml/main.qml")
+        #print(self.ccc.errorString())
+        self.material = self.ccc.create()
+        #print("created", type(self.material))
 
         self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
         self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
