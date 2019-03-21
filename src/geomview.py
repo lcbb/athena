@@ -5,6 +5,8 @@ from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.QtQml import QQmlEngine, QQmlComponent
 
+from athena import ATHENA_DIR
+
 ATHENA_GEOM_UP = vec3d(0, 0, 1)
 
 def rotateAround( v1, v2, angle ):
