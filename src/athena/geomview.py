@@ -7,7 +7,7 @@ from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.QtQml import QQmlEngine, QQmlComponent
 
-from athena import ATHENA_DIR
+from athena import ATHENA_SRC_DIR
 
 ATHENA_GEOM_UP = vec3d(0, 0, 1)
 
@@ -31,14 +31,14 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         # Load
         self.eee = QQmlEngine()
-        main_qml = Path(ATHENA_DIR) / 'src' / 'qml' / 'main.qml'
+        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'main.qml'
         self.ccc = QQmlComponent(self.eee, main_qml.as_uri() )
         #print(self.ccc.errorString())
         self.material = self.ccc.create()
         # We must set the shader program paths here, because qml doesn't know where ATHENA_DIR is
 
         self.shader = Qt3DRender.QShaderProgram()
-        shader_path = Path(ATHENA_DIR) / 'src' / 'shaders' / 'robustwireframe'
+        shader_path = Path(ATHENA_SRC_DIR) / 'shaders' / 'robustwireframe'
         def loadShader(suffix):
             return Qt3DRender.QShaderProgram.loadSource( shader_path.with_suffix( suffix ).as_uri() )
         self.shader.setVertexShaderCode( loadShader( '.vert' ) )
