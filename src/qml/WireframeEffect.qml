@@ -81,11 +81,8 @@ Effect {
 
             renderPasses: [
                 RenderPass {
-                    shaderProgram: ShaderProgram {
-                        vertexShaderCode:   loadSource("file:///Users/sjackso/athena/src/shaders/robustwireframe.vert")
-                        geometryShaderCode: loadSource("file:///Users/sjackso/athena/src/shaders/robustwireframe.geom")
-                        fragmentShaderCode: loadSource("file:///Users/sjackso/athena/src/shaders/robustwireframe.frag")
-                    }
+                    // populated with a shader within geomview.py, since qml cannot usefully work with
+                    // relative file paths for shader loading
                 }
             ]
         }

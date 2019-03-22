@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PySide2.QtGui import QColor, QQuaternion, QVector3D as vec3d
 from PySide2.QtCore import QUrl, Qt
 from PySide2.Qt3DExtras import Qt3DExtras
@@ -27,11 +29,23 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         #self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
         #self.material.setDiffuse( QColor(200, 200, 200) )
 
+        # Load
         self.eee = QQmlEngine()
-        self.ccc = QQmlComponent(self.eee, "file:///Users/sjackso/athena/src/qml/main.qml")
+        main_qml = Path(ATHENA_DIR) / 'src' / 'qml' / 'main.qml'
+        self.ccc = QQmlComponent(self.eee, main_qml.as_uri() )
         #print(self.ccc.errorString())
         self.material = self.ccc.create()
-        #print("created", type(self.material))
+        # We must set the shader program paths here, because qml doesn't know where ATHENA_DIR is
+
+        self.shader = Qt3DRender.QShaderProgram()
+        shader_path = Path(ATHENA_DIR) / 'src' / 'shaders' / 'robustwireframe'
+        def loadShader(suffix):
+            return Qt3DRender.QShaderProgram.loadSource( shader_path.with_suffix( suffix ).as_uri() )
+        self.shader.setVertexShaderCode( loadShader( '.vert' ) )
+        self.shader.setGeometryShaderCode( loadShader( '.geom' ) )
+        self.shader.setFragmentShaderCode( loadShader( '.frag' ) )
+        pass0 = self.material.effect().techniques()[0].renderPasses()[0]
+        pass0.setShaderProgram(self.shader)
 
         self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
         self.displayMesh = Qt3DRender.QMesh(self.rootEntity)

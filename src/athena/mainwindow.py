@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 import sys
 import subprocess
 import os
@@ -12,24 +11,7 @@ from PySide2.QtGui import QKeySequence
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-import geomview
-
-# Set ATHENA_DIR, the base project path, relative to which files and tools will be found
-# and ATHENA_OUTPUT_HOME, the path where an ouput directory will be created
-if getattr(sys, 'frozen', False):
-    # We're inside a PyInstaller bundle of some kind
-    ATHENA_DIR = sys._MEIPASS
-    ATHENA_OUTPUT_HOME = Path( sys.executable ).parent.relative_to(Path.cwd())
-else:
-    # Not bundled, __file__ is within src/
-    ATHENA_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ATHENA_OUTPUT_HOME = '.'
-
-# Set ATHENA_OUTPUT_DIR, the directory where all tools outputs will be written.
-# The program will halt here if no such directory can be created
-ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_outputs")
-ATHENA_OUTPUT_DIR.mkdir( parents=False, exist_ok=True )
-print("Athena's output directory will be", ATHENA_OUTPUT_DIR)
+from athena import geomview, ATHENA_DIR
 
 class UiLoader(QUiLoader):
     '''
@@ -86,7 +68,8 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
 
 
 class AthenaWindow(QMainWindow):
-    def __init__( self, ui_filepath ):
+    default_ui_path = os.path.join( ATHENA_DIR, 'ui', 'AthenaMainWindow.ui' )
+    def __init__( self, ui_filepath=default_ui_path ):
         super( AthenaWindow, self).__init__(None)
         UiLoader.populateUI( self, ui_filepath )
 
@@ -231,7 +214,3 @@ class AthenaWindow(QMainWindow):
         self.updateStatus('METIS returned {}.'.format(human_retval))
 
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = AthenaWindow( os.path.join( ATHENA_DIR, 'ui', 'AthenaMainWindow.ui'))
-    sys.exit(app.exec_())
