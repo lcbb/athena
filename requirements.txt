@@ -1,2 +1,2 @@
-PySide2==5.12.0
-PyInstaller
+PySide2==5.12.2
+git+git://github.com/sjackso/pyinstaller@athena_support#egg=pyinstaller
