@@ -3,7 +3,7 @@ import struct
 import itertools
 
 from PySide2.QtGui import QColor, QQuaternion, QVector3D as vec3d
-from PySide2.QtCore import QUrl, Qt
+from PySide2.QtCore import QUrl, QByteArray, Qt
 from PySide2.Qt3DExtras import Qt3DExtras
 from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DCore import Qt3DCore
@@ -103,6 +103,24 @@ def compute_AABB( geom ):
         maximums.setZ( max( maximums.z(), vtx[2] ) )
     return (minimums, maximums)
 
+class AABBOutline(Qt3DCore.QEntity):
+    def __init__(self, parent, geom):
+        super(AABBOutline, self).__init__(parent)
+
+        self.geometry = Qt3DRender.QGeometry(self)
+        self.qbytes = QByteArray()
+        self.qbytes.resize(3*2*_basetype_widths[_basetypes.Float])
+        codechar = _basetype_struct_codes[_basetypes.Float]
+        (min_vtx, max_vtx) = compute_AABB(geom)
+        struct.pack_into( codechar*6, self.qbytes.data().data(), 0, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
+                                                             max_vtx.x(), max_vtx.y(), max_vtx.z() )
+
+        self.qbuf = QBuffer(self.geometry)
+        self.qbuf.setData(self.qbytes)
+
+
+
+
 class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
         super(AthenaGeomView, self).__init__()
@@ -152,7 +170,6 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
             self.reset3DCamera(cam_distance)
         else:
             self.reset2DCamera()
-        geom = self.displayMesh.geometry()
 
     def meshChange( self ):
         print(self.displayMesh.source(), self.displayMesh.status())
@@ -160,6 +177,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
             geom = self.displayMesh.geometry()
             dumpGeometry(geom)
             print( compute_AABB( geom ) )
+            aabb = AABBOutline( self.rootEntity, geom )
 
     def reset2DCamera( self ):
         self.camera_3d = False
