@@ -17,13 +17,11 @@ def rotateAround( v1, v2, angle ):
     q = QQuaternion.fromAxisAndAngle( v2, angle )
     return q.rotatedVector( v1 )
 
-def _basetype_width( basetype ):
-    if basetype == Qt3DRender.QAttribute.VertexBaseType.Float :
-        return 4
-    elif basetype == Qt3DRender.QAttribute.VertexBaseType.UnsignedShort :
-        return 2
-
+# The base types enumeration
 _basetypes = Qt3DRender.QAttribute.VertexBaseType
+
+# Map from the enumeration to (byte_width, struct_code) pairs
+# This dict is unzipped into two convenience dicts below.
 _basetype_data = { _basetypes.Byte : (1,'b'), _basetypes.UnsignedByte : (1,'B'),
                      _basetypes.Short: (2, 'h'), _basetypes.UnsignedShort : (2,'H'),
                      _basetypes.Int  : (4, 'i'), _basetypes.UnsignedInt : (4,'I'),
@@ -31,11 +29,14 @@ _basetype_data = { _basetypes.Byte : (1,'b'), _basetypes.UnsignedByte : (1,'B'),
                      _basetypes.Float : (4, 'f'),
                      _basetypes.Double : (8, 'd') }
 
+# Map of Qt3D base types to byte widths
 _basetype_widths = { k: v[0] for k,v in _basetype_data.items()}
 
+# Map of Qt3D base types to codes for struct.unpack
 _basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
 
 def iterAttr( att ):
+    '''Iterator over a Qt3DRender.QAttribute'''
     basetype = att.vertexBaseType()
     width = _basetype_widths[ basetype ]
     struct_code = _basetype_struct_codes[ basetype ]
@@ -44,17 +45,25 @@ def iterAttr( att ):
     byteStride = att.byteStride()
     count = att.count()
     vertex_size = att.vertexSize()
-    print( width, struct_code, byteOffset, byteStride, vertex_size, count )
+    #print( width, struct_code, byteOffset, byteStride, vertex_size, count )
     if byteStride == 0:
         byteStride = width
     if vertex_size == 0:
         vertex_size = width
     for i in range (byteOffset, byteOffset + byteStride * count, byteStride ):
-        datum = [ struct.unpack( struct_code, bytes(att_data[ i + (j*width) : i+(j*width)+width ]) ) for j in range(vertex_size) ]
+        datum = [ struct.unpack( struct_code, bytes(att_data[ i + (j*width) : i+(j*width)+width ]) )[0] for j in range(vertex_size) ]
         yield datum
 
 def grouper(i, n):
+    '''from the itertools recipe list: yield n-sized lists of items from iterator i'''
     return iter( lambda: list(itertools.islice(iter(i), n)), [])
+
+def getVertexAttr( geom ):
+    atts = geom.attributes()
+    for att in atts:
+        if att.name() == "vertexPosition" and att.attributeType() == Qt3DRender.QAttribute.AttributeType.VertexAttribute:
+            return att
+    return None
 
 
 def dumpGeometry( geom, dumpf=print ):
@@ -79,20 +88,20 @@ def dumpGeometry( geom, dumpf=print ):
             dumpf( num_tris, "triangles" )
             for tri in grouper(iterAttr(att), 3):
                 dumpf(tri)
-            #for i in range( 0, num_tris*3*width, 3*width ):
-                #tri = [struct.unpack(code, bytes(att_data[i+(j*width):i+(j*width)+width])) for j in range(3)]
-                #dumpf(tri)
 
 
-def AABB( geom ):
-    atts = geom.attributes()
-    for att in atts:
-        if att.name() == "vertexPosition" and att.attributeType() == Qt3DRender.QAttribute.AttributeType.VertexAttribute:
-            vtx_att = att
-            break
-    basetype = att.vertexBaseType()
-    data_width = _basetype_widths[ basetype ]
-    #data = 
+def compute_AABB( geom ):
+    vertices = getVertexAttr(geom)
+    minimums = vec3d()
+    maximums = vec3d()
+    for vtx in iterAttr(vertices):
+        minimums.setX( min( minimums.x(), vtx[0] ) )
+        minimums.setY( min( minimums.y(), vtx[1] ) )
+        minimums.setZ( min( minimums.z(), vtx[2] ) )
+        maximums.setX( max( maximums.x(), vtx[0] ) )
+        maximums.setY( max( maximums.y(), vtx[1] ) )
+        maximums.setZ( max( maximums.z(), vtx[2] ) )
+    return (minimums, maximums)
 
 class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
@@ -150,6 +159,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         if self.displayMesh.status() == Qt3DRender.QMesh.Ready:
             geom = self.displayMesh.geometry()
             dumpGeometry(geom)
+            print( compute_AABB( geom ) )
 
     def reset2DCamera( self ):
         self.camera_3d = False
