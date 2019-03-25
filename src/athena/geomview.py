@@ -16,6 +16,41 @@ def rotateAround( v1, v2, angle ):
     q = QQuaternion.fromAxisAndAngle( v2, angle )
     return q.rotatedVector( v1 )
 
+def dumpGeometry( geom, dumpf=print ):
+    if geom is None:
+        dumpf( "No geometry" )
+        return
+    atts = geom.attributes()
+    for att in atts:
+        att_type = att.attributeType()
+        basetype = att.vertexBaseType()
+        dumpf('{type} "{name}" '.format( type=str(att_type).split('AttributeType.')[-1], name=att.name()), end='' )
+        dumpf( 'with base type {basetype}'.format(basetype = str(basetype).split('BaseType.')[-1]) )
+        if( basetype == Qt3DRender.QAttribute.VertexBaseType.Float ):
+            width = 4
+            code = 'f'
+        elif( basetype == Qt3DRender.QAttribute.VertexBaseType.UnsignedShort ):
+            width = 2 
+            code = 'H'
+        else:
+            # ... others to come
+            raise TypeError("I don't know base type "+str(basetype))
+
+        att_data = att.buffer().data().data()
+        if( att_type == Qt3DRender.QAttribute.AttributeType.VertexAttribute ):
+            for i in range(att.byteOffset(), att.byteOffset() + (max(width,att.byteStride()))*att.count(), max(att.byteStride(),width)):
+                vertex = [struct.unpack(code, bytes(att_data[i+(j*width):i+(j*width)+width])) for j in range(att.vertexSize())]
+                dumpf(vertex)
+        elif att_type == Qt3DRender.QAttribute.AttributeType.IndexAttribute :
+            count = att.count()
+            num_tris = int(count / 3)
+            dumpf( num_tris, "triangles" )
+            for i in range( 0, num_tris*3*width, 3*width ):
+                tri = [struct.unpack(code, bytes(att_data[i+(j*width):i+(j*width)+width])) for j in range(3)]
+                dumpf(tri)
+
+
+
 class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
         super(AthenaGeomView, self).__init__()
@@ -56,6 +91,9 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         self.lastpos = None
 
+        self.displayMesh.statusChanged.connect(self.meshChange)
+        self.displayMesh.geometryChanged.connect(self.meshChange)
+
     def reloadGeom(self, filepath, mesh_3d, cam_distance = None):
         self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
         if (mesh_3d):
@@ -63,23 +101,12 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         else:
             self.reset2DCamera()
         geom = self.displayMesh.geometry()
-        if(geom):
-            atts = geom.attributes()
-            print(atts)
-            for att in atts:
-                print(att.name(), att.vertexBaseType())
-                if( att.vertexBaseType() == Qt3DRender.QAttribute.VertexBaseType.Float ):
-                    width = 4
-                    code = 'f'
-                if( att.vertexBaseType() == Qt3DRender.QAttribute.VertexBaseType.UnsignedShort ):
-                    width = 2 
-                    code = 'H'
-                print(att.vertexSize(), att.attributeType(), att.count())
-                print(att.byteOffset(), att.byteStride(), att.divisor(), code)
-                for i in range(att.byteOffset(), att.byteOffset() + (max(width,att.byteStride()))*att.count(), max(att.byteStride(),width)):
-                    vertex = [struct.unpack(code, bytes(att.buffer().data().data()[i+(j*width):i+(j*width)+width])) for j in range(att.vertexSize())]
-                    print(vertex)
-                #print( struct.unpack('f', bytes(att.buffer().data().data()[0:4]) ) )
+
+    def meshChange( self ):
+        print(self.displayMesh.source(), self.displayMesh.status())
+        if self.displayMesh.status() == Qt3DRender.QMesh.Ready:
+            geom = self.displayMesh.geometry()
+            dumpGeometry(geom)
 
     def reset2DCamera( self ):
         self.camera_3d = False
