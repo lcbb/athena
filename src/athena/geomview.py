@@ -1,4 +1,5 @@
 from pathlib import Path
+import struct
 
 from PySide2.QtGui import QColor, QQuaternion, QVector3D as vec3d
 from PySide2.QtCore import QUrl, Qt
@@ -61,6 +62,24 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
             self.reset3DCamera(cam_distance)
         else:
             self.reset2DCamera()
+        geom = self.displayMesh.geometry()
+        if(geom):
+            atts = geom.attributes()
+            print(atts)
+            for att in atts:
+                print(att.name(), att.vertexBaseType())
+                if( att.vertexBaseType() == Qt3DRender.QAttribute.VertexBaseType.Float ):
+                    width = 4
+                    code = 'f'
+                if( att.vertexBaseType() == Qt3DRender.QAttribute.VertexBaseType.UnsignedShort ):
+                    width = 2 
+                    code = 'H'
+                print(att.vertexSize(), att.attributeType(), att.count())
+                print(att.byteOffset(), att.byteStride(), att.divisor(), code)
+                for i in range(att.byteOffset(), att.byteOffset() + (max(width,att.byteStride()))*att.count(), max(att.byteStride(),width)):
+                    vertex = [struct.unpack(code, bytes(att.buffer().data().data()[i+(j*width):i+(j*width)+width])) for j in range(att.vertexSize())]
+                    print(vertex)
+                #print( struct.unpack('f', bytes(att.buffer().data().data()[0:4]) ) )
 
     def reset2DCamera( self ):
         self.camera_3d = False
