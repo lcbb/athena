@@ -1,5 +1,6 @@
 from pathlib import Path
 import struct
+import itertools
 
 from PySide2.QtGui import QColor, QQuaternion, QVector3D as vec3d
 from PySide2.QtCore import QUrl, Qt
@@ -16,6 +17,46 @@ def rotateAround( v1, v2, angle ):
     q = QQuaternion.fromAxisAndAngle( v2, angle )
     return q.rotatedVector( v1 )
 
+def _basetype_width( basetype ):
+    if basetype == Qt3DRender.QAttribute.VertexBaseType.Float :
+        return 4
+    elif basetype == Qt3DRender.QAttribute.VertexBaseType.UnsignedShort :
+        return 2
+
+_basetypes = Qt3DRender.QAttribute.VertexBaseType
+_basetype_data = { _basetypes.Byte : (1,'b'), _basetypes.UnsignedByte : (1,'B'),
+                     _basetypes.Short: (2, 'h'), _basetypes.UnsignedShort : (2,'H'),
+                     _basetypes.Int  : (4, 'i'), _basetypes.UnsignedInt : (4,'I'),
+                     _basetypes.HalfFloat : (2, 'e'),
+                     _basetypes.Float : (4, 'f'),
+                     _basetypes.Double : (8, 'd') }
+
+_basetype_widths = { k: v[0] for k,v in _basetype_data.items()}
+
+_basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
+
+def iterAttr( att ):
+    basetype = att.vertexBaseType()
+    width = _basetype_widths[ basetype ]
+    struct_code = _basetype_struct_codes[ basetype ]
+    att_data = att.buffer().data().data()
+    byteOffset = att.byteOffset()
+    byteStride = att.byteStride()
+    count = att.count()
+    vertex_size = att.vertexSize()
+    print( width, struct_code, byteOffset, byteStride, vertex_size, count )
+    if byteStride == 0:
+        byteStride = width
+    if vertex_size == 0:
+        vertex_size = width
+    for i in range (byteOffset, byteOffset + byteStride * count, byteStride ):
+        datum = [ struct.unpack( struct_code, bytes(att_data[ i + (j*width) : i+(j*width)+width ]) ) for j in range(vertex_size) ]
+        yield datum
+
+def grouper(i, n):
+    return iter( lambda: list(itertools.islice(iter(i), n)), [])
+
+
 def dumpGeometry( geom, dumpf=print ):
     if geom is None:
         dumpf( "No geometry" )
@@ -26,30 +67,32 @@ def dumpGeometry( geom, dumpf=print ):
         basetype = att.vertexBaseType()
         dumpf('{type} "{name}" '.format( type=str(att_type).split('AttributeType.')[-1], name=att.name()), end='' )
         dumpf( 'with base type {basetype}'.format(basetype = str(basetype).split('BaseType.')[-1]) )
-        if( basetype == Qt3DRender.QAttribute.VertexBaseType.Float ):
-            width = 4
-            code = 'f'
-        elif( basetype == Qt3DRender.QAttribute.VertexBaseType.UnsignedShort ):
-            width = 2 
-            code = 'H'
-        else:
-            # ... others to come
-            raise TypeError("I don't know base type "+str(basetype))
+        width = _basetype_widths[ basetype ]
+        code = _basetype_struct_codes[ basetype ]
 
-        att_data = att.buffer().data().data()
         if( att_type == Qt3DRender.QAttribute.AttributeType.VertexAttribute ):
-            for i in range(att.byteOffset(), att.byteOffset() + (max(width,att.byteStride()))*att.count(), max(att.byteStride(),width)):
-                vertex = [struct.unpack(code, bytes(att_data[i+(j*width):i+(j*width)+width])) for j in range(att.vertexSize())]
-                dumpf(vertex)
+            for vtx in iterAttr( att ):
+                dumpf(vtx)
         elif att_type == Qt3DRender.QAttribute.AttributeType.IndexAttribute :
             count = att.count()
             num_tris = int(count / 3)
             dumpf( num_tris, "triangles" )
-            for i in range( 0, num_tris*3*width, 3*width ):
-                tri = [struct.unpack(code, bytes(att_data[i+(j*width):i+(j*width)+width])) for j in range(3)]
+            for tri in grouper(iterAttr(att), 3):
                 dumpf(tri)
+            #for i in range( 0, num_tris*3*width, 3*width ):
+                #tri = [struct.unpack(code, bytes(att_data[i+(j*width):i+(j*width)+width])) for j in range(3)]
+                #dumpf(tri)
 
 
+def AABB( geom ):
+    atts = geom.attributes()
+    for att in atts:
+        if att.name() == "vertexPosition" and att.attributeType() == Qt3DRender.QAttribute.AttributeType.VertexAttribute:
+            vtx_att = att
+            break
+    basetype = att.vertexBaseType()
+    data_width = _basetype_widths[ basetype ]
+    #data = 
 
 class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
