@@ -2,6 +2,9 @@ from pathlib import Path
 import struct
 import itertools
 
+from plyfile import PlyData, PlyElement
+import numpy as np
+
 from PySide2.QtGui import QColor, QQuaternion, QVector3D as vec3d
 from PySide2.QtCore import QUrl, QByteArray, Qt
 from PySide2.Qt3DExtras import Qt3DExtras
@@ -104,8 +107,17 @@ def compute_AABB( geom ):
     return (minimums, maximums)
 
 class AABBOutline(Qt3DCore.QEntity):
-    def __init__(self, parent, geom):
+    def __init__(self, parent, geom, plydata):
         super(AABBOutline, self).__init__(parent)
+
+        print(plydata['vertex'].name, plydata['vertex'].properties)
+        print(plydata['face'].name, plydata['face'].properties)
+
+        vertices = plydata['vertex'].data
+        faces = plydata['face'].data
+        print(type(vertices[0][0]), vertices)
+        print(vertices.ravel())
+        print(type(faces[0][0][0]), faces[0][0])
 
         self.geometry = Qt3DRender.QGeometry(self)
         codechar = _basetype_struct_codes[_basetypes.Float]
@@ -115,8 +127,10 @@ class AABBOutline(Qt3DCore.QEntity):
         #self.qbytes.resize(3*2*_basetype_widths[_basetypes.Float])
         #struct.pack_into( codechar*6, self.qbytes, 0, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
         #                                                     max_vtx.x(), max_vtx.y(), max_vtx.z() )
-        rawstring= struct.pack( codechar*6, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
-                                 max_vtx.x(), max_vtx.y(), max_vtx.z() )
+        #rawstring= struct.pack( codechar*6, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
+                                 #max_vtx.x(), max_vtx.y(), max_vtx.z() )
+        rawstring = vertices.tobytes()
+        print(struct.unpack('ffffff', rawstring[:24]))
         self.qvbytes = QByteArray(rawstring)
 
         self.qvbuf = Qt3DRender.QBuffer(self.geometry)
@@ -129,11 +143,32 @@ class AABBOutline(Qt3DCore.QEntity):
         self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
         self.positionAttr.setBuffer(self.qvbuf)
         self.positionAttr.setByteStride(3*_basetype_widths[_basetypes.Float])
-        self.positionAttr.setCount(2)
+        self.positionAttr.setCount(len(vertices))
         self.geometry.addAttribute(self.positionAttr)
 
         index_type = _basetypes.UnsignedShort
-        rawstring = struct.pack( _basetype_struct_codes[index_type]*2, 0, 1 )
+        total_segments = 0
+        for poly in faces:
+            total_segments += len(poly[0])
+        index_buffer_np = np.zeros(2*total_segments, np.int16)
+        idx = 0
+        def poly_line_iter(poly):
+            a,b = itertools.tee(poly)
+            next(b, None)
+            return zip(a,b)
+        for poly in faces:
+            indices = poly[0]
+            for a, b in poly_line_iter(indices):
+                index_buffer_np[idx] = a
+                idx += 1
+                index_buffer_np[idx] = b
+                idx += 1
+
+        #rawstring = struct.pack( _basetype_struct_codes[index_type]*4, faces[0][0][0], faces[0][0][1], faces[0][0][2], faces[0][0][0] )
+        rawstring = index_buffer_np.tobytes()
+        
+        print(struct.unpack('HHHH',rawstring[:8]))
+        #rawstring = faces.tobytes()
         self.qibytes = QByteArray(rawstring)
         self.qibuf = Qt3DRender.QBuffer(self.geometry)
         self.qibuf.setData(self.qibytes)
@@ -142,7 +177,7 @@ class AABBOutline(Qt3DCore.QEntity):
         self.indexAttr.setVertexBaseType(index_type)
         self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
         self.indexAttr.setBuffer(self.qibuf)
-        self.indexAttr.setCount(2)
+        self.indexAttr.setCount(total_segments*2)
         self.geometry.addAttribute(self.indexAttr)
 
         self.lineMesh = Qt3DRender.QGeometryRenderer(parent)
@@ -170,8 +205,6 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         self.rootEntity = Qt3DCore.QEntity()
 
-        #self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
-        #self.material.setDiffuse( QColor(200, 200, 200) )
 
         # Load
         self.eee = QQmlEngine()
@@ -191,6 +224,9 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         pass0 = self.material.effect().techniques()[0].renderPasses()[0]
         pass0.setShaderProgram(self.shader)
 
+        self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
+        self.material.setDiffuse( QColor(200, 200, 200) )
+
         self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
         self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
         self.meshEntity.addComponent( self.displayMesh )
@@ -198,12 +234,15 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.setRootEntity(self.rootEntity)
 
         self.lastpos = None
+        self.aabb = None
 
         self.displayMesh.statusChanged.connect(self.meshChange)
         self.displayMesh.geometryChanged.connect(self.meshChange)
 
     def reloadGeom(self, filepath, mesh_3d, cam_distance = None):
+        self.meshFilepath = filepath
         self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
+        self.plydata = PlyData.read(filepath)
         if (mesh_3d):
             self.reset3DCamera(cam_distance)
         else:
@@ -215,7 +254,9 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
             geom = self.displayMesh.geometry()
             dumpGeometry(geom)
             print( compute_AABB( geom ) )
-            aabb = AABBOutline( self.rootEntity, geom )
+            if( self.aabb ):
+                self.aabb.deleteLater()
+            self.aabb = AABBOutline( self.rootEntity, geom, self.plydata )
 
     def reset2DCamera( self ):
         self.camera_3d = False
