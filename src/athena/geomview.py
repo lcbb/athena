@@ -108,15 +108,53 @@ class AABBOutline(Qt3DCore.QEntity):
         super(AABBOutline, self).__init__(parent)
 
         self.geometry = Qt3DRender.QGeometry(self)
-        self.qbytes = QByteArray()
-        self.qbytes.resize(3*2*_basetype_widths[_basetypes.Float])
         codechar = _basetype_struct_codes[_basetypes.Float]
         (min_vtx, max_vtx) = compute_AABB(geom)
-        struct.pack_into( codechar*6, self.qbytes.data().data(), 0, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
-                                                             max_vtx.x(), max_vtx.y(), max_vtx.z() )
 
-        self.qbuf = QBuffer(self.geometry)
-        self.qbuf.setData(self.qbytes)
+        #self.qbytes = QByteArray()
+        #self.qbytes.resize(3*2*_basetype_widths[_basetypes.Float])
+        #struct.pack_into( codechar*6, self.qbytes, 0, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
+        #                                                     max_vtx.x(), max_vtx.y(), max_vtx.z() )
+        rawstring= struct.pack( codechar*6, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
+                                 max_vtx.x(), max_vtx.y(), max_vtx.z() )
+        self.qvbytes = QByteArray(rawstring)
+
+        self.qvbuf = Qt3DRender.QBuffer(self.geometry)
+        self.qvbuf.setData(self.qvbytes)
+
+        self.positionAttr = Qt3DRender.QAttribute(self.geometry)
+        self.positionAttr.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        self.positionAttr.setVertexBaseType(_basetypes.Float)
+        self.positionAttr.setVertexSize(3)
+        self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
+        self.positionAttr.setBuffer(self.qvbuf)
+        self.positionAttr.setByteStride(3*_basetype_widths[_basetypes.Float])
+        self.positionAttr.setCount(2)
+        self.geometry.addAttribute(self.positionAttr)
+
+        index_type = _basetypes.UnsignedShort
+        rawstring = struct.pack( _basetype_struct_codes[index_type]*2, 0, 1 )
+        self.qibytes = QByteArray(rawstring)
+        self.qibuf = Qt3DRender.QBuffer(self.geometry)
+        self.qibuf.setData(self.qibytes)
+
+        self.indexAttr = Qt3DRender.QAttribute(self.geometry)
+        self.indexAttr.setVertexBaseType(index_type)
+        self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
+        self.indexAttr.setBuffer(self.qibuf)
+        self.indexAttr.setCount(2)
+        self.geometry.addAttribute(self.indexAttr)
+
+        self.lineMesh = Qt3DRender.QGeometryRenderer(parent)
+        self.lineMesh.setGeometry(self.geometry)
+        self.lineMesh.setPrimitiveType( Qt3DRender.QGeometryRenderer.Lines )
+
+        self.lineMaterial = Qt3DExtras.QPhongMaterial(parent)
+        self.lineMaterial.setAmbient(QColor(255,255,0))
+
+        self.lineEntity = Qt3DCore.QEntity(parent)
+        self.lineEntity.addComponent(self.lineMesh)
+        self.lineEntity.addComponent(self.lineMaterial)
 
 
 
