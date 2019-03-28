@@ -231,6 +231,19 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
         self.meshEntity.addComponent( self.displayMesh )
         self.meshEntity.addComponent( self.material )
+
+        self.renderStates = Qt3DRender.QRenderStateSet(self.rootEntity)
+        self.renderStateLines = Qt3DRender.QLineWidth(self.rootEntity)
+        self.renderStateLines.setSmooth(False)
+        self.renderStateLines.setValue(10000)
+        self.renderStates.addRenderState(self.renderStateLines)
+        self.activeFrameGraph().setParent(self.renderStates)
+        self.setActiveFrameGraph(self.renderStates)
+        #self.activeFrameGraph().addRenderSettings(self.renderStates)
+        #self.activeFrameGraph().add
+        #self.renderSettings.setActiveFrameGraph(self.renderStates)
+        #self.rootEntity.addComponent(self.)
+
         self.setRootEntity(self.rootEntity)
 
         self.lastpos = None
