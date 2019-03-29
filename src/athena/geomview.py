@@ -38,6 +38,9 @@ _basetype_widths = { k: v[0] for k,v in _basetype_data.items()}
 # Map of Qt3D base types to codes for struct.unpack
 _basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
 
+# Map of Qt3D base types to numpy types
+_basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in _basetype_struct_codes.items()}
+
 def iterAttr( att ):
     '''Iterator over a Qt3DRender.QAttribute'''
     basetype = att.vertexBaseType()
@@ -106,69 +109,71 @@ def compute_AABB( geom ):
         maximums.setZ( max( maximums.z(), vtx[2] ) )
     return (minimums, maximums)
 
-class AABBOutline(Qt3DCore.QEntity):
-    def __init__(self, parent, geom, plydata):
-        super(AABBOutline, self).__init__(parent)
+def getQAttribute( geom, att_type=Qt3DRender.QAttribute.VertexAttribute, att_name=None ):
+    for att in geom.attributes():
+        if att.attributeType() == att_type and (att_name is None or att.name() == att_name):
+            return att
+    return None
 
-        print(plydata['vertex'].name, plydata['vertex'].properties)
-        print(plydata['face'].name, plydata['face'].properties)
+class WireOutline(Qt3DCore.QEntity):
+    def __init__(self, parent, geom, plydata):
+        super(WireOutline, self).__init__(parent)
 
         vertices = plydata['vertex'].data
         faces = plydata['face'].data
-        print(type(vertices[0][0]), vertices)
-        print(vertices.ravel())
-        print(type(faces[0][0][0]), faces[0][0])
 
         self.geometry = Qt3DRender.QGeometry(self)
-        codechar = _basetype_struct_codes[_basetypes.Float]
-        (min_vtx, max_vtx) = compute_AABB(geom)
 
-        #self.qbytes = QByteArray()
-        #self.qbytes.resize(3*2*_basetype_widths[_basetypes.Float])
-        #struct.pack_into( codechar*6, self.qbytes, 0, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
-        #                                                     max_vtx.x(), max_vtx.y(), max_vtx.z() )
-        #rawstring= struct.pack( codechar*6, min_vtx.x(), min_vtx.y(), min_vtx.z(), 
-                                 #max_vtx.x(), max_vtx.y(), max_vtx.z() )
-        rawstring = vertices.tobytes()
-        print(struct.unpack('ffffff', rawstring[:24]))
-        self.qvbytes = QByteArray(rawstring)
+        # The xyz position attribute: recorded here is the way to generate it from the plyfile data.
+        # In practice, the resultng buffer has always been identical to the vertex buffer from
+        # Qt3D's polygon mesh (which was, after all, created from the same file), so we are just
+        # going to borrow that buffer below instead of creating a whole new QAttribute/QBuffer.
+        # But I'm keeping this commented code here in case it proves needful in the future.
+        #rawstring = vertices.tobytes()
+        #self.qvbytes = QByteArray(rawstring)
+        #self.qvbuf = Qt3DRender.QBuffer(self.geometry)
+        #self.qvbuf.setData(self.qvbytes)
+        #self.positionAttr = Qt3DRender.QAttribute(self.geometry)
+        #self.positionAttr.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        #self.positionAttr.setVertexBaseType(_basetypes.Float)
+        #self.positionAttr.setVertexSize(3)
+        #self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
+        #self.positionAttr.setBuffer(self.qvbuf)
+        #self.positionAttr.setByteStride(3*_basetype_widths[_basetypes.Float])
+        #self.positionAttr.setCount(len(vertices))
+        #self.geometry.addAttribute(self.positionAttr)
 
-        self.qvbuf = Qt3DRender.QBuffer(self.geometry)
-        self.qvbuf.setData(self.qvbytes)
+        # Instead of the above, borrow the position attribute buffer from geom
+        vatt = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        self.geometry.addAttribute(vatt)
 
-        self.positionAttr = Qt3DRender.QAttribute(self.geometry)
-        self.positionAttr.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
-        self.positionAttr.setVertexBaseType(_basetypes.Float)
-        self.positionAttr.setVertexSize(3)
-        self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
-        self.positionAttr.setBuffer(self.qvbuf)
-        self.positionAttr.setByteStride(3*_basetype_widths[_basetypes.Float])
-        self.positionAttr.setCount(len(vertices))
-        self.geometry.addAttribute(self.positionAttr)
+        # Now create the index attribute.  This is different from the Qt3D mesh, which has been triangulated,
+        # so we'll need to iterate over the .ply faces and build up our own buffer.
 
-        index_type = _basetypes.UnsignedShort
-        total_segments = 0
-        for poly in faces:
-            total_segments += len(poly[0])
-        index_buffer_np = np.zeros(2*total_segments, np.int16)
-        idx = 0
-        def poly_line_iter(poly):
-            a,b = itertools.tee(poly)
-            next(b, None)
-            return zip(a,b)
-        for poly in faces:
-            indices = poly[0]
-            for a, b in poly_line_iter(indices):
-                index_buffer_np[idx] = a
-                idx += 1
-                index_buffer_np[idx] = b
-                idx += 1
+        def edge_index_iter():
+            '''Iterate all pairs of connected vertices (i.e. all edges) in the faces structure
 
-        #rawstring = struct.pack( _basetype_struct_codes[index_type]*4, faces[0][0][0], faces[0][0][1], faces[0][0][2], faces[0][0][0] )
+            May repeat edges.  Returns (x,y) pairs with x always less than y.
+            '''
+            for poly in faces:
+                indices = poly[0]
+                it = iter(indices)
+                i0 = next(it)
+                i_last = i0
+                for i in it:
+                    pair = (min(i_last, i), max(i_last, i))
+                    i_last = i
+                    yield pair
+                yield (min(i_last,i0), max(i_last,i0))
+
+        unique_edges = set(pair for pair in edge_index_iter())
+
+        #  use the same basetype as the Qt3D mesh, since presumably that file loader chose a suitable type
+        iatt = getQAttribute(geom, att_type=Qt3DRender.QAttribute.IndexAttribute)
+        index_type = iatt.vertexBaseType()
+        index_buffer_np = np.array(list(unique_edges), dtype=_basetype_numpy_codes[index_type])
         rawstring = index_buffer_np.tobytes()
         
-        print(struct.unpack('HHHH',rawstring[:8]))
-        #rawstring = faces.tobytes()
         self.qibytes = QByteArray(rawstring)
         self.qibuf = Qt3DRender.QBuffer(self.geometry)
         self.qibuf.setData(self.qibytes)
@@ -177,7 +182,7 @@ class AABBOutline(Qt3DCore.QEntity):
         self.indexAttr.setVertexBaseType(index_type)
         self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
         self.indexAttr.setBuffer(self.qibuf)
-        self.indexAttr.setCount(total_segments*2)
+        self.indexAttr.setCount(index_buffer_np.size)
         self.geometry.addAttribute(self.indexAttr)
 
         self.lineMesh = Qt3DRender.QGeometryRenderer(parent)
@@ -232,13 +237,6 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.meshEntity.addComponent( self.displayMesh )
         self.meshEntity.addComponent( self.material )
 
-        self.renderStates = Qt3DRender.QRenderStateSet(self.rootEntity)
-        self.renderStateLines = Qt3DRender.QLineWidth(self.rootEntity)
-        self.renderStateLines.setSmooth(False)
-        self.renderStateLines.setValue(10000)
-        self.renderStates.addRenderState(self.renderStateLines)
-        self.activeFrameGraph().setParent(self.renderStates)
-        self.setActiveFrameGraph(self.renderStates)
         #self.activeFrameGraph().addRenderSettings(self.renderStates)
         #self.activeFrameGraph().add
         #self.renderSettings.setActiveFrameGraph(self.renderStates)
@@ -265,11 +263,10 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         print(self.displayMesh.source(), self.displayMesh.status())
         if self.displayMesh.status() == Qt3DRender.QMesh.Ready:
             geom = self.displayMesh.geometry()
-            dumpGeometry(geom)
-            print( compute_AABB( geom ) )
+            #dumpGeometry(geom)
             if( self.aabb ):
                 self.aabb.deleteLater()
-            self.aabb = AABBOutline( self.rootEntity, geom, self.plydata )
+            self.aabb = WireOutline( self.rootEntity, geom, self.plydata )
 
     def reset2DCamera( self ):
         self.camera_3d = False
