@@ -189,12 +189,12 @@ class WireOutline(Qt3DCore.QEntity):
         self.lineMesh.setGeometry(self.geometry)
         self.lineMesh.setPrimitiveType( Qt3DRender.QGeometryRenderer.Lines )
 
-        self.lineMaterial = Qt3DExtras.QPhongMaterial(parent)
-        self.lineMaterial.setAmbient(QColor(255,255,0))
+        #self.lineMaterial = Qt3DExtras.QPhongMaterial(parent)
+        #self.lineMaterial.setAmbient(QColor(255,255,0))
 
-        self.lineEntity = Qt3DCore.QEntity(parent)
-        self.lineEntity.addComponent(self.lineMesh)
-        self.lineEntity.addComponent(self.lineMaterial)
+        #self.lineEntity = Qt3DCore.QEntity(parent)
+        self.addComponent(self.lineMesh)
+        #self.lineEntity.addComponent(self.lineMaterial)
 
 
 
@@ -229,8 +229,8 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         pass0 = self.material.effect().techniques()[0].renderPasses()[0]
         pass0.setShaderProgram(self.shader)
 
-        self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
-        self.material.setDiffuse( QColor(200, 200, 200) )
+        #self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
+        #self.material.setDiffuse( QColor(200, 200, 200) )
 
         self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
         self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
@@ -241,6 +241,9 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         #self.activeFrameGraph().add
         #self.renderSettings.setActiveFrameGraph(self.renderStates)
         #self.rootEntity.addComponent(self.)
+
+        self.wireframeMaterial = Qt3DExtras.QPhongMaterial(self.rootEntity)
+        self.wireframeMaterial.setAmbient(QColor(0,255,0))
 
         self.setRootEntity(self.rootEntity)
 
@@ -267,6 +270,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
             if( self.aabb ):
                 self.aabb.deleteLater()
             self.aabb = WireOutline( self.rootEntity, geom, self.plydata )
+            self.aabb.addComponent(self.wireframeMaterial)
 
     def reset2DCamera( self ):
         self.camera_3d = False
