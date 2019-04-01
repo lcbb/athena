@@ -12,7 +12,7 @@ from PySide2.Qt3DRender import Qt3DRender
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.QtQml import QQmlEngine, QQmlComponent
 
-from athena import ATHENA_SRC_DIR
+from athena import ATHENA_SRC_DIR, plymesh
 
 ATHENA_GEOM_UP = vec3d(0, 0, 1)
 
@@ -118,6 +118,7 @@ def getQAttribute( geom, att_type=Qt3DRender.QAttribute.VertexAttribute, att_nam
 class WireOutline(Qt3DCore.QEntity):
     def __init__(self, parent, geom, plydata):
         super(WireOutline, self).__init__(parent)
+        #self.foobam = plymesh.PlyMesh(parent,plydata)
 
         vertices = plydata['vertex'].data
         faces = plydata['face'].data
@@ -234,7 +235,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
 
         self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
         self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
-        self.meshEntity.addComponent( self.displayMesh )
+        #self.meshEntity.addComponent( self.displayMesh )
         self.meshEntity.addComponent( self.material )
 
         #self.activeFrameGraph().addRenderSettings(self.renderStates)
@@ -269,8 +270,9 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
             #dumpGeometry(geom)
             if( self.aabb ):
                 self.aabb.deleteLater()
-            self.aabb = WireOutline( self.rootEntity, geom, self.plydata )
-            self.aabb.addComponent(self.wireframeMaterial)
+            #self.aabb = WireOutline( self.rootEntity, geom, self.plydata )
+            self.aabb = plymesh.PlyMesh(self.rootEntity, self.plydata)
+            self.aabb.addComponent(self.material)
 
     def reset2DCamera( self ):
         self.camera_3d = False
