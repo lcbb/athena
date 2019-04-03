@@ -17,7 +17,7 @@ uniform float shininess;    // Specular shininess factor
 
 in WireframeVertex {
     vec3 position;
-    vec3 normal;
+    flat vec3 normal;
     noperspective vec4 edgeA;
     noperspective vec4 edgeB;
     flat int configuration;
@@ -28,11 +28,12 @@ out vec4 fragColor;
 vec3 adsModel( const in vec3 pos, const in vec3 n )
 {
     // Calculate the vector from the light to the fragment
-    vec3 s = normalize( vec3( light.position ) - pos );
+//    vec3 s = normalize( vec3( light.position ) - pos );
 
     // Calculate the vector from the fragment to the eye position (the
     // origin since this is in "eye" or "camera" space
     vec3 v = normalize( -pos );
+    vec3 s = v;
 
     // Refleft the light beam using the normal at this fragment
     vec3 r = reflect( -s, n );

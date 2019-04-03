@@ -49,7 +49,7 @@ class PlyMesh(Qt3DCore.QEntity):
 
         total_vertices = len(vertices) + num_large_faces
         total_tris = num_tris + num_interior_tris
-        vertex_nparr = np.zeros([total_vertices,3],dtype=_basetype_numpy_codes[_basetypes.Float])
+        vertex_nparr = np.zeros([total_vertices,7],dtype=_basetype_numpy_codes[_basetypes.Float])
         # Fill with the input vertices
         vertex_nparr[:len(vertices),0] = vertices['x']
         vertex_nparr[:len(vertices),1] = vertices['y']
@@ -59,9 +59,11 @@ class PlyMesh(Qt3DCore.QEntity):
         tri_nparr = np.zeros([total_tris,3],dtype=_basetype_numpy_codes[_basetypes.UnsignedShort])
         tri_idx = 0
 
-        def add_vtx(v):
+        def add_vtx(v,interior=1):
             nonlocal vtx_idx
             vertex_nparr[vtx_idx,:]=v
+            vertex_nparr[vtx_idx,6] = interior
+            print("New vtx:", vertex_nparr[vtx_idx])
             vtx_idx += 1
             return vtx_idx - 1
 
@@ -110,9 +112,20 @@ class PlyMesh(Qt3DCore.QEntity):
         self.positionAttr.setVertexSize(3)
         self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
         self.positionAttr.setBuffer(self.qvbuf)
-        #self.positionAttr.setByteStride(3*_basetype_widths[_basetypes.Float])
+        self.positionAttr.setByteStride(7*_basetype_widths[_basetypes.Float])
         self.positionAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.positionAttr)
+
+        self.interiorAttr = Qt3DRender.QAttribute(parent)
+        self.interiorAttr.setName( 'vertexInterior' )
+        self.interiorAttr.setVertexBaseType(_basetypes.Float)
+        self.interiorAttr.setVertexSize(1)
+        self.interiorAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
+        self.interiorAttr.setBuffer(self.qvbuf)
+        self.interiorAttr.setByteStride(7*_basetype_widths[_basetypes.Float])
+        self.interiorAttr.setByteOffset(6*_basetype_widths[_basetypes.Float])
+        self.interiorAttr.setCount(len(vertex_nparr))
+        self.geometry.addAttribute(self.interiorAttr)
 
         # Now create the index attribute.
         #  use the same basetype as the Qt3D mesh, since presumably that file loader chose a suitable type
