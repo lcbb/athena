@@ -104,6 +104,6 @@ vec4 shadeLine( const in vec4 color )
 void main()
 {
     // Calculate the color from the phong model
-    vec4 color = vec4( adsModel( fs_in.position, normalize( fs_in.normal ) ), 1.0 );
+    vec4 color = vec4( adsModel( fs_in.position, normalize( fs_in.normal ) ), .150 );
     fragColor = shadeLine( color );
 }

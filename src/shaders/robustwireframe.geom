@@ -34,15 +34,15 @@ void main()
 {
     //gs_out.normal = normalize( modelViewNormal * normalize((cross( (gin[2].gl_Position.xyz-gl_in[0].gl_Position.xyz),
                                                         //(gl_in[1].gl_Position.xyz-gl_in[0].gl_Position.xyz)) )));
-    gs_out.normal = modelViewNormal * normalize( cross( gs_in[1].normal - gs_in[0].normal,
-                                                        gs_in[2].normal - gs_in[0].normal ) );
+    gs_out.normal = normalize( modelViewNormal * normalize( cross( gs_in[1].normal - gs_in[0].normal,
+                                                        gs_in[2].normal - gs_in[0].normal ) ));
     gs_out.configuration = int(gl_in[0].gl_Position.z < 0) * int(4)
            + int(gl_in[1].gl_Position.z < 0) * int(2)
            + int(gl_in[2].gl_Position.z < 0);
 
     // If all vertices are behind us, cull the primitive
-    if (gs_out.configuration == 7)
-        return;
+    //if (gs_out.configuration == 7)
+     //   return;
 
     // Transform each vertex into viewport space
     vec2 p[3];

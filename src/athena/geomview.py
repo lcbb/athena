@@ -204,7 +204,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
         super(AthenaGeomView, self).__init__()
 
-        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
+        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63, 63) )
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.reset2DCamera()
@@ -216,7 +216,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
         self.eee = QQmlEngine()
         main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'main.qml'
         self.ccc = QQmlComponent(self.eee, main_qml.as_uri() )
-        #print(self.ccc.errorString())
+        print(self.ccc.errorString())
         self.material = self.ccc.create()
         # We must set the shader program paths here, because qml doesn't know where ATHENA_DIR is
 
