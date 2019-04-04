@@ -82,9 +82,9 @@ Effect {
             renderPasses: [
                 RenderPass {
                     renderStates:[ 
-                        CullFace{ mode : CullFace.NoCulling },
-                        DepthTest{ depthFunction: DepthTest.Always },
-                        NoDepthMask {},
+                        //CullFace{ mode : CullFace.NoCulling },
+                        //DepthTest{ depthFunction: DepthTest.Always },
+                        //NoDepthMask {},
                         BlendEquationArguments{ 
                             sourceRgb: BlendEquationArguments.SourceAlpha
                             destinationRgb: BlendEquationArguments.OneMinusSourceAlpha

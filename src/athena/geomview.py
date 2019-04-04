@@ -204,7 +204,7 @@ class AthenaGeomView(Qt3DExtras.Qt3DWindow):
     def __init__(self):
         super(AthenaGeomView, self).__init__()
 
-        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63, 63) )
+        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.reset2DCamera()
