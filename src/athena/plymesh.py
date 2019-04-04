@@ -37,9 +37,6 @@ class PlyMesh(Qt3DCore.QEntity):
         vertices = plydata['vertex'].data
         faces = plydata['face'].data['vertex_indices']
 
-        print(vertices)
-        print (faces, list(map(len,faces)))
-
         # Count the faces in the model that have more than 3 vertices: we will need to
         # synthesize central vertices for these.
         large_faces = [x for x in faces if len(x) > 3]
@@ -49,46 +46,45 @@ class PlyMesh(Qt3DCore.QEntity):
 
         total_vertices = len(vertices) + num_large_faces
         total_tris = num_tris + num_interior_tris
-        vertex_nparr = np.zeros([total_vertices,7],dtype=_basetype_numpy_codes[_basetypes.Float])
+
+        vertex_basetype = _basetypes.Float
+        if( total_tris < 30000 ):
+            index_basetype = _basetypes.UnsignedShort
+        else:
+            index_basetype = _basetypes.UnsignedInt
+
+        vertex_nparr = np.zeros([total_vertices,7],dtype=_basetype_numpy_codes[vertex_basetype])
         # Fill with the input vertices
         vertex_nparr[:len(vertices),0] = vertices['x']
         vertex_nparr[:len(vertices),1] = vertices['y']
         vertex_nparr[:len(vertices),2] = vertices['z']
         vtx_idx = len(vertices)
 
-        tri_nparr = np.zeros([total_tris,3],dtype=_basetype_numpy_codes[_basetypes.UnsignedShort])
+        tri_nparr = np.zeros([total_tris,3],dtype=_basetype_numpy_codes[index_basetype])
         tri_idx = 0
 
         def add_vtx(v,interior=1):
             nonlocal vtx_idx
             vertex_nparr[vtx_idx,:]=v
             vertex_nparr[vtx_idx,6] = interior
-            print("New vtx:", vertex_nparr[vtx_idx])
+            #print("New vtx:", vertex_nparr[vtx_idx])
             vtx_idx += 1
             return vtx_idx - 1
 
         def add_tri(t):
             nonlocal tri_idx
-            print(t, type(t))
             tri_nparr[tri_idx,:]=t
             tri_idx += 1
             return tri_idx - 1
 
-        # synthesize central vertices for large polys
-        for poly in large_faces:
-            poly_verts = np.take(vertex_nparr, poly, axis=0)
-            print(poly_verts, type(poly_verts))
-            print(np.mean(poly_verts,axis=0))
-            #centroid = np.mean
-
-        # create the index buffer
+        # create the index buffer and any needed internal vertices
         for poly in faces:
             if( len(poly) == 3 ):
                 add_tri(poly)
             else:
                 poly_verts = np.take(vertex_nparr, poly, axis=0)
                 centroid = np.mean(poly_verts, axis=0)
-                c = add_vtx(centroid) # c = index into vertex_nparr of centroid 
+                c = add_vtx(centroid) # c is the index into vertex_nparr of new centroid vertex
                 for i in range(len(poly)):
                     a = poly[i-1]
                     b = poly[i]
@@ -101,37 +97,35 @@ class PlyMesh(Qt3DCore.QEntity):
 
         self.geometry = Qt3DRender.QGeometry(self)
 
-        # Create qt3d vertex buffer
+        # Create qt3d vertex buffers
         rawstring = vertex_nparr.tobytes()
         self.qvbytes = QByteArray(rawstring)
         self.qvbuf = Qt3DRender.QBuffer(parent)
         self.qvbuf.setData(self.qvbytes)
+
+        # Position attribute
         self.positionAttr = Qt3DRender.QAttribute(parent)
         self.positionAttr.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
-        self.positionAttr.setVertexBaseType(_basetypes.Float)
+        self.positionAttr.setVertexBaseType(vertex_basetype)
         self.positionAttr.setVertexSize(3)
         self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
         self.positionAttr.setBuffer(self.qvbuf)
-        self.positionAttr.setByteStride(7*_basetype_widths[_basetypes.Float])
+        self.positionAttr.setByteStride(7*_basetype_widths[vertex_basetype])
         self.positionAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.positionAttr)
 
+        # Interior attribute
         self.interiorAttr = Qt3DRender.QAttribute(parent)
         self.interiorAttr.setName( 'vertexInterior' )
-        self.interiorAttr.setVertexBaseType(_basetypes.Float)
+        self.interiorAttr.setVertexBaseType(vertex_basetype)
         self.interiorAttr.setVertexSize(1)
         self.interiorAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
         self.interiorAttr.setBuffer(self.qvbuf)
-        self.interiorAttr.setByteStride(7*_basetype_widths[_basetypes.Float])
-        self.interiorAttr.setByteOffset(6*_basetype_widths[_basetypes.Float])
+        self.interiorAttr.setByteStride(7*_basetype_widths[vertex_basetype])
+        self.interiorAttr.setByteOffset(6*_basetype_widths[vertex_basetype])
         self.interiorAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.interiorAttr)
 
-        # Now create the index attribute.
-        #  use the same basetype as the Qt3D mesh, since presumably that file loader chose a suitable type
-        #iatt = _basetypes.UnsignedShort # getQAttribute(geom, att_type=Qt3DRender.QAttribute.IndexAttribute)
-        index_type = _basetypes.UnsignedShort # iatt.vertexBaseType()
-        #index_buffer_np = np.array(tri_nparr, dtype=_basetype_numpy_codes[index_type])
         rawstring = tri_nparr.tobytes()
         
         self.qibytes = QByteArray(rawstring)
@@ -139,7 +133,7 @@ class PlyMesh(Qt3DCore.QEntity):
         self.qibuf.setData(self.qibytes)
 
         self.indexAttr = Qt3DRender.QAttribute(self.geometry)
-        self.indexAttr.setVertexBaseType(index_type)
+        self.indexAttr.setVertexBaseType(index_basetype)
         self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
         self.indexAttr.setBuffer(self.qibuf)
         self.indexAttr.setCount(3*total_tris)
@@ -149,10 +143,75 @@ class PlyMesh(Qt3DCore.QEntity):
         self.lineMesh.setGeometry(self.geometry)
         self.lineMesh.setPrimitiveType( Qt3DRender.QGeometryRenderer.Triangles )
 
+        self.addComponent(self.lineMesh)
+
+
+
+def getQAttribute( geom, att_type=Qt3DRender.QAttribute.VertexAttribute, att_name=None ):
+    for att in geom.attributes():
+        if att.attributeType() == att_type and (att_name is None or att.name() == att_name):
+            return att
+    return None
+
+class WireOutline(Qt3DCore.QEntity):
+    # This is a lines-based outline renderer, not currently used
+    def __init__(self, parent, geom, plydata):
+        super(WireOutline, self).__init__(parent)
+
+        vertices = plydata['vertex'].data
+        faces = plydata['face'].data
+
+        self.geometry = Qt3DRender.QGeometry(self)
+
+        # borrow the position attribute buffer from geom
+        vatt = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        self.geometry.addAttribute(vatt)
+
+        # Now create the index attribute.  This is different from the Qt3D mesh, which has been triangulated,
+        # so we'll need to iterate over the .ply faces and build up our own buffer.
+
+        def edge_index_iter():
+            '''Iterate all pairs of connected vertices (i.e. all edges) in the faces structure
+
+            May repeat edges.  Returns (x,y) pairs with x always less than y.
+            '''
+            for poly in faces:
+                indices = poly[0]
+                it = iter(indices)
+                i0 = next(it)
+                i_last = i0
+                for i in it:
+                    pair = (min(i_last, i), max(i_last, i))
+                    i_last = i
+                    yield pair
+                yield (min(i_last,i0), max(i_last,i0))
+
+        unique_edges = set(pair for pair in edge_index_iter())
+
+        #  use the same basetype as the Qt3D mesh, since presumably that file loader chose a suitable type
+        iatt = getQAttribute(geom, att_type=Qt3DRender.QAttribute.IndexAttribute)
+        index_type = iatt.vertexBaseType()
+        index_buffer_np = np.array(list(unique_edges), dtype=_basetype_numpy_codes[index_type])
+        rawstring = index_buffer_np.tobytes()
+        
+        self.qibytes = QByteArray(rawstring)
+        self.qibuf = Qt3DRender.QBuffer(self.geometry)
+        self.qibuf.setData(self.qibytes)
+
+        self.indexAttr = Qt3DRender.QAttribute(self.geometry)
+        self.indexAttr.setVertexBaseType(index_type)
+        self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
+        self.indexAttr.setBuffer(self.qibuf)
+        self.indexAttr.setCount(index_buffer_np.size)
+        self.geometry.addAttribute(self.indexAttr)
+
+        self.lineMesh = Qt3DRender.QGeometryRenderer(parent)
+        self.lineMesh.setGeometry(self.geometry)
+        self.lineMesh.setPrimitiveType( Qt3DRender.QGeometryRenderer.Lines )
+
         #self.lineMaterial = Qt3DExtras.QPhongMaterial(parent)
         #self.lineMaterial.setAmbient(QColor(255,255,0))
 
         #self.lineEntity = Qt3DCore.QEntity(parent)
         self.addComponent(self.lineMesh)
         #self.lineEntity.addComponent(self.lineMaterial)
-

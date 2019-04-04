@@ -2,7 +2,9 @@ import sys
 import os, os.path
 from pathlib import Path
 
-# Set ATHENA_DIR, the base project path, relative to which files and tools will be found
+# Set up Athena's global data
+
+# Set ATHENA_DIR, the base project path, relative to which files and tools will be found,
 # and ATHENA_OUTPUT_HOME, the path where an ouput directory will be created
 if getattr(sys, 'frozen', False):
     # We're inside a PyInstaller bundle of some kind
@@ -20,3 +22,4 @@ else:
 ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_outputs")
 ATHENA_OUTPUT_DIR.mkdir( parents=False, exist_ok=True )
 print("Athena's output directory will be", ATHENA_OUTPUT_DIR)
+

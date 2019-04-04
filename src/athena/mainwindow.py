@@ -11,7 +11,7 @@ from PySide2.QtGui import QKeySequence
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import geomview, ATHENA_DIR
+from athena import viewer, ATHENA_DIR
 
 class UiLoader(QUiLoader):
     '''
@@ -84,7 +84,7 @@ class AthenaWindow(QMainWindow):
         self.setupToolDefaults()
 
 
-        self.geomView = geomview.AthenaGeomView()
+        self.geomView = viewer.AthenaViewer()
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
         self.verticalLayout.insertWidget( 0, self.geomViewWidget )
         self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
