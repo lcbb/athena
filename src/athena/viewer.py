@@ -47,9 +47,14 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         pass0.setShaderProgram(self.shader)
 
         self.setRootEntity(self.rootEntity)
+
+        # Each time a mesh is loaded, we create a new Plymesh and add self.material as a component.
+        # Old meshes are deleteLater()-ed.  A problem with this approach is that the deleted QEntities
+        # also delete their components (and this seems true even if we try to remove the component first).
+        # The workaround we use here is to also add self.material as a component of the root entity,
+        # which keeps Qt3D from deleting it.  I don't know if this is the best approach, but it works.
         self.rootEntity.addComponent(self.material)
         self.meshEntity = None
-
         self.lastpos = None
 
     def reloadGeom(self, filepath, mesh_3d):
@@ -109,11 +114,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
 
     def moveCamera( self, delta_x, delta_y ):
         self.camera().translateWorld( vec3d( -delta_x/3., delta_y/3., 0 ), self.camera().TranslateViewCenter )
-        #ctr = self.camera().viewCenter()
-        #self.camera().setViewCenter( ctr + vec3d( -delta_x, delta_y, 0 ) )
-        #pos = self.camera().position()
-        #self.camera().setPosition( pos + vec3d( -delta_x, delta_y, 0 ) )
-
 
     def mouseMoveEvent(self, event):
         if( self.lastpos ):
