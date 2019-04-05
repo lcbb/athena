@@ -26,11 +26,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.rootEntity = Qt3DCore.QEntity()
 
 
-        # Load
+        # Create the mesh shading material, stored as self.material
         self.eee = QQmlEngine()
         main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'main.qml'
         self.ccc = QQmlComponent(self.eee, main_qml.as_uri() )
-        print(self.ccc.errorString())
+        if( self.ccc.status() != QQmlComponent.Ready ):
+            print("Error loading QML:")
+            print(self.ccc.errorString())
         self.material = self.ccc.create()
         # We must set the shader program paths here, because qml doesn't know where ATHENA_DIR is
 
@@ -44,49 +46,24 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         pass0 = self.material.effect().techniques()[0].renderPasses()[0]
         pass0.setShaderProgram(self.shader)
 
-        #self.material = Qt3DExtras.QGoochMaterial(self.rootEntity)
-        #self.material.setDiffuse( QColor(200, 200, 200) )
-
-        self.meshEntity = Qt3DCore.QEntity(self.rootEntity)
-        self.displayMesh = Qt3DRender.QMesh(self.rootEntity)
-        #self.meshEntity.addComponent( self.displayMesh )
-        self.meshEntity.addComponent( self.material )
-
-        #self.activeFrameGraph().addRenderSettings(self.renderStates)
-        #self.activeFrameGraph().add
-        #self.renderSettings.setActiveFrameGraph(self.renderStates)
-        #self.rootEntity.addComponent(self.)
-
-        self.wireframeMaterial = Qt3DExtras.QPhongMaterial(self.rootEntity)
-        self.wireframeMaterial.setAmbient(QColor(0,255,0))
-
         self.setRootEntity(self.rootEntity)
+        self.rootEntity.addComponent(self.material)
+        self.meshEntity = None
 
         self.lastpos = None
-        self.aabb = None
 
-        self.displayMesh.statusChanged.connect(self.meshChange)
-        self.displayMesh.geometryChanged.connect(self.meshChange)
-
-    def reloadGeom(self, filepath, mesh_3d, cam_distance = None):
+    def reloadGeom(self, filepath, mesh_3d):
         self.meshFilepath = filepath
-        self.displayMesh.setSource( QUrl.fromLocalFile(str(filepath)) )
         self.plydata = PlyData.read(filepath)
+        if( self.meshEntity ):
+            self.meshEntity.deleteLater()
+        self.meshEntity = plymesh.PlyMesh(self.rootEntity, self.plydata)
+        self.meshEntity.addComponent(self.material)
+    
         if (mesh_3d):
-            self.reset3DCamera(cam_distance)
+            self.reset3DCamera()
         else:
             self.reset2DCamera()
-
-    def meshChange( self ):
-        print(self.displayMesh.source(), self.displayMesh.status())
-        if self.displayMesh.status() == Qt3DRender.QMesh.Ready:
-            geom = self.displayMesh.geometry()
-            #dumpGeometry(geom)
-            if( self.aabb ):
-                self.aabb.deleteLater()
-            #self.aabb = WireOutline( self.rootEntity, geom, self.plydata )
-            self.aabb = plymesh.PlyMesh(self.rootEntity, self.plydata)
-            self.aabb.addComponent(self.material)
 
     def reset2DCamera( self ):
         self.camera_3d = False
@@ -98,13 +75,17 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.camera().rightVector = vec3d( 1, 0, 0 )
         self.orientCamera()
 
-    def reset3DCamera( self, cam_distance ):
-        if cam_distance == None: cam_distance = 5
+    def reset3DCamera( self ):
         self.camera_3d = True
         ratio = self.width() / self.height()
         self.camera().lens().setPerspectiveProjection(45, ratio, .01, 1000)
-        self.camera().setPosition( vec3d( cam_distance, 0, 0 ) )
-        self.camera().setViewCenter( vec3d( 0, 0, 0) )
+
+        object_aabb = geom.AABB(self.meshEntity.geometry)
+        aabb_size = object_aabb.max - object_aabb.min
+        cam_distance = 2 * max(aabb_size.x(), aabb_size.y(), aabb_size.z())
+        cam_loc = object_aabb.center + vec3d( cam_distance, 0, 0 )
+        self.camera().setPosition( cam_loc )
+        self.camera().setViewCenter( object_aabb.center )
         self.camera().rightVector = vec3d( 0, 1, 0 )
         self.orientCamera()
 

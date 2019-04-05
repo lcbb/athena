@@ -9,6 +9,8 @@ from PySide2.Qt3DRender import Qt3DRender
 from plyfile import PlyData, PlyElement
 import numpy as np
 
+from athena import geom
+
 # The base types enumeration
 _basetypes = Qt3DRender.QAttribute.VertexBaseType
 
@@ -147,11 +149,6 @@ class PlyMesh(Qt3DCore.QEntity):
 
 
 
-def getQAttribute( geom, att_type=Qt3DRender.QAttribute.VertexAttribute, att_name=None ):
-    for att in geom.attributes():
-        if att.attributeType() == att_type and (att_name is None or att.name() == att_name):
-            return att
-    return None
 
 class WireOutline(Qt3DCore.QEntity):
     # This is a lines-based outline renderer, not currently used

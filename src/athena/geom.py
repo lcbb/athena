@@ -51,25 +51,24 @@ def iterAttr( att ):
     count = att.count()
     vertex_size = att.vertexSize()
     #print( width, struct_code, byteOffset, byteStride, vertex_size, count )
+    # Support index attributes, which report zero stride and size
     if byteStride == 0:
         byteStride = width
     if vertex_size == 0:
-        vertex_size = width
+        vertex_size = 1
     for i in range (byteOffset, byteOffset + byteStride * count, byteStride ):
-        datum = [ struct.unpack( struct_code, bytes(att_data[ i + (j*width) : i+(j*width)+width ]) )[0] for j in range(vertex_size) ]
+        datum = struct.unpack( struct_code*vertex_size, bytes(att_data[i:i+(width*vertex_size)]) )
         yield datum
 
 def grouper(i, n):
     '''from the itertools recipe list: yield n-sized lists of items from iterator i'''
     return iter( lambda: list(itertools.islice(iter(i), n)), [])
 
-def getVertexAttr( geom ):
-    atts = geom.attributes()
-    for att in atts:
-        if att.name() == "vertexPosition" and att.attributeType() == Qt3DRender.QAttribute.AttributeType.VertexAttribute:
+def getQAttribute( geom, att_type=Qt3DRender.QAttribute.VertexAttribute, att_name=None ):
+    for att in geom.attributes():
+        if att.attributeType() == att_type and (att_name is None or att.name() == att_name):
             return att
     return None
-
 
 def dumpGeometry( geom, dumpf=print ):
     if geom is None:
@@ -93,20 +92,19 @@ def dumpGeometry( geom, dumpf=print ):
             dumpf( num_tris, "triangles" )
             for tri in grouper(iterAttr(att), 3):
                 dumpf(tri)
-
-
-def compute_AABB( geom ):
-    vertices = getVertexAttr(geom)
-    minimums = vec3d()
-    maximums = vec3d()
-    for vtx in iterAttr(vertices):
-        minimums.setX( min( minimums.x(), vtx[0] ) )
-        minimums.setY( min( minimums.y(), vtx[1] ) )
-        minimums.setZ( min( minimums.z(), vtx[2] ) )
-        maximums.setX( max( maximums.x(), vtx[0] ) )
-        maximums.setY( max( maximums.y(), vtx[1] ) )
-        maximums.setZ( max( maximums.z(), vtx[2] ) )
-    return (minimums, maximums)
+class AABB:
+    def __init__(self, geom):
+        vertices = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        self.min = vec3d()
+        self.max = vec3d()
+        for v in iterAttr(vertices):
+            self.min.setX( min( self.min.x(), v[0] ) )
+            self.min.setY( min( self.min.y(), v[1] ) )
+            self.min.setZ( min( self.min.z(), v[2] ) )
+            self.max.setX( max( self.max.x(), v[0] ) )
+            self.max.setY( max( self.max.y(), v[1] ) )
+            self.max.setZ( max( self.max.z(), v[2] ) )
+        self.center = (self.min+self.max) / 2.0
 
 
 

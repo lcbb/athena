@@ -147,14 +147,12 @@ class AthenaWindow(QMainWindow):
         return selection_slot
 
     def newMesh( self, dimension ):
-        # Determine which mesh is displaying
         def newMesh_slot():
             chooser = [self.perdixGeometryChooser, self.talosGeometryChooser, 
                        self.daedalusGeometryChooser, self.metisGeometryChooser][ self.tabWidget.currentIndex() ]
             selection = chooser.currentData()
             mesh_3d = True if dimension == 3 else False
-            dist = 50 if chooser == self.daedalusGeometryChooser else None
-            self.geomView.reloadGeom( selection, mesh_3d, dist )
+            self.geomView.reloadGeom( selection, mesh_3d )
         return newMesh_slot
 
     def updateStatus( self, msg ):
