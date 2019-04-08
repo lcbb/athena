@@ -98,7 +98,7 @@ class PlyMesh(Qt3DCore.QEntity):
                 # triangulated faces
                 poly_normal = tri_norm( *(poly_geom[x,:] for x in range(3)) )
                 # Geometric centroid of the polygon
-                G = poly_geom.sum(axis=0) / poly_geom.shape[0]
+                G = np.average( poly_geom, axis=0 )
                 offset_geom = poly_geom - G
                 # Singular value decomposition: we want to map the 3D coordinates
                 # to a 2D subspace that can be fed into a 2D triangulation algorithm.
@@ -116,7 +116,7 @@ class PlyMesh(Qt3DCore.QEntity):
                 tri0_norm = tri_norm(*(geom_tri0[x,:] for x in range(3)))
                 normcheck = np.dot(tri0_norm, poly_normal)
                 flip = False
-                if( not np.isclose(normcheck, 1.0) ):
+                if( not np.isclose(normcheck, 1.0, rtol=1e-2) ):
                     flip = True
 
                 # Now add new triangles to the index buffer
