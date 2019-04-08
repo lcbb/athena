@@ -62,7 +62,9 @@ def iterAttr( att ):
 
 def grouper(i, n):
     '''from the itertools recipe list: yield n-sized lists of items from iterator i'''
-    return iter( lambda: list(itertools.islice(iter(i), n)), [])
+    args = [iter(i)]*n
+    return itertools.zip_longest(*args)
+    #return iter( lambda: list(itertools.islice(iter(i), n)), [])
 
 def getQAttribute( geom, att_type=Qt3DRender.QAttribute.VertexAttribute, att_name=None ):
     for att in geom.attributes():

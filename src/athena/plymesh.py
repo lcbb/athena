@@ -10,6 +10,7 @@ from plyfile import PlyData, PlyElement
 import numpy as np
 
 from athena import geom
+from earcut import earcut
 
 # The base types enumeration
 _basetypes = Qt3DRender.QAttribute.VertexBaseType
@@ -85,17 +86,27 @@ class PlyMesh(Qt3DCore.QEntity):
                 add_tri(poly)
             else:
                 poly_verts = np.take(vertex_nparr, poly, axis=0)
-                centroid = np.mean(poly_verts, axis=0)
-                c = add_vtx(centroid) # c is the index into vertex_nparr of new centroid vertex
-                for i in range(len(poly)):
-                    a = poly[i-1]
-                    b = poly[i]
-                    add_tri( np.array([a, b, c]) )
+                flattened = earcut.flatten([poly_verts,[]])
+                new_tris = earcut.earcut(flattened['vertices'],None,flattened['dimensions'])
+                print(new_tris)
+                print(list(iter(geom.grouper(new_tris,3))))
+                for a,b,c in geom.grouper(new_tris,3):
+                    idx_a = poly[a]
+                    idx_b = poly[b]
+                    idx_c = poly[c]
+                    print(a,b,c,idx_a,idx_b,idx_c)
+                    add_tri(np.array([idx_a,idx_b,idx_c]))
+                #centroid = np.mean(poly_verts, axis=0)
+                #c = add_vtx(centroid) # c is the index into vertex_nparr of new centroid vertex
+                #for i in range(len(poly)):
+                    #a = poly[i-1]
+                    #b = poly[i]
+                    #add_tri( np.array([a, b, c]) )
 
 
         # Sanity checks
-        assert( vtx_idx == total_vertices )
-        assert( tri_idx == total_tris )
+        #assert( vtx_idx == total_vertices )
+        #assert( tri_idx == total_tris )
 
         self.geometry = Qt3DRender.QGeometry(self)
 
