@@ -33,6 +33,11 @@ _basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
 # Map of Qt3D base types to numpy types
 _basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in _basetype_struct_codes.items()}
 
+def tri_norm(a,b,c):
+    tri_normal = np.cross( a-b, a-c)
+    tri_normal /= np.linalg.norm(tri_normal)
+    return tri_normal
+
 class PlyMesh(Qt3DCore.QEntity):
     def __init__(self, parent, plydata):
         super(PlyMesh, self).__init__(parent)
@@ -86,14 +91,54 @@ class PlyMesh(Qt3DCore.QEntity):
                 add_tri(poly)
             else:
                 poly_verts = np.take(vertex_nparr, poly, axis=0)
-                flattened = earcut.flatten([poly_verts,[]])
+                poly_geom = np.c_[ poly_verts[:,0:3] ]#, np.ones(poly_verts.shape[0]) ]
+                poly_normal = tri_norm( *(poly_geom[x,:] for x in range(3)) )
+                G = poly_geom.sum(axis=0) / poly_geom.shape[0]
+                u, s, vh = np.linalg.svd(poly_geom - G, full_matrices=True ) #- G)
+                xvec = vh[0,:]
+                yvec = vh[1,:]
+                norm = vh[2,:]
+                #flip = False
+                #if( not np.allclose(norm[:3],poly_normal) ):
+                    #print('flip', norm, poly_normal, "dot", np.dot(norm, poly_normal) )
+                    #print(poly_geom)
+                    #print(u)
+                    #print(s)
+                    #print(vh)
+                    ##flip = True
+                    #import code
+                    #code.InteractiveConsole(locals=locals()).interact()
+                    #xvec *= -1
+                    #yvec *= -1
+                #print( 's vh', s, vh )
+                #print( 'components', xvec, yvec, norm, poly_normal)
+                #xy_coords = np.dot(poly_geom-G, np.c_[xvec,yvec])
+                vt = vh[:2,:].T
+                xy_coords = np.dot(poly_geom-G, vt)
+                print(xy_coords)
+                flattened = earcut.flatten([xy_coords,[]])
+                #print(flattened)
                 new_tris = earcut.earcut(flattened['vertices'],None,flattened['dimensions'])
-                print(new_tris)
-                print(list(iter(geom.grouper(new_tris,3))))
+
+                tri0 = new_tris[0:3]
+                geom_tri0 = poly_geom.take(tri0, axis=0)
+                tri0_norm = tri_norm(*(geom_tri0[x,:] for x in range(3)))
+                print('tri0', geom_tri0,'norm=',tri0_norm)
+                normcheck = np.dot(tri0_norm, poly_normal)
+                flip = False
+                if( not np.isclose(normcheck, 1.0) ):
+                    flip = True
+                print('normcheck', normcheck)
+                
+                #print(list(iter(geom.grouper(new_tris,3))))
                 for a,b,c in geom.grouper(new_tris,3):
                     idx_a = poly[a]
                     idx_b = poly[b]
                     idx_c = poly[c]
+                    if( flip ): 
+                        idx_b = poly[c]
+                        idx_c = poly[b]
+
                     print(a,b,c,idx_a,idx_b,idx_c)
                     add_tri(np.array([idx_a,idx_b,idx_c]))
                 #centroid = np.mean(poly_verts, axis=0)
