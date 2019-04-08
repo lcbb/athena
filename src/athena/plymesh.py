@@ -46,7 +46,7 @@ class PlyMesh(Qt3DCore.QEntity):
         faces = plydata['face'].data['vertex_indices']
 
         # Count the faces in the model that have more than 3 vertices: we will need to
-        # synthesize central vertices for these.
+        # triangulate these
         large_faces = [x for x in faces if len(x) > 3]
         num_large_faces = len(large_faces)
         num_tris = len(faces) - num_large_faces
@@ -91,46 +91,35 @@ class PlyMesh(Qt3DCore.QEntity):
                 add_tri(poly)
             else:
                 poly_verts = np.take(vertex_nparr, poly, axis=0)
-                poly_geom = np.c_[ poly_verts[:,0:3] ]#, np.ones(poly_verts.shape[0]) ]
+                # The xyz geometry of this polygon
+                poly_geom = np.c_[ poly_verts[:,0:3] ]
+                # Compute the normal of this polygon from the first three verts;
+                # we'll need this later to determine winding direction for the
+                # triangulated faces
                 poly_normal = tri_norm( *(poly_geom[x,:] for x in range(3)) )
+                # Geometric centroid of the polygon
                 G = poly_geom.sum(axis=0) / poly_geom.shape[0]
-                u, s, vh = np.linalg.svd(poly_geom - G, full_matrices=True ) #- G)
-                xvec = vh[0,:]
-                yvec = vh[1,:]
-                norm = vh[2,:]
-                #flip = False
-                #if( not np.allclose(norm[:3],poly_normal) ):
-                    #print('flip', norm, poly_normal, "dot", np.dot(norm, poly_normal) )
-                    #print(poly_geom)
-                    #print(u)
-                    #print(s)
-                    #print(vh)
-                    ##flip = True
-                    #import code
-                    #code.InteractiveConsole(locals=locals()).interact()
-                    #xvec *= -1
-                    #yvec *= -1
-                #print( 's vh', s, vh )
-                #print( 'components', xvec, yvec, norm, poly_normal)
-                #xy_coords = np.dot(poly_geom-G, np.c_[xvec,yvec])
+                offset_geom = poly_geom - G
+                # Singular value decomposition: we want to map the 3D coordinates
+                # to a 2D subspace that can be fed into a 2D triangulation algorithm.
+                # For this we only need the last return value.
+                _, _, vh = np.linalg.svd(offset_geom)
                 vt = vh[:2,:].T
-                xy_coords = np.dot(poly_geom-G, vt)
-                print(xy_coords)
+                xy_coords = np.dot(offset_geom, vt)
                 flattened = earcut.flatten([xy_coords,[]])
-                #print(flattened)
                 new_tris = earcut.earcut(flattened['vertices'],None,flattened['dimensions'])
 
-                tri0 = new_tris[0:3]
-                geom_tri0 = poly_geom.take(tri0, axis=0)
+                # Now we have the new triangles from earcut.
+                # Check the first one's normal; if it doesn't match the polygon normal,
+                # then we'll assume the 2D projection reversed our triangle windings.
+                geom_tri0 = poly_geom.take(new_tris[0:3], axis=0)
                 tri0_norm = tri_norm(*(geom_tri0[x,:] for x in range(3)))
-                print('tri0', geom_tri0,'norm=',tri0_norm)
                 normcheck = np.dot(tri0_norm, poly_normal)
                 flip = False
                 if( not np.isclose(normcheck, 1.0) ):
                     flip = True
-                print('normcheck', normcheck)
-                
-                #print(list(iter(geom.grouper(new_tris,3))))
+
+                # Now add new triangles to the index buffer
                 for a,b,c in geom.grouper(new_tris,3):
                     idx_a = poly[a]
                     idx_b = poly[b]
@@ -138,16 +127,7 @@ class PlyMesh(Qt3DCore.QEntity):
                     if( flip ): 
                         idx_b = poly[c]
                         idx_c = poly[b]
-
-                    print(a,b,c,idx_a,idx_b,idx_c)
                     add_tri(np.array([idx_a,idx_b,idx_c]))
-                #centroid = np.mean(poly_verts, axis=0)
-                #c = add_vtx(centroid) # c is the index into vertex_nparr of new centroid vertex
-                #for i in range(len(poly)):
-                    #a = poly[i-1]
-                    #b = poly[i]
-                    #add_tri( np.array([a, b, c]) )
-
 
         # Sanity checks
         #assert( vtx_idx == total_vertices )
