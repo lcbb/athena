@@ -38,6 +38,36 @@ def tri_norm(a,b,c):
     tri_normal /= np.linalg.norm(tri_normal)
     return tri_normal
 
+class EdgeDict:
+    def __init__(self):
+        self.edges = dict()
+
+    @classmethod
+    def _key(a,b):
+        return (min(a,b), max(a,b))
+
+    def addEdge( self, a, b, idx ):
+        self.edges[ _key(a,b) ] = idx
+
+    def hasEdge( self, a, b ):
+        return _key(a,b) in self.edges
+
+    def getEdge( self, a, b ):
+        return self.edges[_key(a,b)]
+
+def edge( a, b ):
+    return (min(a,b), max(a,b))
+
+def edgeIter(poly):
+    it = iter(poly)
+    i0 = next(it)
+    i_last = i0
+    for i in it:
+        yield edge( i_last, i )
+        i_last = i
+    yield edge( i_last, i0 )
+   
+
 class PlyMesh(Qt3DCore.QEntity):
     def __init__(self, parent, plydata):
         super(PlyMesh, self).__init__(parent)
@@ -52,7 +82,8 @@ class PlyMesh(Qt3DCore.QEntity):
         num_tris = len(faces) - num_large_faces
         num_interior_tris = sum(len(x) for x in large_faces)
 
-        total_vertices = len(vertices) + num_large_faces
+        #total_vertices = len(vertices) + num_large_faces
+        total_vertices = len(vertices) * 2
         total_tris = num_tris + num_interior_tris
 
         vertex_basetype = _basetypes.Float
@@ -71,6 +102,7 @@ class PlyMesh(Qt3DCore.QEntity):
         tri_nparr = np.zeros([total_tris,3],dtype=_basetype_numpy_codes[index_basetype])
         tri_idx = 0
 
+
         def add_vtx(v,interior=1):
             nonlocal vtx_idx
             vertex_nparr[vtx_idx,:]=v
@@ -78,6 +110,15 @@ class PlyMesh(Qt3DCore.QEntity):
             #print("New vtx:", vertex_nparr[vtx_idx])
             vtx_idx += 1
             return vtx_idx - 1
+
+        internal_vertices = {}
+        def internalize_vtx( v ):
+            nonlocal internal_vertices
+            if v not in internal_vertices:
+                vert_data = vertex_nparr[v,:]
+                new_idx = add_vtx(vert_data)
+                internal_vertices[v] = new_idx
+            return internal_vertices[v]
 
         def add_tri(t):
             nonlocal tri_idx
@@ -90,6 +131,8 @@ class PlyMesh(Qt3DCore.QEntity):
             if( len(poly) == 3 ):
                 add_tri(poly)
             else:
+                external_edges = set( edgeIter( poly ) )
+                assert( len(external_edges) == len(poly) )
                 poly_verts = np.take(vertex_nparr, poly, axis=0)
                 # The xyz geometry of this polygon
                 poly_geom = np.c_[ poly_verts[:,0:3] ]
@@ -116,7 +159,7 @@ class PlyMesh(Qt3DCore.QEntity):
                 tri0_norm = tri_norm(*(geom_tri0[x,:] for x in range(3)))
                 normcheck = np.dot(tri0_norm, poly_normal)
                 flip = False
-                if( not np.isclose(normcheck, 1.0, rtol=1e-2) ):
+                if( not np.isclose(normcheck, 1.0, rtol=1e-1) ):
                     flip = True
 
                 # Now add new triangles to the index buffer
@@ -125,8 +168,16 @@ class PlyMesh(Qt3DCore.QEntity):
                     idx_b = poly[b]
                     idx_c = poly[c]
                     if( flip ): 
-                        idx_b = poly[c]
-                        idx_c = poly[b]
+                        idx_b, idx_c = idx_c, idx_b
+                    edge_a = edge( idx_a, idx_b )
+                    edge_b = edge( idx_b, idx_c )
+                    edge_c = edge( idx_c, idx_a )
+                    if( edge_a not in external_edges ):
+                        idx_a = internalize_vtx( idx_a )
+                    if( edge_b not in external_edges ):
+                        idx_b = internalize_vtx( idx_b )
+                    if( edge_c not in external_edges ):
+                        idx_c = internalize_vtx( idx_c )
                     add_tri(np.array([idx_a,idx_b,idx_c]))
 
         # Sanity checks

@@ -82,36 +82,36 @@ void main()
         // the position and normal calculated in the vertex shader.
 
         // Vertex 0 (a)
-        if( gs_in[0].interior > 0.5 ){
-            gs_out.edgeA = vec4( ha, b, c, 0.0 );
-        }
-        else{
-            gs_out.edgeA = vec4( ha, b*gs_in[2].interior, c*gs_in[1].interior, 0.0 );
-        }
+        //if( gs_in[0].interior > 0.5 ){
+            //gs_out.edgeA = vec4( ha, b, c, 0.0 );
+        //}
+        //else{
+            gs_out.edgeA = vec4( ha, b*gs_in[2].interior, c*gs_in[0].interior, 0.0 );
+        //}
         //gs_out.normal = gs_in[0].normal;
         gs_out.position = gs_in[0].position;
         gl_Position = gl_in[0].gl_Position;
         EmitVertex();
 
         // Vertex 1 (b)
-        if( gs_in[1].interior > 0.5 ){
-            gs_out.edgeA = vec4( a, hb, c, 0.0 );
-        }
-        else{
-            gs_out.edgeA = vec4( a*gs_in[2].interior, hb, c*gs_in[0].interior, 0.0 );
-        }
+        //if( gs_in[1].interior > 0.5 ){
+            //gs_out.edgeA = vec4( a, hb, c, 0.0 );
+        //}
+        //else{
+            gs_out.edgeA = vec4( a*gs_in[1].interior, hb, c*gs_in[0].interior, 0.0 );
+        //}
         //gs_out.normal = gs_in[1].normal;
         gs_out.position = gs_in[1].position;
         gl_Position = gl_in[1].gl_Position;
         EmitVertex();
 
         // Vertex 2 (c)
-        if( gs_in[2].interior > 0.5 ){
-            gs_out.edgeA = vec4( a, b, hc, 0.0 );
-        }
-        else{
-            gs_out.edgeA = vec4( a*gs_in[1].interior, b*gs_in[0].interior, hc, 0.0 );
-        }
+        //if( gs_in[2].interior > 0.5 ){
+            //gs_out.edgeA = vec4( a, b, hc, 0.0 );
+        //}
+        //else{
+            gs_out.edgeA = vec4( a*gs_in[1].interior, b*gs_in[2].interior, hc, 0.0 );
+        //}
         //gs_out.normal = gs_in[2].normal;
         gs_out.position = gs_in[2].position;
         gl_Position = gl_in[2].gl_Position;
