@@ -46,6 +46,12 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         pass0 = self.material.effect().techniques()[0].renderPasses()[0]
         pass0.setShaderProgram(self.shader)
 
+        self.alpha_param = Qt3DRender.QParameter( self.material )
+        self.alpha_param.setName('alpha')
+        self.alpha_param.setValue(1.0)
+        self.material.addParameter( self.alpha_param )
+        print( self.getMaterialParam('ka').value() )
+
         self.setRootEntity(self.rootEntity)
 
         # Each time a mesh is loaded, we create a new Plymesh and add self.material as a component.
@@ -56,6 +62,16 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.rootEntity.addComponent(self.material)
         self.meshEntity = None
         self.lastpos = None
+
+    def getMaterialParam(self, name):
+        for param in self.material.parameters():
+            print(param.name())
+            if param.name() == name:
+                return param
+        return None
+
+    def setAlpha(self, value):
+        self.alpha_param.setValue( float(value) / 255.0 )
 
     def reloadGeom(self, filepath, mesh_3d):
         self.meshFilepath = filepath

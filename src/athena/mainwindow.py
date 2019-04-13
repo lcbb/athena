@@ -86,7 +86,7 @@ class AthenaWindow(QMainWindow):
 
         self.geomView = viewer.AthenaViewer()
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
-        self.verticalLayout.insertWidget( 0, self.geomViewWidget )
+        self.upperLayout.insertWidget( -1, self.geomViewWidget )
         self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
@@ -105,6 +105,8 @@ class AthenaWindow(QMainWindow):
         self.metisGeometryChooser.currentIndexChanged.connect(self.newMesh(2))
 
         self.actionQuit.triggered.connect(self.close)
+
+        self.alphaSlider.valueChanged.connect( self.geomView.setAlpha )
 
         self.newMesh(2)()
         self.show()
