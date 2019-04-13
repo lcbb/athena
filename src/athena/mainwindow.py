@@ -11,7 +11,7 @@ from PySide2.QtGui import QKeySequence
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import viewer, ATHENA_DIR
+from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR
 
 class UiLoader(QUiLoader):
     '''

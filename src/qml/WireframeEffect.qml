@@ -79,6 +79,11 @@ Effect {
                 Parameter { name: "line.color"; value: Qt.vector4d( 1.0, 1.0, 1.0, 1.0 ) }
             ]
 
+            // As ever, it's tricky to display the inside of a complex transparent mesh.  We don't
+            // have any way to depth-sort our triangles, so true back-to-front rendering is not easy
+            // to implement here.  Here's a decent potemkin version of that: render all the back faces
+            // first, when the depth test disabled, then render the front faces in the usual way.
+            // It's goofy-looking for certain models but looks good for most.
             renderPasses: [
                 RenderPass {
                     renderStates:[ 

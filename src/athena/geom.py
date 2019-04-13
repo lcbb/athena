@@ -15,10 +15,6 @@ from athena import plymesh
 
 ATHENA_GEOM_UP = vec3d(0, 0, 1)
 
-def rotateAround( v1, v2, angle ):
-    q = QQuaternion.fromAxisAndAngle( v2, angle )
-    return q.rotatedVector( v1 )
-
 # The base types enumeration
 _basetypes = Qt3DRender.QAttribute.VertexBaseType
 
@@ -39,6 +35,10 @@ _basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
 
 # Map of Qt3D base types to numpy types
 _basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in _basetype_struct_codes.items()}
+
+def rotateAround( v1, v2, angle ):
+    q = QQuaternion.fromAxisAndAngle( v2, angle )
+    return q.rotatedVector( v1 )
 
 def iterAttr( att ):
     '''Iterator over a Qt3DRender.QAttribute'''
@@ -97,9 +97,11 @@ def dumpGeometry( geom, dumpf=print ):
 class AABB:
     def __init__(self, geom):
         vertices = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
-        self.min = vec3d()
-        self.max = vec3d()
-        for v in iterAttr(vertices):
+        it = iterAttr(vertices)
+        v0 = next(it)
+        self.min = vec3d( v0[0], v0[1], v0[2])
+        self.max = vec3d( self.min  )
+        for v in it:
             self.min.setX( min( self.min.x(), v[0] ) )
             self.min.setY( min( self.min.y(), v[1] ) )
             self.min.setZ( min( self.min.z(), v[2] ) )
