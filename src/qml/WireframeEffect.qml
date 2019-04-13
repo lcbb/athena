@@ -57,7 +57,7 @@ Effect {
     parameters: [
         Parameter { name: "ka";   value: Qt.vector3d( 0.1, 0.1, 0.1 ) },
         Parameter { name: "kd";   value: Qt.vector3d( 0.7, 0.7, 0.7 ) },
-        Parameter { name: "ks";  value: Qt.vector3d( 0.95, 0.95, 0.95 ) },
+        Parameter { name: "ks";  value: Qt.vector3d( 0.05, 0.05, 0.05 ) },
         Parameter { name: "shininess"; value: 150.0 }
     ]
 

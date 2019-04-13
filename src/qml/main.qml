@@ -60,8 +60,8 @@ import Qt3D.Extras 2.0
     WireframeMaterial {
         id: wireframeMaterial
         effect: WireframeEffect {}
-        ambient: Qt.rgba( 0.2, 0.0, 0.0, 1.0 )
-        diffuse: Qt.rgba( 0.8, 0.0, 0.0, 1.0 )
+        ambient: Qt.rgba( 0.2, 0.2, 0.2, 1.0 )
+        diffuse: Qt.rgba( 0.8, 0.8, 0.8, 1.0 )
 
         /*
         QQ2.SequentialAnimation {
