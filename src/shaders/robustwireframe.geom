@@ -3,6 +3,11 @@
 layout( triangles ) in;
 layout( triangle_strip, max_vertices = 3 ) out;
 
+uniform struct LineInfo {
+    float width;
+    vec4 color;
+} line;
+
 in EyeSpaceVertex {
     vec3 position;
     vec3 normal;
@@ -30,10 +35,13 @@ vec2 transformToViewport( const in vec4 p )
     return vec2( viewportMatrix * ( p / p.w ) );
 }
 
+float cross2( const in vec2 a, const in vec2 b )
+{
+    return a.x * b.y - b.x * a.y;
+}
+
 void main()
 {
-    //gs_out.normal = normalize( modelViewNormal * normalize((cross( (gin[2].gl_Position.xyz-gl_in[0].gl_Position.xyz),
-                                                        //(gl_in[1].gl_Position.xyz-gl_in[0].gl_Position.xyz)) )));
     gs_out.normal = normalize( modelViewNormal * normalize( cross( gs_in[1].normal - gs_in[0].normal,
                                                         gs_in[2].normal - gs_in[0].normal ) ));
     gs_out.configuration = int(gl_in[0].gl_Position.z < 0) * int(4)
@@ -55,64 +63,66 @@ void main()
         // Common configuration where all vertices are within the viewport
         gs_out.edgeA = vec4(0.0);
         gs_out.edgeB = vec4(0.0);
+        
+        float area2 = cross2( p[2]-p[0] , p[2]-p[1] );
 
         // Calculate lengths of 3 edges of triangle
-        float a = abs(length( p[1] - p[2] ));
-        float b = abs(length( p[2] - p[0] ));
-        float c = abs(length( p[1] - p[0] ));
+        float a = distance( p[1], p[2] ); //length( p[1] - p[2] );
+        float b = distance( p[2], p[0] );
+        float c = distance( p[1], p[0] );
 
         // Calculate internal angles using the cosine rule
-        float alpha = acos( ( b * b + c * c - a * a ) / ( 2.0 * b * c ) );
-        float beta = acos( ( a * a + c * c - b * b ) / ( 2.0 * a * c ) );
+        float alpha_args = ( b * b + c * c - a * a ) / ( 2.0 * b * c );
+        float alpha;
+        if( alpha_args > 1-1e3 ){
+            alpha = sqrt( (a*a-(b-c)*(b-c)) / (b*c) );
+        }
+        else{
+            alpha = acos( alpha_args );
+        }
+
+        float beta;
+        float beta_args = ( a * a +  c * c - b * b ) / ( 2.0 * a * c );
+        if( beta_args > 1-1e3 ){
+            beta = sqrt( (b*b-(a-c)*(a-c)) / (a*c) );
+        }
+        else{
+            beta = acos( beta_args );
+        }
+        //float alpha = acos( ( b * b + c * c - a * a ) / ( 2.0 * b * c ) );
+        //float beta = acos( ( a * a + c * c - b * b ) / ( 2.0 * a * c ) );
+
+        float degen_offset = line.width+1.1;
 
         // Calculate the perpendicular distance of each vertex from the opposing edge
-        float ha = abs( c * sin( beta ) );
-        float hb = abs( c * sin( alpha ) );
-        float hc = abs( b * sin( alpha ) );
+        //float ha = abs( c * sin(beta)  );
+        //float hb = abs( c * sin(alpha) );
+        //float hc = abs( b * sin(alpha) );
+        float ha = max( abs( area2 / a ), degen_offset );
+        float hb = max( abs( area2 / b ), degen_offset );
+        float hc = max( abs( area2 / c ), degen_offset );
+        //float ha = max( degen_offset*gs_in[1].interior, abs( c * sin( beta ) ) );
+        //float hb = max( degen_offset*gs_in[2].interior, abs( c * sin( alpha ) ) );
+        //float hc = max( degen_offset*gs_in[0].interior, abs( b * sin( alpha ) ) );
 
-        //bool v0_interior = gs_in[0].interior > .5;
-        //bool v1_interior = gs_in[1].interior > .5;
-        //bool v2_interior = gs_in[2].interior > .5;
-
-        //bool a_interior = v1_interior || v2_interior;
-        //bool b_interior = v2_interior || v0_interior;
-        //bool c_interior = v1_interior || v0_interior;
 
         // Now add this perpendicular distance as a per-vertex property in addition to
         // the position and normal calculated in the vertex shader.
 
         // Vertex 0 (a)
-        //if( gs_in[0].interior > 0.5 ){
-            //gs_out.edgeA = vec4( ha, b, c, 0.0 );
-        //}
-        //else{
-            gs_out.edgeA = vec4( ha, b*gs_in[2].interior, c*gs_in[0].interior, 0.0 );
-        //}
-        //gs_out.normal = gs_in[0].normal;
+        gs_out.edgeA = vec4( ha, (b+degen_offset)*gs_in[2].interior, (c+degen_offset)*gs_in[0].interior, 0.0 );
         gs_out.position = gs_in[0].position;
         gl_Position = gl_in[0].gl_Position;
         EmitVertex();
 
         // Vertex 1 (b)
-        //if( gs_in[1].interior > 0.5 ){
-            //gs_out.edgeA = vec4( a, hb, c, 0.0 );
-        //}
-        //else{
-            gs_out.edgeA = vec4( a*gs_in[1].interior, hb, c*gs_in[0].interior, 0.0 );
-        //}
-        //gs_out.normal = gs_in[1].normal;
+        gs_out.edgeA = vec4( (a+degen_offset)*gs_in[1].interior, hb, (c+degen_offset)*gs_in[0].interior, 0.0 );
         gs_out.position = gs_in[1].position;
         gl_Position = gl_in[1].gl_Position;
         EmitVertex();
 
         // Vertex 2 (c)
-        //if( gs_in[2].interior > 0.5 ){
-            //gs_out.edgeA = vec4( a, b, hc, 0.0 );
-        //}
-        //else{
-            gs_out.edgeA = vec4( a*gs_in[1].interior, b*gs_in[2].interior, hc, 0.0 );
-        //}
-        //gs_out.normal = gs_in[2].normal;
+        gs_out.edgeA = vec4( (a+degen_offset)*gs_in[1].interior, (b+degen_offset)*gs_in[2].interior, hc, 0.0 );
         gs_out.position = gs_in[2].position;
         gl_Position = gl_in[2].gl_Position;
         EmitVertex();
