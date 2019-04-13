@@ -45,6 +45,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.shader.setFragmentShaderCode( loadShader( '.frag' ) )
         pass0 = self.material.effect().techniques()[0].renderPasses()[0]
         pass0.setShaderProgram(self.shader)
+        pass1 = self.material.effect().techniques()[0].renderPasses()[1]
+        pass1.setShaderProgram(self.shader)
 
         self.alpha_param = Qt3DRender.QParameter( self.material )
         self.alpha_param.setName('alpha')

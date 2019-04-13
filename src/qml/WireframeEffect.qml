@@ -82,8 +82,22 @@ Effect {
             renderPasses: [
                 RenderPass {
                     renderStates:[ 
-                        //CullFace{ mode : CullFace.NoCulling },
+                        CullFace{ mode : CullFace.Front },
                         //DepthTest{ depthFunction: DepthTest.Always },
+                        NoDepthMask {},
+                        BlendEquationArguments{ 
+                            sourceRgb: BlendEquationArguments.SourceAlpha
+                            destinationRgb: BlendEquationArguments.OneMinusSourceAlpha
+                        },
+                        BlendEquation{ blendFunction: BlendEquation.Add}
+                    ]
+                    // populated with a shader within geomview.py, since qml cannot usefully work with
+                    // relative file paths for shader loading
+                },
+                RenderPass {
+                    renderStates:[ 
+                        CullFace{ mode : CullFace.Back },
+                        DepthTest{ depthFunction: DepthTest.Less },
                         //NoDepthMask {},
                         BlendEquationArguments{ 
                             sourceRgb: BlendEquationArguments.SourceAlpha
