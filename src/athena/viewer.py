@@ -32,63 +32,81 @@ class CameraController:
     def drag(self, dx, dy):
         pass
 
+    def resize(self, newsize_x, newsize_y):
+        pass
+
 class CameraController2D(CameraController):
     def __init__(self, window, camera, geometry):
         super(CameraController2D,self).__init__(window, camera, geometry)
         self.margin = 1.4
+        self.aabb = geom.AABB(self.geometry)
+        self.zpos = self.aabb.max.z() + 10
         self.reset()
 
     def reset(self):
-        ratio = self._windowAspectRatio()
-        aabb = geom.AABB(self.geometry)
-        extents = aabb.max - aabb.min
-        x_view = extents.x() * self.margin
-        y_view = extents.y() * self.margin
-        x_view = y_view * ratio
+        self.camera.setViewCenter( self.aabb.center )
+        self.camera.setPosition( vec3d( self.aabb.center.x(), self.aabb.center.y(), self.zpos ) )
+        self.camera.setUpVector( ATHENA_GEOM_UP )
+        self._orient()
 
-        xmin = aabb.center.x() - x_view / 2
-        xmax = aabb.center.x() + x_view / 2
-        ymin = aabb.center.y() - y_view / 2
-        ymax = aabb.center.y() + y_view / 2
-        zmin = aabb.min.z() - 20
-        zmax = aabb.max.z() + 20
-        #print (xmin, xmax, ymin, ymax, zmin, zmax)
+    def _extents(self, ratio=None):
+        # Return the visible x,y dimensions
+        ratio = ratio if ratio else self._windowAspectRatio()
+        mesh_extents = self.aabb.max - self.aabb.min
+        view_extents = mesh_extents * self.margin
+        view_extents.setX( view_extents.y() * ratio )
+        return view_extents.x(), view_extents.y()
+
+    def _orient(self, ratio=None):
+        x_view, y_view = self._extents(ratio)
+
+        xmin = self.aabb.center.x() - x_view / 2
+        xmax = self.aabb.center.x() + x_view / 2
+        ymin = self.aabb.center.y() - y_view / 2
+        ymax = self.aabb.center.y() + y_view / 2
+        zmin = self.aabb.min.z() - 20
+        zmax = self.aabb.max.z() + 20
 
         self.camera.lens().setOrthographicProjection( xmin, xmax, ymin, ymax, zmin, zmax )
-        self.camera.setPosition( vec3d( aabb.center.x(), aabb.center.y(), zmax - 10 ) )
-        self.camera.setViewCenter( aabb.center )
-        self.camera.rightVector = vec3d( 1, 0, 0 )
-        self.camera.setUpVector( ATHENA_GEOM_UP )
 
     def drag( self, delta_x, delta_y ):
-        self.camera.translateWorld( vec3d( -delta_x/3., delta_y/3., 0 ), self.camera.TranslateViewCenter )
+        xview, yview = self._extents()
+        xchange = delta_x / self.window.width()
+        ychange = delta_y / self.window.height()
+        self.camera.translateWorld( vec3d( -xchange * xview, ychange * yview, 0 ), self.camera.TranslateViewCenter )
+        self._orient()
 
     def zoom( self, delta ):
         delta = pow ( 1.1, -delta/100 )
         self.margin *= delta
-        self.reset()
+        self._orient()
+
+    def resize(self, new_width, new_height):
+        new_ratio = new_width / new_height
+        self._orient(new_ratio)
 
 class CameraController3D(CameraController):
     def __init__(self, window, camera, geometry):
         super(CameraController3D,self).__init__(window, camera, geometry)
+        self.aabb = geom.AABB(self.geometry)
+        self.reset()
 
     def reset(self):
         ratio = self._windowAspectRatio()
         self.camera.lens().setPerspectiveProjection(45, ratio, .01, 1000)
 
-        object_aabb = geom.AABB(self.geometry)
-        aabb_size = object_aabb.max - object_aabb.min
+        aabb_size = self.aabb.max - self.aabb.min
         cam_distance = 2 * max(aabb_size.x(), aabb_size.y(), aabb_size.z())
-        cam_loc = object_aabb.center + vec3d( cam_distance, 0, 0 )
+        cam_loc = self.aabb.center + vec3d( cam_distance, 0, 0 )
         self.camera.setPosition( cam_loc )
-        self.camera.setViewCenter( object_aabb.center )
-        self.camera.rightVector = vec3d( 0, 1, 0 )
+        self.camera.setViewCenter( self.aabb.center )
+        self.rightVector = vec3d( 0, 1, 0 )
         self._orientCamera()
 
     def _orientCamera( self ):
         # Set the camera up vector based on our tracking of the right vector
         view_vec = self.camera.viewCenter() - self.camera.position()
-        up = vec3d.crossProduct( self.camera.rightVector, view_vec )
+        up = vec3d.crossProduct( self.rightVector, view_vec )
         self.camera.setUpVector( up.normalized() )
 
     def drag( self, delta_x, delta_y ):
@@ -96,11 +114,11 @@ class CameraController3D(CameraController):
         ctr = self.camera.viewCenter()
         up = ATHENA_GEOM_UP
         v = self.camera.position() - ctr
-        right = self.camera.rightVector
+        right = self.rightVector
         v = geom.rotateAround( v, right, -delta_y )
         v = geom.rotateAround( v, up, -delta_x )
         self.camera.setPosition ( (ctr + v) )
-        self.camera.rightVector = geom.rotateAround( right, up, -delta_x )
+        self.rightVector = geom.rotateAround( right, up, -delta_x )
         self._orientCamera()
 
     def zoom( self, delta ):
@@ -110,6 +128,10 @@ class CameraController3D(CameraController):
             return min( max( value, min_ ), max_ )
         new_fov = clamp (5, 150, fov - delta)
         self.camera.setFieldOfView( new_fov )
+
+    def resize(self, new_width, new_height):
+        new_ratio = new_width / new_height
+        self.camera.setAspectRatio(new_ratio)
 
 
 class AthenaViewer(Qt3DExtras.Qt3DWindow):
@@ -195,4 +217,5 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.camControl.zoom( event.angleDelta().y() )
 
     def resizeEvent( self, event ):
-        self.camControl.reset()
+        newsize = event.size()
+        self.camControl.resize(newsize.width(), newsize.height())
