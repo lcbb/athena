@@ -82,7 +82,8 @@ class PlyMesh(Qt3DCore.QEntity):
         num_tris = len(faces) - num_large_faces
         num_interior_tris = sum(len(x) for x in large_faces)
 
-        #total_vertices = len(vertices) + num_large_faces
+        # FIXME: overallocation occurs here.  In the limit we would need to create
+        # interior-flavor copies of all vertices, but in practice we won't usually need that.
         total_vertices = len(vertices) * 2
         total_tris = num_tris + num_interior_tris
 
@@ -92,7 +93,7 @@ class PlyMesh(Qt3DCore.QEntity):
         else:
             index_basetype = _basetypes.UnsignedInt
 
-        vertex_nparr = np.zeros([total_vertices,7],dtype=_basetype_numpy_codes[vertex_basetype])
+        vertex_nparr = np.zeros([total_vertices,4],dtype=_basetype_numpy_codes[vertex_basetype])
         # Fill with the input vertices
         vertex_nparr[:len(vertices),0] = vertices['x']
         vertex_nparr[:len(vertices),1] = vertices['y']
@@ -106,7 +107,7 @@ class PlyMesh(Qt3DCore.QEntity):
         def add_vtx(v,interior=1):
             nonlocal vtx_idx
             vertex_nparr[vtx_idx,:]=v
-            vertex_nparr[vtx_idx,6] = interior
+            vertex_nparr[vtx_idx,3] = interior
             #print("New vtx:", vertex_nparr[vtx_idx])
             vtx_idx += 1
             return vtx_idx - 1
@@ -199,7 +200,7 @@ class PlyMesh(Qt3DCore.QEntity):
         self.positionAttr.setVertexSize(3)
         self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
         self.positionAttr.setBuffer(self.qvbuf)
-        self.positionAttr.setByteStride(7*_basetype_widths[vertex_basetype])
+        self.positionAttr.setByteStride(4*_basetype_widths[vertex_basetype])
         self.positionAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.positionAttr)
 
@@ -210,8 +211,8 @@ class PlyMesh(Qt3DCore.QEntity):
         self.interiorAttr.setVertexSize(1)
         self.interiorAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
         self.interiorAttr.setBuffer(self.qvbuf)
-        self.interiorAttr.setByteStride(7*_basetype_widths[vertex_basetype])
-        self.interiorAttr.setByteOffset(6*_basetype_widths[vertex_basetype])
+        self.interiorAttr.setByteStride(4*_basetype_widths[vertex_basetype])
+        self.interiorAttr.setByteOffset(3*_basetype_widths[vertex_basetype])
         self.interiorAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.interiorAttr)
 

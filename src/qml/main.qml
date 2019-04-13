@@ -63,6 +63,7 @@ import Qt3D.Extras 2.0
         ambient: Qt.rgba( 0.2, 0.0, 0.0, 1.0 )
         diffuse: Qt.rgba( 0.8, 0.0, 0.0, 1.0 )
 
+        /*
         QQ2.SequentialAnimation {
             loops: QQ2.Animation.Infinite
             running: true
@@ -85,5 +86,6 @@ import Qt3D.Extras 2.0
 
             QQ2.PauseAnimation { duration: 1500 }
         }
+        */
     }
 //}
