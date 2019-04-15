@@ -82,9 +82,8 @@ class PlyMesh(Qt3DCore.QEntity):
         num_tris = len(faces) - num_large_faces
         num_interior_tris = sum(len(x) for x in large_faces)
 
-        # FIXME: overallocation occurs here.  In the limit we would need to create
-        # interior-flavor copies of all vertices, but in practice we won't usually need that.
-        total_vertices = len(vertices) * 2
+        # FIXME: some overallocation occurs here.
+        total_vertices = len(vertices) + (num_interior_tris * 3)
         total_tris = num_tris + num_interior_tris
 
         vertex_basetype = _basetypes.Float
