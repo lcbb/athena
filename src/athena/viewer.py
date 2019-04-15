@@ -135,8 +135,42 @@ class CameraController3D(CameraController):
 
 
 class AthenaViewer(Qt3DExtras.Qt3DWindow):
+
+
+    def _athenaMaterial( self, flavor ):
+        engine = QQmlEngine()
+        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'main.qml'
+        component = QQmlComponent(engine, main_qml.as_uri() )
+        if ( component.status() != QQmlComponent.Ready ):
+            print ("Error loading QML:")
+            print(component.errorString())
+        material = component.create()
+
+        # Need to hold a reference in python to the QQmlComponent, or else
+        # PySide2 will helpfully delete the material object along with it
+        # after this function ends.
+        self._qtrefs.append(component)
+
+        shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
+        vert_shader = shader_path / 'wireframe.vert'
+        geom_shader = shader_path / 'wireframe.geom'
+        frag_shader = shader_path / (flavor+'_wireframe.frag')
+        def loadShader( s ):
+            return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
+        shader = Qt3DRender.QShaderProgram(material)
+        shader.setVertexShaderCode( loadShader( vert_shader ) )
+        shader.setGeometryShaderCode( loadShader( geom_shader ) )
+        shader.setFragmentShaderCode( loadShader( frag_shader ) )
+        for rpass in material.effect().techniques()[0].renderPasses():
+            rpass.setShaderProgram( shader )
+
+        return material
+
+
+
     def __init__(self):
         super(AthenaViewer, self).__init__()
+        self._qtrefs = []
 
         self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
@@ -144,50 +178,32 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.rootEntity = Qt3DCore.QEntity()
         self.camControl = CameraController(None, None, None)
 
-
-        # Create the mesh shading material, stored as self.material
-        self.eee = QQmlEngine()
-        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'main.qml'
-        self.ccc = QQmlComponent(self.eee, main_qml.as_uri() )
-        if( self.ccc.status() != QQmlComponent.Ready ):
-            print("Error loading QML:")
-            print(self.ccc.errorString())
-        self.material = self.ccc.create()
-        # We must set the shader program paths here, because qml doesn't know where ATHENA_DIR is
-
-        self.shader = Qt3DRender.QShaderProgram()
-        shader_path = Path(ATHENA_SRC_DIR) / 'shaders' / 'robustwireframe'
-        def loadShader(suffix):
-            return Qt3DRender.QShaderProgram.loadSource( shader_path.with_suffix( suffix ).as_uri() )
-        self.shader.setVertexShaderCode( loadShader( '.vert' ) )
-        self.shader.setGeometryShaderCode( loadShader( '.geom' ) )
-        self.shader.setFragmentShaderCode( loadShader( '.frag' ) )
-        pass0 = self.material.effect().techniques()[0].renderPasses()[0]
-        pass0.setShaderProgram(self.shader)
-        pass1 = self.material.effect().techniques()[0].renderPasses()[1]
-        pass1.setShaderProgram(self.shader)
-
-        self.alpha_param = Qt3DRender.QParameter( self.material )
+        self.alpha_param = Qt3DRender.QParameter( self.rootEntity )
         self.alpha_param.setName('alpha')
         self.alpha_param.setValue(1.0)
-        self.material.addParameter( self.alpha_param )
+
+        self.color_param = Qt3DRender.QParameter( self.rootEntity )
+        self.color_param.setName('flat_color')
+        self.color_param.setValue( QColor( 97, 188, 188 ) )
+
+        self.flat_material = self._athenaMaterial( 'flat' )
+        self.flat_material.addParameter( self.alpha_param )
+        self.flat_material.addParameter( self.color_param )
+
+        self.gooch_material = self._athenaMaterial( 'gooch' )
+        self.gooch_material.addParameter( self.alpha_param )
 
         self.setRootEntity(self.rootEntity)
 
-        # Each time a mesh is loaded, we create a new Plymesh and add self.material as a component.
+        # Each time a mesh is loaded, we create a new Plymesh and add a material as a component.
         # Old meshes are deleteLater()-ed.  A problem with this approach is that the deleted QEntities
         # also delete their components (and this seems true even if we try to remove the component first).
-        # The workaround we use here is to also add self.material as a component of the root entity,
+        # The workaround we use here is to also add the materials as components of the root entity,
         # which keeps Qt3D from deleting it.  I don't know if this is the best approach, but it works.
-        self.rootEntity.addComponent(self.material)
+        self.rootEntity.addComponent(self.flat_material)
+        self.rootEntity.addComponent(self.gooch_material)
         self.meshEntity = None
         self.lastpos = None
-
-    def getMaterialParam(self, name):
-        for param in self.material.parameters():
-            if param.name() == name:
-                return param
-        return None
 
     def setAlpha(self, value):
         self.alpha_param.setValue( float(value) / 255.0 )
@@ -198,11 +214,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         if( self.meshEntity ):
             self.meshEntity.deleteLater()
         self.meshEntity = plymesh.PlyMesh(self.rootEntity, self.plydata)
-        self.meshEntity.addComponent(self.material)
-    
-        if (mesh_3d):
+        if( mesh_3d ):
+            self.meshEntity.addComponent(self.gooch_material)
             self.camControl = CameraController3D(self, self.camera(), self.meshEntity.geometry)
         else:
+            self.meshEntity.addComponent(self.flat_material)
             self.camControl = CameraController2D(self, self.camera(), self.meshEntity.geometry)
         self.camControl.reset()
 
