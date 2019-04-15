@@ -93,10 +93,14 @@ class CameraController3D(CameraController):
 
     def reset(self):
         ratio = self._windowAspectRatio()
-        self.camera.lens().setPerspectiveProjection(45, ratio, .01, 1000)
 
         aabb_size = self.aabb.max - self.aabb.min
+
         cam_distance = 2 * max(aabb_size.x(), aabb_size.y(), aabb_size.z())
+        frustum_max = cam_distance * 2
+        frustum_min = frustum_max / 1e5
+
+        self.camera.lens().setPerspectiveProjection(45, ratio, frustum_min, frustum_max)
         cam_loc = self.aabb.center + vec3d( cam_distance, 0, 0 )
         self.camera.setPosition( cam_loc )
         self.camera.setViewCenter( self.aabb.center )
