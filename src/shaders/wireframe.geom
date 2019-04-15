@@ -67,11 +67,12 @@ void main()
         float area2 = cross2( p[2]-p[0] , p[2]-p[1] );
 
         // Calculate lengths of 3 edges of triangle
-        float a = distance( p[1], p[2] ); //length( p[1] - p[2] );
+        float a = distance( p[1], p[2] );
         float b = distance( p[2], p[0] );
         float c = distance( p[1], p[0] );
 
         // Calculate internal angles using the cosine rule
+        /*
         float alpha_args = ( b * b + c * c - a * a ) / ( 2.0 * b * c );
         float alpha;
         if( alpha_args > 1-1e3 ){
@@ -91,8 +92,9 @@ void main()
         }
         //float alpha = acos( ( b * b + c * c - a * a ) / ( 2.0 * b * c ) );
         //float beta = acos( ( a * a + c * c - b * b ) / ( 2.0 * a * c ) );
+        */
 
-        float degen_offset = line.width+1.1;
+        float degen_offset = 0; // line.width+1.1;
 
         // Calculate the perpendicular distance of each vertex from the opposing edge
         //float ha = abs( c * sin(beta)  );
@@ -101,10 +103,6 @@ void main()
         float ha = max( abs( area2 / a ), degen_offset );
         float hb = max( abs( area2 / b ), degen_offset );
         float hc = max( abs( area2 / c ), degen_offset );
-        //float ha = max( degen_offset*gs_in[1].interior, abs( c * sin( beta ) ) );
-        //float hb = max( degen_offset*gs_in[2].interior, abs( c * sin( alpha ) ) );
-        //float hc = max( degen_offset*gs_in[0].interior, abs( b * sin( alpha ) ) );
-
 
         // Now add this perpendicular distance as a per-vertex property in addition to
         // the position and normal calculated in the vertex shader.
