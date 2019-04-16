@@ -15,11 +15,12 @@ uniform vec3 kd;            // Diffuse reflectivity
 uniform vec3 ks;            // Specular reflectivity
 uniform float shininess;    // Specular shininess factor
 uniform float alpha; 
+uniform float light_angle;
 
 const vec3 kblue = vec3 ( 0, .1, .8 );
 const vec3 kyellow = vec3( .7, .7, 0 );
-const float gooch_beta = .3;
-const float gooch_alpha = .1;
+const float gooch_beta = .35;
+const float gooch_alpha = .2;
 
 in WireframeVertex {
     vec3 position;
@@ -39,15 +40,18 @@ vec3 goochModel( const in vec3 pos, const in vec3 n )
     // Calculate the vector from the fragment to the eye position
     // (origin since this is in "eye" or "camera" space)
     vec3 v = normalize( -pos );
-    //vec3 s = normalize( vec3( light.position ) - pos );
-    vec3 s = v;
+    vec3 s = normalize( vec3( light.position ) - pos );
+    //vec3 s = v;
+
+    
+
+    // Calculate the vector from the light to the fragment
+    //vec3 s = normalize( vec3( lightPosition ) - pos );
 
     // Calculate kcool and kwarm from equation (3)
     vec3 kcool = clamp(kblue + gooch_alpha * kd, 0.0, 1.0);
     vec3 kwarm = clamp(kyellow + gooch_beta * kd, 0.0, 1.0);
 
-    // Calculate the vector from the light to the fragment
-    //vec3 s = normalize( vec3( lightPosition ) - pos );
 
     // Calculate the cos theta factor mapped onto the range [0,1]
     float sDotNFactor = ( 1.0 + dot( s, n ) ) / 2.0;

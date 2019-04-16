@@ -72,12 +72,7 @@ Effect {
 
             filterKeys: [ FilterKey { name: "renderingStyle"; value: "forward" } ]
 
-            parameters: [
-                Parameter { name: "light.position"; value: Qt.vector4d( 0.0, 0.0, 0.0, 1.0 ) },
-                Parameter { name: "light.intensity"; value: Qt.vector3d( 1.0, 1.0, 1.0 ) },
-                Parameter { name: "line.width"; value: 1.0 },
-                Parameter { name: "line.color"; value: Qt.vector4d( 1.0, 1.0, 1.0, 1.0 ) }
-            ]
+            parameters: []
 
             // As ever, it's tricky to display the inside of a complex transparent mesh.  We don't
             // have any way to depth-sort our triangles, so true back-to-front rendering is not easy

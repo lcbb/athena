@@ -108,6 +108,7 @@ class AthenaWindow(QMainWindow):
 
         self.alphaSlider.valueChanged.connect( self.geomView.setAlpha )
         self.lineWidthSlider.valueChanged.connect( self.geomView.setLineWidth )
+        self.lightDial.valueChanged.connect( self.geomView.setLightOrientation )
 
         self.newMesh(2)()
         self.show()

@@ -182,17 +182,17 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.rootEntity = Qt3DCore.QEntity()
         self.camControl = CameraController(None, None, None)
 
-        self.alpha_param = Qt3DRender.QParameter( self.rootEntity )
-        self.alpha_param.setName('alpha')
-        self.alpha_param.setValue(1.0)
+        def _param( name, value ):
+            param = Qt3DRender.QParameter( self.rootEntity )
+            param.setName(name)
+            param.setValue(value)
+            return param
 
-        self.color_param = Qt3DRender.QParameter( self.rootEntity )
-        self.color_param.setName('flat_color')
-        self.color_param.setValue( QColor( 97, 188, 188 ) )
+        self.alpha_param = _param( 'alpha', 1.0 )
+        self.color_param = _param( 'flat_color', QColor(97,188,188) )
+        self.line_width_param = _param( 'line.width', 1.0 )
+        self.light_position_param = _param( 'light.position', vec3d( 0, 0, 100) )
 
-        self.line_width_param = Qt3DRender.QParameter( self.rootEntity )
-        self.line_width_param.setName('line.width')
-        self.line_width_param.setValue( 1.0 )
 
         self.flat_material = self._athenaMaterial( 'flat' )
         self.flat_material.addParameter( self.alpha_param )
@@ -202,6 +202,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.gooch_material = self._athenaMaterial( 'gooch' )
         self.gooch_material.addParameter( self.alpha_param )
         self.gooch_material.addParameter( self.line_width_param )
+        self.gooch_material.addParameter( self.light_position_param )
 
         self.setRootEntity(self.rootEntity)
 
@@ -221,6 +222,12 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
     def setLineWidth(self, value):
         new_width = float(value) / 10.
         self.line_width_param.setValue( new_width )
+
+    def setLightOrientation( self, value ):
+        scaled_value = float(value)
+        new_value = geom.rotateAround( vec3d(0,0,100), vec3d(0,1,0), scaled_value )
+        self.light_position_param.setValue( new_value ) 
+
 
     def reloadGeom(self, filepath, mesh_3d):
         self.meshFilepath = filepath
