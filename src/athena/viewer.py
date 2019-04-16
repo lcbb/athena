@@ -190,12 +190,18 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.color_param.setName('flat_color')
         self.color_param.setValue( QColor( 97, 188, 188 ) )
 
+        self.line_width_param = Qt3DRender.QParameter( self.rootEntity )
+        self.line_width_param.setName('line.width')
+        self.line_width_param.setValue( 1.0 )
+
         self.flat_material = self._athenaMaterial( 'flat' )
         self.flat_material.addParameter( self.alpha_param )
         self.flat_material.addParameter( self.color_param )
+        self.flat_material.addParameter( self.line_width_param )
 
         self.gooch_material = self._athenaMaterial( 'gooch' )
         self.gooch_material.addParameter( self.alpha_param )
+        self.gooch_material.addParameter( self.line_width_param )
 
         self.setRootEntity(self.rootEntity)
 
@@ -211,6 +217,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
 
     def setAlpha(self, value):
         self.alpha_param.setValue( float(value) / 255.0 )
+
+    def setLineWidth(self, value):
+        new_width = float(value) / 10.
+        self.line_width_param.setValue( new_width )
 
     def reloadGeom(self, filepath, mesh_3d):
         self.meshFilepath = filepath

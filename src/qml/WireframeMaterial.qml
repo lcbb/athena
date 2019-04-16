@@ -58,7 +58,6 @@ Material {
     property color diffuse: Qt.rgba( 0.7, 0.7, 0.7, 1.0 )
     property color specular: Qt.rgba( 0.95, 0.95, 0.95, 1.0 )
     property real shininess: 50.0
-    property real lineWidth: 1.4
     property color lineColor: Qt.rgba( 0.8, 0.1, 0.1, 1.0 )
 
     parameters: [
@@ -66,7 +65,7 @@ Material {
         Parameter { name: "kd"; value: Qt.vector3d(root.diffuse.r, root.diffuse.g, root.diffuse.b) },
         Parameter { name: "ksp"; value: Qt.vector3d(root.specular.r, root.specular.g, root.specular.b) },
         Parameter { name: "shininess"; value: root.shininess },
-        Parameter { name: "line.width"; value: root.lineWidth },
         Parameter { name: "line.color"; value: root.lineColor }
+        // line.width now set in plymesh.py
     ]
 }
