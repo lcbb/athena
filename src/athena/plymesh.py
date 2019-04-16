@@ -2,9 +2,11 @@ from pathlib import Path
 import struct
 import itertools
 
+from PySide2.QtGui import QColor, QVector3D as vec3d
 from PySide2.QtCore import QByteArray, Qt
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.Qt3DRender import Qt3DRender
+from PySide2.Qt3DExtras import Qt3DExtras
 
 from plyfile import PlyData, PlyElement
 import numpy as np
@@ -235,11 +237,9 @@ class PlyMesh(Qt3DCore.QEntity):
         self.addComponent(self.lineMesh)
 
 
-
-
 class WireOutline(Qt3DCore.QEntity):
     # This is a lines-based outline renderer, not currently used
-    def __init__(self, parent, geom, plydata):
+    def __init__(self, parent, geometry, plydata):
         super(WireOutline, self).__init__(parent)
 
         vertices = plydata['vertex'].data
@@ -247,8 +247,8 @@ class WireOutline(Qt3DCore.QEntity):
 
         self.geometry = Qt3DRender.QGeometry(self)
 
-        # borrow the position attribute buffer from geom
-        vatt = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
+        # borrow the position attribute buffer from geometry
+        vatt = geom.getQAttribute( geometry, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
         self.geometry.addAttribute(vatt)
 
         # Now create the index attribute.  This is different from the Qt3D mesh, which has been triangulated,
@@ -273,7 +273,7 @@ class WireOutline(Qt3DCore.QEntity):
         unique_edges = set(pair for pair in edge_index_iter())
 
         #  use the same basetype as the Qt3D mesh, since presumably that file loader chose a suitable type
-        iatt = getQAttribute(geom, att_type=Qt3DRender.QAttribute.IndexAttribute)
+        iatt = geom.getQAttribute(geometry, att_type=Qt3DRender.QAttribute.IndexAttribute)
         index_type = iatt.vertexBaseType()
         index_buffer_np = np.array(list(unique_edges), dtype=_basetype_numpy_codes[index_type])
         rawstring = index_buffer_np.tobytes()
@@ -293,9 +293,9 @@ class WireOutline(Qt3DCore.QEntity):
         self.lineMesh.setGeometry(self.geometry)
         self.lineMesh.setPrimitiveType( Qt3DRender.QGeometryRenderer.Lines )
 
-        #self.lineMaterial = Qt3DExtras.QPhongMaterial(parent)
-        #self.lineMaterial.setAmbient(QColor(255,255,0))
+        self.lineMaterial = Qt3DExtras.QPhongMaterial(parent)
+        self.lineMaterial.setAmbient(QColor(255,255,0))
 
         #self.lineEntity = Qt3DCore.QEntity(parent)
         self.addComponent(self.lineMesh)
-        #self.lineEntity.addComponent(self.lineMaterial)
+        self.addComponent(self.lineMaterial)
