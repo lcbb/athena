@@ -137,9 +137,97 @@ class CameraController3D(CameraController):
         new_ratio = new_width / new_height
         self.camera.setAspectRatio(new_ratio)
 
+class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
+    '''
+    Metaclass magic to simplify attaching QParameters to a QObject
 
-class AthenaViewer(Qt3DExtras.Qt3DWindow):
+    This metaclass adds methods to a class that invokes it.  QParameter
+    names and default values should be specified in the invoking class's
+    _qparameters dict (which needs to be a class member, not an instance
+    member). Then, for each parameter foo, this metaclass defines:
 
+        * foo(), the getter method
+        * setFoo(), the setter method
+        * fooChanged(), a qt signal
+        * initFoo(), an initializer for self._fooParam
+
+    It also defines initParameters(), which calls all the initFoos.  These
+    initializer methods assume that the object will have already defined
+    a self.rootEntity to parent the newly-created QParameters onto.
+
+    These automatic method definitions do not override custom definitions given
+    in the class, so it's possible to customize any of these methods as necessary.
+    '''
+
+    @staticmethod
+    def _mkGetter(attr_name):
+        def getter(self):
+            return getattr( self, attr_name ).value()
+        return getter
+
+    @staticmethod
+    def _mkSetter(attr_name, signal_name):
+        def setter( self, param ):
+            getattr( self, attr_name ).setValue( param )
+            getattr( self, signal_name ).emit(param)
+        return setter
+
+    @staticmethod
+    def _mkInit(attr_name, key, value):
+        def init( self ):
+            param = Qt3DRender.QParameter( self.rootEntity )
+            param.setName( key )
+            param.setValue( value )
+            setattr( self, attr_name, param )
+        return init
+
+    @staticmethod
+    def _mkInitAll(initializers):
+        def initAll(self):
+            for x in initializers:
+                getattr(self, x)()
+        return initAll
+
+
+    def __new__(cls, name, parents, dct):
+        params =dct['_qparameters']
+        api_translation = str.maketrans( {'.':None, '_':None} )
+
+        def addMethod(name, value):
+            if name in dct:
+                return
+            dct[name] = value
+
+        initList = list()
+        for key, value in params.items():
+            # Create API names for each parameter:
+            # with a running example for a key named flat_color
+            camel_key = key[0] + key.title()[1:]
+            api_name = camel_key.translate( api_translation )
+            studly_name = api_name[0].upper() + api_name[1:]
+            getter_name = api_name           # flatColor
+            setter_name = 'set'+studly_name  # setFlatColor
+            signal_name = api_name+'Changed' # flatColorChanged
+            init_name = 'init'+studly_name   # initFlatColor
+            attr_name = '_'+api_name+'Param' # _flatColorParam 
+
+            addMethod( getter_name, _metaParameters._mkGetter(attr_name) )
+            addMethod( setter_name, _metaParameters._mkSetter(attr_name, signal_name) )
+            addMethod( signal_name, Signal( type ( value ) ) )
+            addMethod( init_name, _metaParameters._mkInit( attr_name, key, value ) )
+            initList.append(init_name)
+
+        addMethod('initParameters', _metaParameters._mkInitAll( initList ) )
+
+        return super(_metaParameters,cls).__new__(cls,name,parents,dct)
+
+class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
+
+    _qparameters = { 'alpha': 1.0,
+                     'flat_color': QColor( 97, 188, 188),
+                     'line.width': 1.0,
+                     'line.color': QColor( 200, 10, 10),
+                     'light.position': vec3d( 0, 0, 100) }
 
     def _athenaMaterial( self, flavor ):
         engine = QQmlEngine()
@@ -182,30 +270,20 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.rootEntity = Qt3DCore.QEntity()
         self.camControl = CameraController(None, None, None)
 
-        def _param( name, value ):
-            param = Qt3DRender.QParameter( self.rootEntity )
-            param.setName(name)
-            param.setValue(value)
-            return param
-
-        self.alpha_param = _param( 'alpha', 1.0 )
-        self.color_param = _param( 'flat_color', QColor(97,188,188) )
-        self.line_width_param = _param( 'line.width', 1.0 )
-        self.line_color_param = _param( 'line.color', QColor(200, 10, 10) )
-        self.light_position_param = _param( 'light.position', vec3d( 0, 0, 100) )
+        self.initParameters() # defined in metaclass
 
 
         self.flat_material = self._athenaMaterial( 'flat' )
-        self.flat_material.addParameter( self.alpha_param )
-        self.flat_material.addParameter( self.color_param )
-        self.flat_material.addParameter( self.line_width_param )
-        self.flat_material.addParameter( self.line_color_param )
+        self.flat_material.addParameter( self._alphaParam )
+        self.flat_material.addParameter( self._flatColorParam )
+        self.flat_material.addParameter( self._lineWidthParam )
+        self.flat_material.addParameter( self._lineColorParam )
 
         self.gooch_material = self._athenaMaterial( 'gooch' )
-        self.gooch_material.addParameter( self.alpha_param )
-        self.gooch_material.addParameter( self.line_width_param )
-        self.gooch_material.addParameter( self.line_color_param )
-        self.gooch_material.addParameter( self.light_position_param )
+        self.gooch_material.addParameter( self._alphaParam )
+        self.gooch_material.addParameter( self._lineWidthParam )
+        self.gooch_material.addParameter( self._lineColorParam )
+        self.gooch_material.addParameter( self._lightPositionParam )
 
 
         self.setRootEntity(self.rootEntity)
@@ -221,26 +299,19 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.lastpos = None
 
     def setAlpha(self, value):
-        self.alpha_param.setValue( float(value) / 255.0 )
+        alpha = float(value) / 255.0
+        self._alphaParam.setValue( alpha )
+        self.alphaChanged.emit(alpha)
 
     def setLineWidth(self, value):
         new_width = float(value) / 10.
-        self.line_width_param.setValue( new_width )
-
-    def lineColor(self):
-        return self.line_color_param.value()
-
-    lineColorChanged = Signal(QColor)
-
-    def setLineColor(self, color):
-        self.line_color_param.setValue( color )
-        self.lineColorChanged.emit(color)
-
+        self._lineWidthParam.setValue( new_width )
+        self.lineWidthChanged.emit(new_width)
 
     def setLightOrientation( self, value ):
         scaled_value = float(value)
         new_value = geom.rotateAround( vec3d(0,0,100), vec3d(0,1,0), scaled_value )
-        self.light_position_param.setValue( new_value ) 
+        self.setLightPosition( new_value ) 
 
 
     def reloadGeom(self, filepath):
