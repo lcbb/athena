@@ -99,6 +99,7 @@ class AthenaWindow(QMainWindow):
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
 
+        self.actionOpen.triggered.connect( self.addFileToComboBox_action(self.geometryChooser) )
         #self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
 
         self.geometryChooser.currentIndexChanged.connect(self.newMesh)
@@ -130,7 +131,7 @@ class AthenaWindow(QMainWindow):
 
         self.geometryChooser.addItem('', None)
         self.geometryChooser.addItem('2D Examples:', None)
-        self.geometryChooser.insertSeparator(400)
+        self.geometryChooser.insertSeparator(3)
         perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "PERDIX")
         for ply in perdix_inputs.glob('*.ply'):
             self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
@@ -149,6 +150,7 @@ class AthenaWindow(QMainWindow):
         daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
         for ply in daedalus_inputs.glob("*.ply"):
             self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+        self.geometryChooser.insertSeparator(900)
 
 
     def resetLineColor( self, color ):
