@@ -328,6 +328,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
             self.meshEntity.addComponent(self.flat_material)
             self.camControl = CameraController2D(self, self.camera(), self.meshEntity.geometry)
         self.camControl.reset()
+        return mesh_3d
 
     def mouseMoveEvent(self, event):
         if( self.lastpos ):

@@ -15,7 +15,6 @@ uniform vec3 kd;            // Diffuse reflectivity
 uniform vec3 ks;            // Specular reflectivity
 uniform float shininess;    // Specular shininess factor
 uniform float alpha; 
-uniform float light_angle;
 
 const vec3 kblue = vec3 ( 0, .1, .8 );
 const vec3 kyellow = vec3( .7, .7, 0 );

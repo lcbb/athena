@@ -87,7 +87,9 @@ class AthenaWindow(QMainWindow):
         self.geomView = viewer.AthenaViewer()
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
         self.upperLayout.insertWidget( -1, self.geomViewWidget )
-        self.geomViewWidget.setSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
+        sizePolicy = QSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
+        sizePolicy.setHorizontalStretch(1)
+        self.geomViewWidget.setSizePolicy(sizePolicy) 
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
@@ -107,6 +109,10 @@ class AthenaWindow(QMainWindow):
         self.lineColorButton.clicked.connect( self.chooseLineColor )
         self.geomView.lineColorChanged.connect( self.resetLineColor )
         self.resetLineColor( self.geomView.lineColor() )
+
+        self.flatColorButton.clicked.connect( self.chooseFlatColor )
+        self.geomView.flatColorChanged.connect( self.resetFlatColor )
+        self.resetFlatColor( self.geomView.flatColor() )
 
         self.actionQuit.triggered.connect(self.close)
 
@@ -151,6 +157,16 @@ class AthenaWindow(QMainWindow):
         color = QColorDialog.getColor()
         self.geomView.setLineColor( color )
 
+    def resetFlatColor( self, color ):
+        pixels = QPixmap(50,50)
+        pixels.fill(color)
+        icon = QIcon(pixels)
+        self.flatColorButton.setIcon( icon )
+
+    def chooseFlatColor( self ):
+        color = QColorDialog.getColor()
+        self.geomView.setFlatColor( color )
+
     def addFileToComboBox_action( self, combobox ):
         def selection_slot():
             fileName = QFileDialog.getOpenFileName( self,
@@ -167,7 +183,11 @@ class AthenaWindow(QMainWindow):
         chooser = [self.perdixGeometryChooser, self.talosGeometryChooser,
                    self.daedalusGeometryChooser, self.metisGeometryChooser][ self.tabWidget.currentIndex() ]
         selection = chooser.currentData()
-        self.geomView.reloadGeom( selection )
+        mesh_3d = self.geomView.reloadGeom( selection )
+        if( mesh_3d ):
+            self.renderControls.setCurrentIndex( 1 )
+        else:
+            self.renderControls.setCurrentIndex( 0 )
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
