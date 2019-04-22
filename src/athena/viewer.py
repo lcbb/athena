@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from PySide2.QtGui import QColor, QVector3D as vec3d
-from PySide2.QtCore import QUrl, QByteArray, Qt
+from PySide2.QtCore import QUrl, QByteArray, Qt, Signal
 
 from PySide2.Qt3DExtras import Qt3DExtras
 from PySide2.Qt3DRender import Qt3DRender
@@ -191,6 +191,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.alpha_param = _param( 'alpha', 1.0 )
         self.color_param = _param( 'flat_color', QColor(97,188,188) )
         self.line_width_param = _param( 'line.width', 1.0 )
+        self.line_color_param = _param( 'line.color', QColor(200, 10, 10) )
         self.light_position_param = _param( 'light.position', vec3d( 0, 0, 100) )
 
 
@@ -198,11 +199,14 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.flat_material.addParameter( self.alpha_param )
         self.flat_material.addParameter( self.color_param )
         self.flat_material.addParameter( self.line_width_param )
+        self.flat_material.addParameter( self.line_color_param )
 
         self.gooch_material = self._athenaMaterial( 'gooch' )
         self.gooch_material.addParameter( self.alpha_param )
         self.gooch_material.addParameter( self.line_width_param )
+        self.gooch_material.addParameter( self.line_color_param )
         self.gooch_material.addParameter( self.light_position_param )
+
 
         self.setRootEntity(self.rootEntity)
 
@@ -222,6 +226,16 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
     def setLineWidth(self, value):
         new_width = float(value) / 10.
         self.line_width_param.setValue( new_width )
+
+    def lineColor(self):
+        return self.line_color_param.value()
+
+    lineColorChanged = Signal(QColor)
+
+    def setLineColor(self, color):
+        self.line_color_param.setValue( color )
+        self.lineColorChanged.emit(color)
+
 
     def setLightOrientation( self, value ):
         scaled_value = float(value)

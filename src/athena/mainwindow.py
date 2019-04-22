@@ -6,8 +6,8 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy
-from PySide2.QtGui import QKeySequence
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog
+from PySide2.QtGui import QKeySequence, QPixmap, QIcon
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
@@ -104,6 +104,10 @@ class AthenaWindow(QMainWindow):
         self.daedalusGeometryChooser.currentIndexChanged.connect(self.newMesh)
         self.metisGeometryChooser.currentIndexChanged.connect(self.newMesh)
 
+        self.lineColorButton.clicked.connect( self.chooseLineColor )
+        self.geomView.lineColorChanged.connect( self.resetLineColor )
+        self.resetLineColor( self.geomView.lineColor() )
+
         self.actionQuit.triggered.connect(self.close)
 
         self.alphaSlider.valueChanged.connect( self.geomView.setAlpha )
@@ -137,6 +141,15 @@ class AthenaWindow(QMainWindow):
         for ply in metis_inputs.glob("*.ply"):
             self.metisGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
 
+    def resetLineColor( self, color ):
+        pixels = QPixmap(50,50)
+        pixels.fill(color)
+        icon = QIcon(pixels)
+        self.lineColorButton.setIcon( icon )
+
+    def chooseLineColor( self ):
+        color = QColorDialog.getColor()
+        self.geomView.setLineColor( color )
 
     def addFileToComboBox_action( self, combobox ):
         def selection_slot():
