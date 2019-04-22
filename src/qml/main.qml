@@ -48,44 +48,15 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.1 as QQ2
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 
-//Material {
- //   id: root
+WireframeMaterial {
+    id: wireframeMaterial
+    effect: WireframeEffect {}
+    ambient: Qt.rgba( 0.2, 0.2, 0.2, 1.0 )
+    diffuse: Qt.rgba( 0.8, 0.8, 0.8, 1.0 )
 
-    WireframeMaterial {
-        id: wireframeMaterial
-        effect: WireframeEffect {}
-        ambient: Qt.rgba( 0.2, 0.2, 0.2, 1.0 )
-        diffuse: Qt.rgba( 0.8, 0.8, 0.8, 1.0 )
-
-        /*
-        QQ2.SequentialAnimation {
-            loops: QQ2.Animation.Infinite
-            running: true
-
-            QQ2.NumberAnimation {
-                target: wireframeMaterial;
-                property: "lineWidth";
-                duration: 1000;
-                from: 0.8
-                to: 1.8
-            }
-
-            QQ2.NumberAnimation {
-                target: wireframeMaterial;
-                property: "lineWidth";
-                duration: 1000;
-                from: 1.8
-                to: 0.8
-            }
-
-            QQ2.PauseAnimation { duration: 1500 }
-        }
-        */
-    }
-//}
+}
