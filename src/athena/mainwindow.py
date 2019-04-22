@@ -91,20 +91,17 @@ class AthenaWindow(QMainWindow):
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
 
+        chooser_width = self.geometryChooser.minimumSizeHint().width()
+        self.geometryChooser.view().setMinimumWidth(chooser_width)
+
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
 
-        self.perdixOpenButton.clicked.connect(self.addFileToComboBox_action(self.perdixGeometryChooser))
-        self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
-        self.daedalusOpenButton.clicked.connect(self.addFileToComboBox_action(self.daedalusGeometryChooser))
-        self.metisOpenButton.clicked.connect(self.addFileToComboBox_action(self.metisGeometryChooser))
+        #self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
 
-        self.perdixGeometryChooser.currentIndexChanged.connect(self.newMesh)
-        self.talosGeometryChooser.currentIndexChanged.connect(self.newMesh)
-        self.daedalusGeometryChooser.currentIndexChanged.connect(self.newMesh)
-        self.metisGeometryChooser.currentIndexChanged.connect(self.newMesh)
+        self.geometryChooser.currentIndexChanged.connect(self.newMesh)
 
         self.lineColorButton.clicked.connect( self.chooseLineColor )
         self.geomView.lineColorChanged.connect( self.resetLineColor )
@@ -131,21 +128,28 @@ class AthenaWindow(QMainWindow):
             if len(words) > 1 and words[0].isdigit(): words = words[1:]
             return ' '.join( word.capitalize() for word in words )
 
+        self.geometryChooser.addItem('', None)
+        self.geometryChooser.addItem('2D Examples:', None)
+        self.geometryChooser.insertSeparator(400)
         perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "PERDIX")
         for ply in perdix_inputs.glob('*.ply'):
-            self.perdixGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
-
-        talos_inputs = Path(ATHENA_DIR, "sample_inputs", "TALOS")
-        for ply in talos_inputs.glob("*.ply"):
-            self.talosGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
-
-        daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
-        for ply in daedalus_inputs.glob("*.ply"):
-            self.daedalusGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
+            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
 
         metis_inputs = Path(ATHENA_DIR, "sample_inputs", "METIS" )
         for ply in metis_inputs.glob("*.ply"):
-            self.metisGeometryChooser.addItem( pretty_name(ply), ply.resolve() )
+            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+
+        self.geometryChooser.addItem('', None)
+        self.geometryChooser.addItem('3D Examples:', None)
+        self.geometryChooser.insertSeparator(400)
+        talos_inputs = Path(ATHENA_DIR, "sample_inputs", "TALOS")
+        for ply in talos_inputs.glob("*.ply"):
+            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+
+        daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
+        for ply in daedalus_inputs.glob("*.ply"):
+            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+
 
     def resetLineColor( self, color ):
         pixels = QPixmap(50,50)
@@ -180,14 +184,16 @@ class AthenaWindow(QMainWindow):
         return selection_slot
 
     def newMesh( self ):
-        chooser = [self.perdixGeometryChooser, self.talosGeometryChooser,
-                   self.daedalusGeometryChooser, self.metisGeometryChooser][ self.tabWidget.currentIndex() ]
+        chooser = self.geometryChooser
         selection = chooser.currentData()
+        if( selection is None ): return
         mesh_3d = self.geomView.reloadGeom( selection )
         if( mesh_3d ):
             self.renderControls.setCurrentIndex( 1 )
+            self.toolControls.setCurrentIndex( 1 )
         else:
             self.renderControls.setCurrentIndex( 0 )
+            self.toolControls.setCurrentIndex( 0 )
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
@@ -200,7 +206,7 @@ class AthenaWindow(QMainWindow):
 
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX', self.perdixGeometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX', self.geometryChooser )
         process = runLCBBTool ('PERDIX',
                                p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
@@ -211,7 +217,7 @@ class AthenaWindow(QMainWindow):
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'TALOS', self.talosGeometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'TALOS', self.geometryChooser )
         process = runLCBBTool('TALOS',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
@@ -222,20 +228,20 @@ class AthenaWindow(QMainWindow):
         self.updateStatus('TALOS returned {}.'.format(human_retval))
 
     def runDAEDALUS2( self ):
-        self.updateStatus('Running DAEDALUS2...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'DAEDALUS2', self.daedalusGeometryChooser )
+        self.updateStatus('Running DAEDALUS...')
+        infile_path, outfile_dir_path = self._toolFilenames( 'DAEDALUS2', self.geometryChooser )
         process = runLCBBTool('DAEDALUS2',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
                               p4_edge_sections=1, p5_vertex_design=2,
                               p7_edge_length=self.daedalusEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
-        self.updateStatus('DAEDALUS2 returned {}.'.format(human_retval))
+        self.updateStatus('DAEDALUS returned {}.'.format(human_retval))
 
 
     def runMETIS( self ):
         self.updateStatus('Running METIS...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'METIS', self.metisGeometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'METIS', self.geometryChooser )
         process = runLCBBTool ('METIS',
                                p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
