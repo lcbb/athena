@@ -94,6 +94,9 @@ class PlyMesh(Qt3DCore.QEntity):
         else:
             index_basetype = _basetypes.UnsignedInt
 
+        flat_xy = np.all( 0 == vertices['z'] )
+        self.dimensions = 2 if flat_xy else 3
+
         vertex_nparr = np.zeros([total_vertices,4],dtype=_basetype_numpy_codes[vertex_basetype])
         # Fill with the input vertices
         vertex_nparr[:len(vertices),0] = vertices['x']

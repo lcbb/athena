@@ -229,12 +229,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow):
         self.light_position_param.setValue( new_value ) 
 
 
-    def reloadGeom(self, filepath, mesh_3d):
+    def reloadGeom(self, filepath):
         self.meshFilepath = filepath
         self.plydata = PlyData.read(filepath)
         if( self.meshEntity ):
             self.meshEntity.deleteLater()
         self.meshEntity = plymesh.PlyMesh(self.rootEntity, self.plydata)
+        mesh_3d = self.meshEntity.dimensions == 3
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
             self.camControl = CameraController3D(self, self.camera(), self.meshEntity.geometry)
