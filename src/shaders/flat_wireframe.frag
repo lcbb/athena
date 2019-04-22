@@ -11,7 +11,6 @@ uniform struct LineInfo {
 } line;
 
 uniform vec3 flat_color; 
-uniform float alpha; 
 
 in WireframeVertex {
     vec3 position;
@@ -81,6 +80,6 @@ void main()
     //vec4 color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), alpha );
     //vec4 color = vec4( flat_color.x, flat_color.y, flat_color.z, alpha );
 
-    vec4 color = vec4( flat_color, alpha );
+    vec4 color = vec4( flat_color, 1.0 );
     fragColor = shadeLine( color );
 }
