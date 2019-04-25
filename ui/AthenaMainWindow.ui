@@ -322,10 +322,10 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="leftMargin">
-           <number>3</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>3</number>
+           <number>0</number>
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -345,19 +345,6 @@
               </item>
              </widget>
             </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
            </layout>
           </item>
           <item>
@@ -368,6 +355,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="frameShape">
+             <enum>QFrame::Panel</enum>
+            </property>
             <property name="frameShadow">
              <enum>QFrame::Sunken</enum>
             </property>
@@ -376,16 +366,28 @@
             </property>
             <widget class="QWidget" name="tools_2D">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
               <item>
                <widget class="QToolBox" name="toolBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -400,9 +402,9 @@
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>-66</y>
-                   <width>143</width>
-                   <height>118</height>
+                   <y>0</y>
+                   <width>122</width>
+                   <height>113</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -415,11 +417,22 @@
                   <string>PERDIX</string>
                  </attribute>
                  <layout class="QVBoxLayout" name="verticalLayout_3">
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
                   <item>
                    <widget class="QLabel" name="label_10">
                     <property name="text">
-                     <string>2D wireframe DNA origami
-with DX edges</string>
+                     <string>2D with DX edges</string>
                     </property>
                    </widget>
                   </item>
@@ -432,6 +445,12 @@ with DX edges</string>
                   </item>
                   <item>
                    <widget class="QSpinBox" name="perdixEdgeLengthSpinner">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="minimum">
                      <number>38</number>
                     </property>
@@ -445,6 +464,12 @@ with DX edges</string>
                   </item>
                   <item>
                    <widget class="QPushButton" name="perdixRunButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
                      <string>Run</string>
                     </property>
@@ -457,8 +482,8 @@ with DX edges</string>
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>143</width>
-                   <height>164</height>
+                   <width>187</width>
+                   <height>197</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -471,11 +496,22 @@ with DX edges</string>
                   <string>METIS</string>
                  </attribute>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
                   <item>
                    <widget class="QLabel" name="label_28">
                     <property name="text">
-                     <string>2D wireframe DNA origami
-with 6HB edges</string>
+                     <string>2D with 6HB edges</string>
                     </property>
                    </widget>
                   </item>
@@ -488,6 +524,12 @@ with 6HB edges</string>
                   </item>
                   <item>
                    <widget class="QSpinBox" name="metisEdgeLengthSpinner">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="correctionMode">
                      <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
                     </property>
@@ -530,14 +572,32 @@ with 6HB edges</string>
             </widget>
             <widget class="QWidget" name="tools_3D">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+              <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
               <item>
                <widget class="QToolBox" name="toolBox_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="currentIndex">
                  <number>0</number>
                 </property>
@@ -546,19 +606,30 @@ with 6HB edges</string>
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>143</width>
-                   <height>208</height>
+                   <width>187</width>
+                   <height>233</height>
                   </rect>
                  </property>
                  <attribute name="label">
                   <string>TALOS</string>
                  </attribute>
                  <layout class="QVBoxLayout" name="verticalLayout_9">
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
                   <item>
                    <widget class="QLabel" name="label_11">
                     <property name="text">
-                     <string>3D wireframe DNA origami
-with 6HB edges</string>
+                     <string>3D with 6HB edges</string>
                     </property>
                    </widget>
                   </item>
@@ -571,6 +642,12 @@ with 6HB edges</string>
                   </item>
                   <item>
                    <widget class="QComboBox" name="talosEdgeSectionBox">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <item>
                      <property name="text">
                       <string>6HB - Inner</string>
@@ -592,6 +669,12 @@ with 6HB edges</string>
                   </item>
                   <item>
                    <widget class="QSpinBox" name="talosEdgeLengthSpinner">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="correctionMode">
                      <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
                     </property>
@@ -641,19 +724,30 @@ with 6HB edges</string>
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>143</width>
-                   <height>124</height>
+                   <width>187</width>
+                   <height>143</height>
                   </rect>
                  </property>
                  <attribute name="label">
                   <string>DAEDALUS</string>
                  </attribute>
                  <layout class="QVBoxLayout" name="verticalLayout_10">
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
                   <item>
                    <widget class="QLabel" name="label_23">
                     <property name="text">
-                     <string>3D wireframe DNA origami
-with DX edges</string>
+                     <string>3D with DX edges</string>
                     </property>
                    </widget>
                   </item>
@@ -666,6 +760,12 @@ with DX edges</string>
                   </item>
                   <item>
                    <widget class="QSpinBox" name="daedalusEdgeLengthSpinner">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="minimum">
                      <number>38</number>
                     </property>
@@ -679,8 +779,17 @@ with DX edges</string>
                   </item>
                   <item>
                    <widget class="QPushButton" name="daedalusRunButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
                      <string>Run</string>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -732,7 +841,7 @@ with DX edges</string>
      <x>0</x>
      <y>0</y>
      <width>811</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
