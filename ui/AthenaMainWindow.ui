@@ -139,9 +139,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QStackedWidget" name="renderControls">
+           <widget class="AutoResizingStackedWidget" name="renderControls">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -151,7 +151,7 @@
             </property>
             <widget class="QWidget" name="controls_2D">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -160,7 +160,7 @@
               <item>
                <widget class="QGroupBox" name="groupBox_2">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -189,19 +189,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <spacer name="verticalSpacer_2">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
                 </layout>
                </widget>
               </item>
@@ -209,7 +196,7 @@
             </widget>
             <widget class="QWidget" name="controls_3D">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -376,7 +363,7 @@
           <item>
            <widget class="AutoResizingStackedWidget" name="toolControls">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -388,9 +375,21 @@
              <number>0</number>
             </property>
             <widget class="QWidget" name="tools_2D">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <widget class="QToolBox" name="toolBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="frameShadow">
                  <enum>QFrame::Plain</enum>
                 </property>
@@ -401,10 +400,16 @@
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>0</y>
+                   <y>-66</y>
                    <width>143</width>
-                   <height>254</height>
+                   <height>118</height>
                   </rect>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
                  <attribute name="label">
                   <string>PERDIX</string>
@@ -453,8 +458,14 @@ with DX edges</string>
                    <x>0</x>
                    <y>0</y>
                    <width>143</width>
-                   <height>254</height>
+                   <height>164</height>
                   </rect>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
                  <attribute name="label">
                   <string>METIS</string>
@@ -518,6 +529,12 @@ with 6HB edges</string>
              </layout>
             </widget>
             <widget class="QWidget" name="tools_3D">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
                <widget class="QToolBox" name="toolBox_2">
@@ -530,7 +547,7 @@ with 6HB edges</string>
                    <x>0</x>
                    <y>0</y>
                    <width>143</width>
-                   <height>254</height>
+                   <height>208</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -617,19 +634,6 @@ with 6HB edges</string>
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <spacer name="verticalSpacer_3">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
                  </layout>
                 </widget>
                 <widget class="QWidget" name="page_4">
@@ -638,7 +642,7 @@ with 6HB edges</string>
                    <x>0</x>
                    <y>0</y>
                    <width>143</width>
-                   <height>228</height>
+                   <height>124</height>
                   </rect>
                  </property>
                  <attribute name="label">

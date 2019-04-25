@@ -16,16 +16,20 @@ from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR
 class AutoResizingStackedWidget( QStackedWidget ):
 
     def __init__(self, *args, **kw):
-        print('auto init')
         super().__init__(*args, **kw)
 
     def setCurrentIndex( self, idx ):
-        print('auto', idx)
+        for page_idx in range(self.count()):
+            h_policy = self.widget(page_idx).sizePolicy().horizontalPolicy()
+            v_policy = QSizePolicy.Maximum if page_idx == idx else QSizePolicy.Ignored
+            self.widget(page_idx).setSizePolicy(h_policy, v_policy)
         return super().setCurrentIndex( idx )
 
 class UiLoader(QUiLoader):
     '''
-    This works around a shortcoming in QUiLoader: it doesn't provide
+    Athena UI file loader
+
+    This class works around a shortcoming in QUiLoader: it doesn't provide
     a means to apply a ui into a given, existing object (except
     by the Qt Designer "promoted widgets" method, which in turn
     does not work for QMainWindow)
@@ -33,19 +37,29 @@ class UiLoader(QUiLoader):
     This extended QUiLoader uses a given object instance
     as the default object for any un-parented widget in the loaded UI,
     allowing us to populate a pre-constructed widget from a ui file.
+
+    It also works around bugs PYSIDE-124 and PYSIDE-77, which prevent
+    QUiLoader from working properly with custom widgets when
+    createWidget() is overridden.  We maintain our own custom
+    widget map to use in this case.
+
+    (QUiLoader has a lot of problems.)
     '''
     def __init__(self, baseInstance, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.baseInstance = baseInstance
+        self.customWidgets = {}
+
+    def registerCustomWidget( self, cls ):
+        self.customWidgets[ cls.__name__ ] = cls
 
     def createWidget( self, className, parent=None, name=''):
         if parent is None:
             # Don't create a new one, return the existing one.
             return self.baseInstance
         else:
-            print(className, parent, name)
-            if( className == 'AutoResizingStackedWidget' ):
-                return AutoResizingStackedWidget( parent )
+            if( className in self.customWidgets ):
+                return self.customWidgets[className] ( parent )
             else:
                 return super().createWidget(className, parent, name)
 
@@ -57,8 +71,6 @@ class UiLoader(QUiLoader):
             ui_loader = UiLoader( parent )
             ui_loader.registerCustomWidget( AutoResizingStackedWidget )
             ui_loader.load( ui_file )
-        except e:
-            print('except!', e)
         finally:
             ui_file.close()
 
@@ -93,7 +105,6 @@ class AthenaWindow(QMainWindow):
 
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
-        print(self.toolControls)
 
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
         # so do that here.
