@@ -85,8 +85,10 @@ class AthenaWindow(QMainWindow):
 
 
         self.geomView = viewer.AthenaViewer()
+        self.viewerWidget_dummy.deleteLater()
+        del self.viewerWidget_dummy
         self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
-        self.upperLayout.insertWidget( -1, self.geomViewWidget )
+        self.upperLayout.insertWidget( 1, self.geomViewWidget )
         sizePolicy = QSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
@@ -100,7 +102,6 @@ class AthenaWindow(QMainWindow):
         self.metisRunButton.clicked.connect(self.runMETIS)
 
         self.actionOpen.triggered.connect( self.addFileToComboBox_action(self.geometryChooser) )
-        #self.talosOpenButton.clicked.connect(self.addFileToComboBox_action(self.talosGeometryChooser))
 
         self.geometryChooser.currentIndexChanged.connect(self.newMesh)
 
@@ -185,17 +186,24 @@ class AthenaWindow(QMainWindow):
                 combobox.setCurrentIndex( combobox.count()-1 )
         return selection_slot
 
+    def enable2DControls( self ):
+        self.renderControls.setCurrentIndex( 0 )
+        self.toolControls.setCurrentIndex( 0 )
+
+    def enable3DControls( self ):
+        self.renderControls.setCurrentIndex( 1 )
+        self.toolControls.setCurrentIndex( 1 )
+
+
     def newMesh( self ):
         chooser = self.geometryChooser
         selection = chooser.currentData()
         if( selection is None ): return
         mesh_3d = self.geomView.reloadGeom( selection )
         if( mesh_3d ):
-            self.renderControls.setCurrentIndex( 1 )
-            self.toolControls.setCurrentIndex( 1 )
+            self.enable3DControls()
         else:
-            self.renderControls.setCurrentIndex( 0 )
-            self.toolControls.setCurrentIndex( 0 )
+            self.enable2DControls()
 
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
