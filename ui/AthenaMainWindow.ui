@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>808</width>
-    <height>701</height>
+    <width>811</width>
+    <height>533</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -374,12 +374,15 @@
            </layout>
           </item>
           <item>
-           <widget class="QStackedWidget" name="toolControls">
+           <widget class="AutoResizingStackedWidget" name="toolControls">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
             </property>
             <property name="currentIndex">
              <number>0</number>
@@ -388,6 +391,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <widget class="QToolBox" name="toolBox">
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
                 <property name="currentIndex">
                  <number>0</number>
                 </property>
@@ -438,19 +444,6 @@ with DX edges</string>
                      <string>Run</string>
                     </property>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="verticalSpacer_5">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </widget>
@@ -709,7 +702,7 @@ with DX edges</string>
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer_7">
+           <spacer name="verticalSpacer_5">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -734,7 +727,7 @@ with DX edges</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>808</width>
+     <width>811</width>
      <height>21</height>
     </rect>
    </property>
@@ -769,6 +762,14 @@ with DX edges</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AutoResizingStackedWidget</class>
+   <extends>QStackedWidget</extends>
+   <header>mainwindow.py</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

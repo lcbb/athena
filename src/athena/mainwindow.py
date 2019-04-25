@@ -6,12 +6,22 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon
 from PySide2.QtCore import QFile
 import PySide2.QtXml #Temporary pyinstaller workaround
 
 from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR
+
+class AutoResizingStackedWidget( QStackedWidget ):
+
+    def __init__(self, *args, **kw):
+        print('auto init')
+        super().__init__(*args, **kw)
+
+    def setCurrentIndex( self, idx ):
+        print('auto', idx)
+        return super().setCurrentIndex( idx )
 
 class UiLoader(QUiLoader):
     '''
@@ -25,7 +35,7 @@ class UiLoader(QUiLoader):
     allowing us to populate a pre-constructed widget from a ui file.
     '''
     def __init__(self, baseInstance, *args, **kwargs):
-        super(UiLoader, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.baseInstance = baseInstance
 
     def createWidget( self, className, parent=None, name=''):
@@ -33,7 +43,11 @@ class UiLoader(QUiLoader):
             # Don't create a new one, return the existing one.
             return self.baseInstance
         else:
-            return super(UiLoader,self).createWidget(className, parent, name)
+            print(className, parent, name)
+            if( className == 'AutoResizingStackedWidget' ):
+                return AutoResizingStackedWidget( parent )
+            else:
+                return super().createWidget(className, parent, name)
 
     @staticmethod
     def populateUI( parent, filepath ):
@@ -41,9 +55,13 @@ class UiLoader(QUiLoader):
         ui_file.open( QFile.ReadOnly )
         try:
             ui_loader = UiLoader( parent )
+            ui_loader.registerCustomWidget( AutoResizingStackedWidget )
             ui_loader.load( ui_file )
+        except e:
+            print('except!', e)
         finally:
             ui_file.close()
+
 
 def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'),
                  p3_scaffold='m13', p4_edge_sections=1, p5_vertex_design=1, p6_edge_number=0,
@@ -75,6 +93,7 @@ class AthenaWindow(QMainWindow):
 
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
+        print(self.toolControls)
 
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
         # so do that here.
