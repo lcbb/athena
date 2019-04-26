@@ -41,19 +41,22 @@ class FileSelectionTreeWidget( QTreeWidget ):
         if len(words) > 1 and words[0].isdigit(): words = words[1:]
         return ' '.join( word.capitalize() for word in words )
 
-    def _addFile( self, heading, filepath ):
+    def _addFile( self, heading, name, filepath ):
         item = QTreeWidgetItem( heading )
-        item.setText( 0, FileSelectionTreeWidget.prettyNameFromPath( filepath ) )
+        item.setText( 0, name )
         item.setData( 0, Qt.UserRole, filepath.resolve() )
+        return item
 
     def add2DExampleFile( self, filepath ):
-        self._addFile( self.topLevelItem(0), filepath )
+        self._addFile( self.topLevelItem(0), self.prettyNameFromPath(filepath), filepath )
 
     def add3DExampleFile( self, filepath ):
-        self._addFile( self.topLevelItem(1), filepath )
+        self._addFile( self.topLevelItem(1), self.prettyNameFromPath(filepath), filepath )
 
-    def addUserFile( self, filepath ):
-        self._addFile( self.topLevelItem(2), filepath )
+    def addUserFile( self, filepath, force_select = False ):
+        item = self._addFile( self.topLevelItem(2), filepath.name, filepath )
+        if( force_select ):
+            self.setCurrentItem( item )
 
     newFileSelected = Signal( Path )
 
@@ -163,15 +166,12 @@ class AthenaWindow(QMainWindow):
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
 
-        #chooser_width = self.geometryChooser.minimumSizeHint().width()
-        #self.geometryChooser.view().setMinimumWidth(chooser_width)
-
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
 
-        #self.actionOpen.triggered.connect( self.addFileToComboBox_action(self.geometryChooser) )
+        self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
 
         self.geometryList.newFileSelected.connect( self.newMesh )
 
@@ -231,17 +231,14 @@ class AthenaWindow(QMainWindow):
         color = QColorDialog.getColor()
         self.geomView.setFlatColor( color )
 
-    def addFileToComboBox_action( self, combobox ):
-        def selection_slot():
-            fileName = QFileDialog.getOpenFileName( self,
-                                                   "Open geometry file",
-                                                   os.path.join(ATHENA_DIR, 'sample_inputs'),
-                                                   "Geometry files (*.ply)")
-            filepath = Path(fileName[0])
-            if( filepath.is_file() ):
-                combobox.addItem( filepath.name, filepath )
-                combobox.setCurrentIndex( combobox.count()-1 )
-        return selection_slot
+    def selectAndAddFileToGeomList( self ):
+        fileName = QFileDialog.getOpenFileName( self,
+                                               "Open geometry file",
+                                               os.path.join(ATHENA_DIR, 'sample_inputs'),
+                                               "Geometry files (*.ply)")
+        filepath = Path(fileName[0])
+        if( filepath.is_file() ):
+            self.geometryList.addUserFile( filepath, force_select=True )
 
     def enable2DControls( self ):
         self.renderControls.setCurrentIndex( 0 )

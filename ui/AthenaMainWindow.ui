@@ -80,15 +80,24 @@
              <property name="text">
               <string>2D Examples</string>
              </property>
+             <property name="flags">
+              <set>ItemIsEnabled</set>
+             </property>
             </item>
             <item>
              <property name="text">
               <string>3D Examples</string>
              </property>
+             <property name="flags">
+              <set>ItemIsEnabled</set>
+             </property>
             </item>
             <item>
              <property name="text">
               <string>Loaded Files</string>
+             </property>
+             <property name="flags">
+              <set>ItemIsEnabled</set>
              </property>
             </item>
            </widget>
