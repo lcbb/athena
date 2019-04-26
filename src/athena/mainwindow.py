@@ -6,9 +6,9 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon
-from PySide2.QtCore import QFile
+from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
 from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR
@@ -24,6 +24,43 @@ class AutoResizingStackedWidget( QStackedWidget ):
             v_policy = QSizePolicy.Maximum if page_idx == idx else QSizePolicy.Ignored
             self.widget(page_idx).setSizePolicy(h_policy, v_policy)
         return super().setCurrentIndex( idx )
+
+class FileSelectionTreeWidget( QTreeWidget ):
+
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.currentItemChanged.connect( self.handleSelect )
+
+    @staticmethod
+    def prettyNameFromPath( input_path ):
+        # make words from the file stem, capitalize them, omit a leading number if possible
+        # e.g. path/to/06_rhombic_tiling -> 'Rhombic Tiling'
+        words = input_path.stem.split('_')
+        if len(words) > 1 and words[0].isdigit(): words = words[1:]
+        return ' '.join( word.capitalize() for word in words )
+
+    def _addFile( self, heading, filepath ):
+        item = QTreeWidgetItem( heading )
+        item.setText( 0, FileSelectionTreeWidget.prettyNameFromPath( filepath ) )
+        item.setData( 0, Qt.UserRole, filepath.resolve() )
+
+    def add2DExampleFile( self, filepath ):
+        self._addFile( self.topLevelItem(0), filepath )
+
+    def add3DExampleFile( self, filepath ):
+        self._addFile( self.topLevelItem(1), filepath )
+
+    def addUserFile( self, filepath ):
+        self._addFile( self.topLevelItem(2), filepath )
+
+    newFileSelected = Signal( Path )
+
+    def handleSelect( self, current_item, previous_item ):
+        data = current_item.data( 0, Qt.UserRole )
+        if data is not None:
+            self.newFileSelected.emit( data )
+
+
 
 class UiLoader(QUiLoader):
     '''
@@ -70,6 +107,7 @@ class UiLoader(QUiLoader):
         try:
             ui_loader = UiLoader( parent )
             ui_loader.registerCustomWidget( AutoResizingStackedWidget )
+            ui_loader.registerCustomWidget( FileSelectionTreeWidget )
             ui_loader.load( ui_file )
         finally:
             ui_file.close()
@@ -123,17 +161,17 @@ class AthenaWindow(QMainWindow):
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
 
-        chooser_width = self.geometryChooser.minimumSizeHint().width()
-        self.geometryChooser.view().setMinimumWidth(chooser_width)
+        #chooser_width = self.geometryChooser.minimumSizeHint().width()
+        #self.geometryChooser.view().setMinimumWidth(chooser_width)
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
 
-        self.actionOpen.triggered.connect( self.addFileToComboBox_action(self.geometryChooser) )
+        #self.actionOpen.triggered.connect( self.addFileToComboBox_action(self.geometryChooser) )
 
-        self.geometryChooser.currentIndexChanged.connect(self.newMesh)
+        self.geometryList.newFileSelected.connect( self.newMesh )
 
         self.lineColorButton.clicked.connect( self.chooseLineColor )
         self.geomView.lineColorChanged.connect( self.resetLineColor )
@@ -149,39 +187,26 @@ class AthenaWindow(QMainWindow):
         self.lineWidthSlider.valueChanged.connect( self.geomView.setLineWidth )
         self.lightDial.valueChanged.connect( self.geomView.setLightOrientation )
 
-        self.newMesh()
+        self.newMesh(None)
         self.show()
 
     def setupToolDefaults( self ):
-        def pretty_name( input_path ):
-            # make words from the file stem, capitalize them, omit a leading number if possible
-            # e.g. path/to/06_rhombic_tiling -> 'Rhombic Tiling'
-            words = input_path.stem.split('_')
-            if len(words) > 1 and words[0].isdigit(): words = words[1:]
-            return ' '.join( word.capitalize() for word in words )
 
-        self.geometryChooser.addItem('', None)
-        self.geometryChooser.addItem('2D Examples:', None)
-        self.geometryChooser.insertSeparator(3)
         perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "PERDIX")
         for ply in perdix_inputs.glob('*.ply'):
-            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+            self.geometryList.add2DExampleFile( ply )
 
         metis_inputs = Path(ATHENA_DIR, "sample_inputs", "METIS" )
         for ply in metis_inputs.glob("*.ply"):
-            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+            self.geometryList.add2DExampleFile( ply )
 
-        self.geometryChooser.addItem('', None)
-        self.geometryChooser.addItem('3D Examples:', None)
-        self.geometryChooser.insertSeparator(400)
         talos_inputs = Path(ATHENA_DIR, "sample_inputs", "TALOS")
         for ply in talos_inputs.glob("*.ply"):
-            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
+            self.geometryList.add3DExampleFile( ply )
 
         daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
         for ply in daedalus_inputs.glob("*.ply"):
-            self.geometryChooser.addItem(pretty_name(ply), ply.resolve() )
-        self.geometryChooser.insertSeparator(900)
+            self.geometryList.add3DExampleFile( ply )
 
 
     def resetLineColor( self, color ):
@@ -225,11 +250,9 @@ class AthenaWindow(QMainWindow):
         self.toolControls.setCurrentIndex( 1 )
 
 
-    def newMesh( self ):
-        chooser = self.geometryChooser
-        selection = chooser.currentData()
-        if( selection is None ): return
-        mesh_3d = self.geomView.reloadGeom( selection )
+    def newMesh( self, meshFile ):
+        if( meshFile is None ): return
+        mesh_3d = self.geomView.reloadGeom( meshFile )
         if( mesh_3d ):
             self.enable3DControls()
         else:
@@ -238,26 +261,26 @@ class AthenaWindow(QMainWindow):
     def updateStatus( self, msg ):
         self.statusMsg.setText( msg )
 
-    def _toolFilenames( self, toolname, activeComboBox ):
-        infile_path = activeComboBox.currentData()
-        infile_name = activeComboBox.currentText()
+    def _toolFilenames( self, toolname ):
+        active_item = self.geometryList.currentItem()
+        infile_path = active_item.data(0, Qt.UserRole)
+        infile_name = active_item.text(0)
         outfile_dir_path = ATHENA_OUTPUT_DIR / toolname / infile_name
         return infile_path, outfile_dir_path
 
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX', self.geometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX' )
         process = runLCBBTool ('PERDIX',
                                p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
-                               p7_edge_length=self.perdixEdgeLengthSpinner.value(),
-                               p8_mesh_spacing=self.perdixMeshSpacingSpinner.value())
+                               p7_edge_length=self.perdixEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('PERDIX returned {}.'.format(human_retval))
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'TALOS', self.geometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'TALOS' )
         process = runLCBBTool('TALOS',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
@@ -269,7 +292,7 @@ class AthenaWindow(QMainWindow):
 
     def runDAEDALUS2( self ):
         self.updateStatus('Running DAEDALUS...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'DAEDALUS2', self.geometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'DAEDALUS2' )
         process = runLCBBTool('DAEDALUS2',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
@@ -281,13 +304,12 @@ class AthenaWindow(QMainWindow):
 
     def runMETIS( self ):
         self.updateStatus('Running METIS...')
-        infile_path, outfile_dir_path = self._toolFilenames( 'METIS', self.geometryChooser )
+        infile_path, outfile_dir_path = self._toolFilenames( 'METIS' )
         process = runLCBBTool ('METIS',
                                p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
                                p4_edge_sections=3, p5_vertex_design=2,
-                               p7_edge_length=self.metisEdgeLengthSpinner.value(),
-                               p8_mesh_spacing=self.metisMeshSpacingSpinner.value())
+                               p7_edge_length=self.metisEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('METIS returned {}.'.format(human_retval))
 
