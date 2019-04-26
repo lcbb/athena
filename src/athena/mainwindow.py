@@ -6,7 +6,7 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
@@ -29,6 +29,8 @@ class FileSelectionTreeWidget( QTreeWidget ):
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
+        self.header().setSectionResizeMode( 0, QHeaderView.ResizeToContents )
+        #self.setStretchLastSection(False)
         self.currentItemChanged.connect( self.handleSelect )
 
     @staticmethod
