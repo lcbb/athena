@@ -81,7 +81,7 @@ class ColorButton(QPushButton):
         self.colorChosen.emit(color)
 
     def setColor( self, color ):
-        pixels = QPixmap(100, 16)
+        pixels = QPixmap(35, 12)
         pixels.fill(color)
         icon = QIcon(pixels)
         self.setIcon( icon )

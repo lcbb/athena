@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>789</width>
-    <height>572</height>
+    <height>619</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -408,6 +408,9 @@
                  <property name="bottomMargin">
                   <number>2</number>
                  </property>
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
                  <item row="0" column="1">
                   <widget class="QSlider" name="alphaSlider">
                    <property name="sizePolicy">
@@ -643,8 +646,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>88</width>
-                   <height>91</height>
+                   <width>122</width>
+                   <height>109</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -722,8 +725,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>94</width>
-                   <height>137</height>
+                   <width>130</width>
+                   <height>28</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -833,8 +836,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>94</width>
-                   <height>181</height>
+                   <width>131</width>
+                   <height>233</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -951,8 +954,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>94</width>
-                   <height>137</height>
+                   <width>122</width>
+                   <height>109</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1055,7 +1058,7 @@
      <x>0</x>
      <y>0</y>
      <width>789</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
