@@ -578,7 +578,7 @@
             </property>
             <widget class="QWidget" name="tools_2D">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -599,7 +599,7 @@
               <item>
                <widget class="QToolBox" name="toolBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -699,7 +699,7 @@
                   </rect>
                  </property>
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Ignored">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -763,19 +763,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <spacer name="verticalSpacer_6">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
                  </layout>
                 </widget>
                </widget>
@@ -818,7 +805,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
+                   <width>94</width>
                    <height>181</height>
                   </rect>
                  </property>
@@ -936,8 +923,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>98</width>
-                   <height>97</height>
+                   <width>94</width>
+                   <height>137</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1004,19 +991,6 @@
                      <bool>false</bool>
                     </property>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="verticalSpacer_4">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </widget>
