@@ -264,6 +264,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         super(AthenaViewer, self).__init__()
         self._qtrefs = []
 
+        self.setBackgroundColor( QColor(63,63,63) )
         self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
@@ -297,6 +298,15 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.rootEntity.addComponent(self.gooch_material)
         self.meshEntity = None
         self.lastpos = None
+
+    backgroundColorChanged = Signal( QColor )
+
+    def backgroundColor( self ):
+        return self.defaultFrameGraph().clearColor()
+
+    def setBackgroundColor( self, color ):
+        self.defaultFrameGraph().setClearColor( color )
+        self.backgroundColorChanged.emit(color)
 
     def setAlpha(self, value):
         alpha = float(value) / 255.0

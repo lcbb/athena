@@ -118,7 +118,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="ColorButton" name="bgColorButton">
               <property name="text">
                <string/>
               </property>
@@ -198,7 +198,7 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QPushButton" name="lineColorButton">
+              <widget class="ColorButton" name="lineColorButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -295,7 +295,7 @@
                 <property name="flat">
                  <bool>true</bool>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0">
+                <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0">
                  <property name="leftMargin">
                   <number>2</number>
                  </property>
@@ -316,7 +316,7 @@
                   </widget>
                  </item>
                  <item row="0" column="2">
-                  <widget class="QPushButton" name="flatColorButton">
+                  <widget class="ColorButton" name="flatColorButton">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -615,8 +615,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>122</width>
-                   <height>109</height>
+                   <width>88</width>
+                   <height>91</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -694,8 +694,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>131</width>
-                   <height>161</height>
+                   <width>94</width>
+                   <height>137</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -818,8 +818,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>131</width>
-                   <height>233</height>
+                   <width>98</width>
+                   <height>181</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -936,8 +936,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>122</width>
-                   <height>113</height>
+                   <width>98</width>
+                   <height>97</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1053,7 +1053,7 @@
      <x>0</x>
      <y>0</y>
      <width>789</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
@@ -1097,6 +1097,11 @@
   <customwidget>
    <class>FileSelectionTreeWidget</class>
    <extends>QTreeWidget</extends>
+   <header>mainwindow.py</header>
+  </customwidget>
+  <customwidget>
+   <class>ColorButton</class>
+   <extends>QPushButton</extends>
    <header>mainwindow.py</header>
   </customwidget>
  </customwidgets>

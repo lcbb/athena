@@ -6,8 +6,8 @@ import platform
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView
-from PySide2.QtGui import QKeySequence, QPixmap, QIcon
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView
+from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
@@ -68,6 +68,24 @@ class FileSelectionTreeWidget( QTreeWidget ):
         if data is not None:
             self.newFileSelected.emit( data )
 
+class ColorButton(QPushButton):
+    def __init__( self, *args, **kw ):
+        super().__init__(*args, **kw)
+        self.clicked.connect( self.chooseColor )
+        self.colorChosen.connect( self.setColor )
+
+    colorChosen = Signal(QColor)
+
+    def chooseColor( self ):
+        color = QColorDialog.getColor()
+        self.colorChosen.emit(color)
+
+    def setColor( self, color ):
+        pixels = QPixmap(50,50)
+        pixels.fill(color)
+        icon = QIcon(pixels)
+        self.setIcon( icon )
+
 
 
 class UiLoader(QUiLoader):
@@ -116,6 +134,7 @@ class UiLoader(QUiLoader):
             ui_loader = UiLoader( parent )
             ui_loader.registerCustomWidget( AutoResizingStackedWidget )
             ui_loader.registerCustomWidget( FileSelectionTreeWidget )
+            ui_loader.registerCustomWidget( ColorButton )
             ui_loader.load( ui_file )
         finally:
             ui_file.close()
@@ -178,13 +197,14 @@ class AthenaWindow(QMainWindow):
 
         self.geometryList.newFileSelected.connect( self.newMesh )
 
-        self.lineColorButton.clicked.connect( self.chooseLineColor )
-        self.geomView.lineColorChanged.connect( self.resetLineColor )
-        self.resetLineColor( self.geomView.lineColor() )
+        def _setupColorButton( button, setter, signal, init_value ):
+            button.colorChosen.connect( setter )
+            signal.connect( button.setColor )
+            button.setColor( init_value )
 
-        self.flatColorButton.clicked.connect( self.chooseFlatColor )
-        self.geomView.flatColorChanged.connect( self.resetFlatColor )
-        self.resetFlatColor( self.geomView.flatColor() )
+        _setupColorButton( self.lineColorButton, self.geomView.setLineColor, self.geomView.lineColorChanged, self.geomView.lineColor() )
+        _setupColorButton( self.flatColorButton, self.geomView.setFlatColor, self.geomView.flatColorChanged, self.geomView.flatColor() )
+        _setupColorButton( self.bgColorButton, self.geomView.setBackgroundColor, self.geomView.backgroundColorChanged, self.geomView.backgroundColor() )
 
         self.actionQuit.triggered.connect(self.close)
 
@@ -213,26 +233,6 @@ class AthenaWindow(QMainWindow):
         for ply in daedalus_inputs.glob("*.ply"):
             self.geometryList.add3DExampleFile( ply )
 
-
-    def resetLineColor( self, color ):
-        pixels = QPixmap(50,50)
-        pixels.fill(color)
-        icon = QIcon(pixels)
-        self.lineColorButton.setIcon( icon )
-
-    def chooseLineColor( self ):
-        color = QColorDialog.getColor()
-        self.geomView.setLineColor( color )
-
-    def resetFlatColor( self, color ):
-        pixels = QPixmap(50,50)
-        pixels.fill(color)
-        icon = QIcon(pixels)
-        self.flatColorButton.setIcon( icon )
-
-    def chooseFlatColor( self ):
-        color = QColorDialog.getColor()
-        self.geomView.setFlatColor( color )
 
     def selectAndAddFileToGeomList( self ):
         fileName = QFileDialog.getOpenFileName( self,
