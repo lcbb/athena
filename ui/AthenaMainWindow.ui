@@ -238,7 +238,7 @@
              <enum>QFrame::NoFrame</enum>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="controls_2D">
              <property name="sizePolicy">
@@ -392,7 +392,7 @@
                 <property name="flat">
                  <bool>true</bool>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0" columnstretch="0,0" columnminimumwidth="0,0">
+                <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0" columnstretch="0,0" columnminimumwidth="0,0">
                  <property name="sizeConstraint">
                   <enum>QLayout::SetDefaultConstraint</enum>
                  </property>
@@ -439,17 +439,17 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_4">
-                   <property name="text">
-                    <string>Transparency</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="1" column="0" rowspan="2">
                   <widget class="QLabel" name="label_14">
                    <property name="text">
                     <string>Light Direction</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="ColorButton" name="coolColorButton">
+                   <property name="text">
+                    <string/>
                    </property>
                   </widget>
                  </item>
@@ -496,6 +496,34 @@
                    </property>
                    <property name="notchesVisible">
                     <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Transparency</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="ColorButton" name="warmColorButton">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_8">
+                   <property name="text">
+                    <string>Cool Color</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_12">
+                   <property name="text">
+                    <string>Warm Color</string>
                    </property>
                   </widget>
                  </item>

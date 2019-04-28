@@ -225,6 +225,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     _qparameters = { 'alpha': 1.0,
                      'flat_color': QColor( 97, 188, 188),
+                     'cool_color': QColor( 0, 25, 170 ),
+                     'warm_color': QColor( 210, 190, 0),
                      'line.width': 1.0,
                      'line.color': QColor( 200, 10, 10),
                      'light.position': vec3d( 0, 0, 100) }
@@ -265,7 +267,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self._qtrefs = []
 
         self.setBackgroundColor( QColor(63,63,63) )
-        self.defaultFrameGraph().setClearColor( QColor(63, 63, 63) )
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.rootEntity = Qt3DCore.QEntity()
@@ -284,6 +285,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.gooch_material.addParameter( self._alphaParam )
         self.gooch_material.addParameter( self._lineWidthParam )
         self.gooch_material.addParameter( self._lineColorParam )
+        self.gooch_material.addParameter( self._coolColorParam )
+        self.gooch_material.addParameter( self._warmColorParam )
         self.gooch_material.addParameter( self._lightPositionParam )
 
 

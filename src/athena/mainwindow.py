@@ -205,6 +205,8 @@ class AthenaWindow(QMainWindow):
         _setupColorButton( self.lineColorButton, self.geomView.setLineColor, self.geomView.lineColorChanged, self.geomView.lineColor() )
         _setupColorButton( self.flatColorButton, self.geomView.setFlatColor, self.geomView.flatColorChanged, self.geomView.flatColor() )
         _setupColorButton( self.bgColorButton, self.geomView.setBackgroundColor, self.geomView.backgroundColorChanged, self.geomView.backgroundColor() )
+        _setupColorButton( self.warmColorButton, self.geomView.setWarmColor, self.geomView.warmColorChanged, self.geomView.warmColor() )
+        _setupColorButton( self.coolColorButton, self.geomView.setCoolColor, self.geomView.coolColorChanged, self.geomView.coolColor() )
 
         self.actionQuit.triggered.connect(self.close)
 
