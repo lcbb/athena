@@ -19,10 +19,13 @@ class AutoResizingStackedWidget( QStackedWidget ):
         super().__init__(*args, **kw)
 
     def setCurrentIndex( self, idx ):
+        max_width = max( self.widget(x).sizeHint().width() for x in range(self.count()))
         for page_idx in range(self.count()):
             h_policy = self.widget(page_idx).sizePolicy().horizontalPolicy()
             v_policy = QSizePolicy.Maximum if page_idx == idx else QSizePolicy.Ignored
+            self.widget(page_idx).setMinimumSize( max_width,0 )
             self.widget(page_idx).setSizePolicy(h_policy, v_policy)
+        #    self.widget(page_idx).adjustSize()
         return super().setCurrentIndex( idx )
 
 class FileSelectionTreeWidget( QTreeWidget ):
@@ -155,7 +158,7 @@ class AthenaWindow(QMainWindow):
         self.actionQuit.setShortcut( QKeySequence.StandardKey.Quit )
 
         self.setupToolDefaults()
-
+        self.enable2DControls()
 
         self.geomView = viewer.AthenaViewer()
         self.viewerWidget_dummy.deleteLater()
