@@ -14,19 +14,35 @@ import PySide2.QtXml #Temporary pyinstaller workaround
 from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR
 
 class AutoResizingStackedWidget( QStackedWidget ):
+    '''
+    Derivative of QStackedWidget that auto-resizes in the vertical
+    direction to fit the visible widget, and never shrinks in the
+    horizontal direction
+    '''
 
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
+        self.k_max_width = -1
 
-    def setCurrentIndex( self, idx ):
+    def _updateSizePolicy(self, current_idx):
+        # self.k_max_width is the largest child widget width seen so far.
+        # Child widgets may shrink in width (e.g. when QToolBoxes change
+        # tabs), but this container will never shrink in width: this avoids
+        # screen rendering artifacts on OSX.
         max_width = max( self.widget(x).sizeHint().width() for x in range(self.count()))
+        self.k_max_width = max( self.k_max_width, max_width )
         for page_idx in range(self.count()):
             h_policy = self.widget(page_idx).sizePolicy().horizontalPolicy()
-            v_policy = QSizePolicy.Maximum if page_idx == idx else QSizePolicy.Ignored
-            self.widget(page_idx).setMinimumSize( max_width,0 )
+            v_policy = QSizePolicy.Maximum if page_idx == current_idx else QSizePolicy.Ignored
+            self.widget(page_idx).setMinimumSize( self.k_max_width,0 )
             self.widget(page_idx).setSizePolicy(h_policy, v_policy)
-        #    self.widget(page_idx).adjustSize()
-        return super().setCurrentIndex( idx )
+
+    def setCurrentIndex( self, idx ):
+        # Only if this is actually an index change do we fool with our size policy
+        if self.k_max_width < 0 or idx != self.currentIndex():
+            self._updateSizePolicy(idx)
+        self.adjustSize()
+        super().setCurrentIndex( idx )
 
 class FileSelectionTreeWidget( QTreeWidget ):
 
