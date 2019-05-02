@@ -194,6 +194,8 @@ class AthenaWindow(QMainWindow):
 
         self.setupToolDefaults()
         self.enable2DControls()
+        self.scaffoldBox.setItemData(0,"m13")
+        self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
 
         self.geomView = viewer.AthenaViewer()
         self.viewerWidget_dummy.deleteLater()
@@ -210,6 +212,7 @@ class AthenaWindow(QMainWindow):
         self.metisRunButton.clicked.connect(self.runMETIS)
 
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
+        self.actionAddScaffold.triggered.connect( self.selectAndAddScaffoldFile )
 
         self.geometryList.newFileSelected.connect( self.newMesh )
 
@@ -261,6 +264,19 @@ class AthenaWindow(QMainWindow):
         if( filepath.is_file() ):
             self.geometryList.addUserFile( filepath, force_select=True )
 
+    def selectAndAddScaffoldFile( self ):
+        fileName = QFileDialog.getOpenFileName( self,
+                                                "Open scaffold file",
+                                                ATHENA_DIR,
+                                                "Text files (*)" )
+        filepath = Path(fileName[0])
+        if( filepath.is_file() ):
+            self.scaffoldBox.addItem( filepath.name, filepath )
+            self.scaffoldBox.setCurrentIndex( self.scaffoldBox.count() - 1 )
+            w = self.scaffoldBox.minimumSizeHint().width()
+            self.scaffoldBox.view().setMinimumWidth( w )
+            self.scaffoldBox.view().reset()
+
     def enable2DControls( self ):
         self.renderControls.setCurrentIndex( 0 )
         self.toolControls.setCurrentIndex( 0 )
@@ -294,6 +310,7 @@ class AthenaWindow(QMainWindow):
         process = runLCBBTool ('PERDIX',
                                p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
+                               p3_scaffold=self.scaffoldBox.currentData(),
                                p7_edge_length=self.perdixEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.updateStatus('PERDIX returned {}.'.format(human_retval))
@@ -304,6 +321,7 @@ class AthenaWindow(QMainWindow):
         process = runLCBBTool('TALOS',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
+                               p3_scaffold=self.scaffoldBox.currentData(),
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
                               p7_edge_length=self.talosEdgeLengthSpinner.value())
@@ -316,6 +334,7 @@ class AthenaWindow(QMainWindow):
         process = runLCBBTool('DAEDALUS2',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
+                              p3_scaffold=self.scaffoldBox.currentData(),
                               p4_edge_sections=1, p5_vertex_design=2,
                               p7_edge_length=self.daedalusEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
@@ -328,6 +347,7 @@ class AthenaWindow(QMainWindow):
         process = runLCBBTool ('METIS',
                                p1_output_dir=outfile_dir_path,
                                p2_input_file=infile_path,
+                               p3_scaffold=self.scaffoldBox.currentData(),
                                p4_edge_sections=3, p5_vertex_design=2,
                                p7_edge_length=self.metisEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)

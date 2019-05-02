@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>789</width>
-    <height>619</height>
+    <width>828</width>
+    <height>562</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -95,6 +95,12 @@
             <item>
              <property name="text">
               <string>Loaded Files</string>
+             </property>
+             <property name="statusTip">
+              <string/>
+             </property>
+             <property name="whatsThis">
+              <string>Load custom files by choosing Load from the File menu</string>
              </property>
              <property name="flags">
               <set>ItemIsEnabled</set>
@@ -238,7 +244,7 @@
              <enum>QFrame::NoFrame</enum>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="controls_2D">
              <property name="sizePolicy">
@@ -408,9 +414,6 @@
                  <property name="bottomMargin">
                   <number>2</number>
                  </property>
-                 <property name="spacing">
-                  <number>0</number>
-                 </property>
                  <item row="0" column="1">
                   <widget class="QSlider" name="alphaSlider">
                    <property name="sizePolicy">
@@ -571,7 +574,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
              <widget class="QLabel" name="label_9">
               <property name="text">
@@ -580,7 +583,16 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_2">
+             <widget class="QComboBox" name="scaffoldBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="sizeAdjustPolicy">
+               <enum>QComboBox::AdjustToContents</enum>
+              </property>
               <item>
                <property name="text">
                 <string>m13</string>
@@ -646,8 +658,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>122</width>
-                   <height>109</height>
+                   <width>88</width>
+                   <height>91</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -725,8 +737,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>130</width>
-                   <height>28</height>
+                   <width>94</width>
+                   <height>137</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -836,8 +848,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>131</width>
-                   <height>233</height>
+                   <width>94</width>
+                   <height>181</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -954,8 +966,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>122</width>
-                   <height>109</height>
+                   <width>94</width>
+                   <height>137</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1057,8 +1069,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>789</width>
-     <height>22</height>
+     <width>828</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
@@ -1066,6 +1078,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionAddScaffold"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -1089,6 +1102,11 @@
    </property>
    <property name="shortcut">
     <string/>
+   </property>
+  </action>
+  <action name="actionAddScaffold">
+   <property name="text">
+    <string>Add Scaffold File...</string>
    </property>
   </action>
  </widget>
