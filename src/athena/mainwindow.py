@@ -236,19 +236,19 @@ class AthenaWindow(QMainWindow):
     def setupToolDefaults( self ):
 
         perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "PERDIX")
-        for ply in perdix_inputs.glob('*.ply'):
+        for ply in sorted(perdix_inputs.glob('*.ply')):
             self.geometryList.add2DExampleFile( ply )
 
         metis_inputs = Path(ATHENA_DIR, "sample_inputs", "METIS" )
-        for ply in metis_inputs.glob("*.ply"):
+        for ply in sorted(metis_inputs.glob("*.ply")):
             self.geometryList.add2DExampleFile( ply )
 
         talos_inputs = Path(ATHENA_DIR, "sample_inputs", "TALOS")
-        for ply in talos_inputs.glob("*.ply"):
+        for ply in sorted(talos_inputs.glob("*.ply")):
             self.geometryList.add3DExampleFile( ply )
 
         daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
-        for ply in daedalus_inputs.glob("*.ply"):
+        for ply in sorted(daedalus_inputs.glob("*.ply")):
             self.geometryList.add3DExampleFile( ply )
 
 
