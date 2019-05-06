@@ -1,0 +1,4 @@
+athena.iconset: created by hand by screenshotting and using Preview.app
+athena.icns: created on OSX with `iconutil -c icns athena.iconset`
+athena.ico: created with imagemagick `convert -background transparent icon_512x512.png -define icon:auto-resize=16,32,48,64,256 athena.ico`
+
