@@ -11,7 +11,7 @@ from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR
+from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow
 
 class AutoResizingStackedWidget( QStackedWidget ):
     '''
@@ -175,17 +175,20 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     tool_call_strs = [str(x) for x in tool_call]
 
     print('Calling {} as follows'.format(tool), tool_call_strs)
-    return subprocess.run(tool_call_strs, stdout=subprocess.DEVNULL, stderr=None)
+    return subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 
 
 class AthenaWindow(QMainWindow):
     default_ui_path = os.path.join( ATHENA_DIR, 'ui', 'AthenaMainWindow.ui' )
     def __init__( self, ui_filepath=default_ui_path ):
-        super( AthenaWindow, self).__init__(None)
+        super().__init__(None)
         UiLoader.populateUI( self, ui_filepath )
 
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
+
+        self.logWindow = logwindow.LogWindow()
+        self.actionShowLogWindow.toggled.connect( self.logWindow.setVisible )
 
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
         # so do that here.
@@ -285,8 +288,11 @@ class AthenaWindow(QMainWindow):
         self.renderControls.setCurrentIndex( 1 )
         self.toolControls.setCurrentIndex( 1 )
 
+    def log( self, text ):
+        self.logWindow.appendText( text )
 
     def newMesh( self, meshFile ):
+        self.log( 'Loading '+str(meshFile) )
         if( meshFile is None ): return
         mesh_3d = self.geomView.reloadGeom( meshFile )
         if( mesh_3d ):
@@ -295,6 +301,7 @@ class AthenaWindow(QMainWindow):
             self.enable2DControls()
 
     def updateStatus( self, msg ):
+        self.log( msg )
         self.statusMsg.setText( msg )
 
     def _toolFilenames( self, toolname ):
@@ -313,6 +320,7 @@ class AthenaWindow(QMainWindow):
                                p3_scaffold=self.scaffoldBox.currentData(),
                                p7_edge_length=self.perdixEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.log( process.stdout )
         self.updateStatus('PERDIX returned {}.'.format(human_retval))
 
     def runTALOS( self ):
@@ -326,6 +334,7 @@ class AthenaWindow(QMainWindow):
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
                               p7_edge_length=self.talosEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.log( process.stdout )
         self.updateStatus('TALOS returned {}.'.format(human_retval))
 
     def runDAEDALUS2( self ):
@@ -338,6 +347,7 @@ class AthenaWindow(QMainWindow):
                               p4_edge_sections=1, p5_vertex_design=2,
                               p7_edge_length=self.daedalusEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.log( process.stdout )
         self.updateStatus('DAEDALUS returned {}.'.format(human_retval))
 
 
@@ -351,6 +361,7 @@ class AthenaWindow(QMainWindow):
                                p4_edge_sections=3, p5_vertex_design=2,
                                p7_edge_length=self.metisEdgeLengthSpinner.value())
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
+        self.log( process.stdout )
         self.updateStatus('METIS returned {}.'.format(human_retval))
 
 
