@@ -1,2 +1,4 @@
 PySide2==5.12.2
+setuptools_scm
 git+git://github.com/sjackso/pyinstaller@athena_support#egg=pyinstaller
+

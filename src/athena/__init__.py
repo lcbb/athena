@@ -4,6 +4,19 @@ from pathlib import Path
 
 # Set up Athena's global data
 
+# This is set to a non-None value by deployment scripts;
+# if that doesn't happen, we'll ask setuptools_scm
+__version__ = None
+
+if( __version__ is None ):
+    try:
+        from setuptools_scm import get_version
+        __version__ = get_version()
+    except LookupError:
+        __version__ = "unknown"
+
+print('Athena version is', __version__)
+
 # Set ATHENA_DIR, the base project path, relative to which files and tools will be found,
 # and ATHENA_OUTPUT_HOME, the path where an ouput directory will be created
 if getattr(sys, 'frozen', False):
