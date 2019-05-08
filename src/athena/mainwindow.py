@@ -187,7 +187,7 @@ class AthenaWindow(QMainWindow):
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
 
-        self.logWindow = logwindow.LogWindow()
+        self.logWindow = logwindow.LogWindow(self)
         self.actionShowLogWindow.toggled.connect( self.logWindow.setVisible )
 
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,

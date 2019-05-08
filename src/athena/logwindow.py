@@ -25,8 +25,8 @@ def findMonospaceFont():
 
 class LogWindow(QDialog):
     default_ui_path = os.path.join( ATHENA_DIR, 'ui', 'LogWindow.ui' )
-    def __init__( self, ui_filepath=default_ui_path ):
-        super().__init__(None)
+    def __init__( self, parent, ui_filepath=default_ui_path ):
+        super().__init__(parent)
         mainwindow.UiLoader.populateUI( self, ui_filepath )
         self.font = findMonospaceFont()
         self.textView.setFont(self.font)
