@@ -195,6 +195,7 @@ class AthenaWindow(QMainWindow):
         self.actionOpen.setShortcut( QKeySequence.StandardKey.Open )
         self.actionQuit.setShortcut( QKeySequence.StandardKey.Quit )
 
+
         self.setupToolDefaults()
         self.enable2DControls()
         self.scaffoldBox.setItemData(0,"m13")

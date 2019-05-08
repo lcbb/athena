@@ -4,6 +4,10 @@ and is licensed under the terms of the GNU GPL version 3.
 Athena includes the Earcut library, copied from https://github.com/joshuaskelly/earcut-python
 Earcut is copyright (c) 2016, MapBox [ISC License]
 
+Athena includes code from Orange, https://github.com/biolab/orange3
+Orange is copyright (c) 2016 Bioinformatics Laboratory, University of Ljubljana,
+                             Faculty of Computer and Information Science [GPL3 License]
+
 Athena includes code adapted from Qt3D's published example projects.
 Qt's example project are copyright (c) 2018 The Qt Company Ltd. [BSD License]
 

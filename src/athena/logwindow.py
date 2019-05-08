@@ -14,20 +14,14 @@ def findMonospaceFont():
     def isFixedPitch(font):
         return QFontInfo(font).fixedPitch()
     font = QFont('monospace')
-    print('mono')
     if isFixedPitch(font): return font
-    print('hint')
     font.setStyleHint(QFont.Monospace)
     if isFixedPitch(font): return font
-    print('hint')
     font.setStyleHint(QFont.TypeWriter)
     if isFixedPitch(font): return font
-    print('courier')
     font.setFamily("courier")
     if isFixedPitch(font): return font
-    print('fail')
     return font
-
 
 class LogWindow(QDialog):
     default_ui_path = os.path.join( ATHENA_DIR, 'ui', 'LogWindow.ui' )
