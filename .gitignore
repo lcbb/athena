@@ -1,5 +1,11 @@
 athena_tmp_output
 athena_outputs
+athena_output
+
+# Athena build process artifacts
+version_info.txt
+athena_version.py
+
 #
 # Byte-compiled / optimized / DLL files
 __pycache__/
