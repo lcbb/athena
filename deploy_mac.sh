@@ -11,7 +11,7 @@ VERSION=${1}
 
 echo "Deploying as version" $VERSION
 
-./build_mac.sh --clean --onefile
+./build_mac.sh --clean
 
 zip -j dist/athena_mac_${VERSION}.zip dist/athena
 

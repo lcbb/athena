@@ -69,7 +69,11 @@ VSVersionInfo(
         f.write(content)
     print("Wrote windows exe version info to", filename)
 
+def writeOSXPlistFile():
+    pass
 
 writeAthenaVersionFile()
 if platform.system() ==  'Windows':
     writeWindowsVersionFile(version_hunks)
+elif platform.system() == 'Darwin':
+    writeOSXPlistFile()
