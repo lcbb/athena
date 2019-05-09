@@ -3,16 +3,21 @@ import os, os.path
 from pathlib import Path
 
 # Set up Athena's global data
-
-# This is set to a non-None value by deployment scripts;
-# if that doesn't happen, we'll ask setuptools_scm
 __version__ = None
 
+# First look for a version.py, which is only installed by pyinstaller
+try:
+    import athena_version
+    __version__ = athena_version.version
+except ImportError:
+    print("No version.py available")
+
+# If no version.py, then ask setuptools_scm to compute a version number from our tree
 if( __version__ is None ):
     try:
         from setuptools_scm import get_version
         __version__ = get_version()
-    except LookupError:
+    except:
         __version__ = "unknown"
 
 print('Athena version is', __version__)

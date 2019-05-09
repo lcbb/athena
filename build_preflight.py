@@ -1,5 +1,6 @@
 import setuptools_scm
 import platform
+import codecs
 
 # Derive a version string from git
 athena_version = setuptools_scm.get_version()
@@ -18,8 +19,7 @@ def writeAthenaVersionFile():
     print('Wrote',filename)
 
 def writeWindowsVersionFile(version_hunks):
-    windows_version_template = '''
-# UTF-8
+    windows_version_template = u'''# UTF-8
 #
 # For more details about fixed file info 'ffi' see:
 # http://msdn.microsoft.com/en-us/library/ms646997.aspx
@@ -54,18 +54,19 @@ VSVersionInfo(
         StringStruct(u'FileDescription', u'Athena - a GUI Toolkit for DNA Design'),
         StringStruct(u'FileVersion', u'0, 0, 5, 0'),
         StringStruct(u'InternalName', u'Athena'),
-        StringStruct(u'LegalCopyright', u'Copyright © 2019'),
+        StringStruct(u'LegalCopyright', u'Copyright 2019'),
         StringStruct(u'LegalTrademarks', u''),
         StringStruct(u'OriginalFilename', u'Athena.exe'),
         StringStruct(u'ProductName', u'Athena'),
-        StringStruct(u'ProductVersion', u'{0}, {1}, {2}, 0')])
+        StringStruct(u'ProductVersion', u'{3}')])
       ]), 
-    #VarFileInfo([VarStruct(u'Translation', [1033, 1252])])
+    VarFileInfo([VarStruct(u'Translation', [1033, 1252])])
   ]
 )'''
-    content = windows_version_template.format(*version_hunks)
+    content = windows_version_template.format(*(version_hunks[0:3]+[athena_version]))
     filename = 'version_info.txt'
-    open(filename,'w+').write(content)
+    with codecs.open(filename, 'w+', 'utf_8') as f:
+        f.write(content)
     print("Wrote windows exe version info to", filename)
 
 
