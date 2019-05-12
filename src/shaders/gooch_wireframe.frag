@@ -17,6 +17,7 @@ uniform float shininess;    // Specular shininess factor
 uniform vec3 cool_color;
 uniform vec3 warm_color;
 uniform float alpha; 
+uniform float face_enable;
 
 //const vec3 kblue = vec3 ( 0, .1, .8 );
 //const vec3 kyellow = vec3( .7, .7, 0 );
@@ -126,6 +127,7 @@ vec4 shadeLine( const in vec4 color )
 void main()
 {
     // Calculate the color from the phong model
-    vec4 color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), alpha );
+    float effective_alpha = min( alpha, face_enable );
+    vec4 color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), effective_alpha );
     fragColor = shadeLine( color );
 }

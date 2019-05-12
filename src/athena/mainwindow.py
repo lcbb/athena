@@ -196,8 +196,6 @@ class AthenaWindow(QMainWindow):
         self.actionQuit.setShortcut( QKeySequence.StandardKey.Quit )
 
 
-        self.setupToolDefaults()
-        self.enable2DControls()
         self.scaffoldBox.setItemData(0,"m13")
         self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
 
@@ -209,6 +207,9 @@ class AthenaWindow(QMainWindow):
         sizePolicy = QSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
+
+        self.setupToolDefaults()
+        self.enable2DControls()
 
         self.perdixRunButton.clicked.connect(self.runPERDIX)
         self.talosRunButton.clicked.connect(self.runTALOS)
@@ -236,6 +237,8 @@ class AthenaWindow(QMainWindow):
         self.alphaSlider.valueChanged.connect( self.geomView.setAlpha )
         self.lineWidthSlider.valueChanged.connect( self.geomView.setLineWidth )
         self.lightDial.valueChanged.connect( self.geomView.setLightOrientation )
+        self.controls_2D.toggled.connect( self.toggleFaceRendering )
+        self.controls_3D.toggled.connect( self.toggleFaceRendering )
 
         self.newMesh(None)
         self.show()
@@ -281,13 +284,18 @@ class AthenaWindow(QMainWindow):
             self.scaffoldBox.view().setMinimumWidth( w )
             self.scaffoldBox.view().reset()
 
+    def toggleFaceRendering( self, show_faces ):
+        self.geomView.setFaceEnable( show_faces )
+
     def enable2DControls( self ):
         self.renderControls.setCurrentIndex( 0 )
         self.toolControls.setCurrentIndex( 0 )
+        self.toggleFaceRendering( self.controls_2D.isChecked() )
 
     def enable3DControls( self ):
         self.renderControls.setCurrentIndex( 1 )
         self.toolControls.setCurrentIndex( 1 )
+        self.toggleFaceRendering( self.controls_3D.isChecked() )
 
     def log( self, text ):
         self.logWindow.appendText( text )

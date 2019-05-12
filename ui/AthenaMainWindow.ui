@@ -246,7 +246,7 @@
             <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="controls_2D">
+            <widget class="QWidget" name="controls_2D_container">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -276,7 +276,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QGroupBox" name="groupBox_2">
+               <widget class="QGroupBox" name="controls_2D">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                   <horstretch>1</horstretch>
@@ -301,6 +301,9 @@
                 <property name="flat">
                  <bool>true</bool>
                 </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
                 <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0">
                  <property name="leftMargin">
                   <number>2</number>
@@ -314,13 +317,6 @@
                  <property name="bottomMargin">
                   <number>2</number>
                  </property>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="label_16">
-                   <property name="text">
-                    <string>Color</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="2">
                   <widget class="ColorButton" name="flatColorButton">
                    <property name="sizePolicy">
@@ -331,6 +327,13 @@
                    </property>
                    <property name="text">
                     <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="label_16">
+                   <property name="text">
+                    <string>Color</string>
                    </property>
                   </widget>
                  </item>
@@ -352,7 +355,7 @@
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="controls_3D">
+            <widget class="QWidget" name="controls_3D_container">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -376,7 +379,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QGroupBox" name="groupBox_3">
+               <widget class="QGroupBox" name="controls_3D">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -396,6 +399,12 @@
                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                 </property>
                 <property name="flat">
+                 <bool>true</bool>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
                  <bool>true</bool>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0" columnstretch="0,0" columnminimumwidth="0,0">

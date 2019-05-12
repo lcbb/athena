@@ -224,6 +224,7 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
 class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     _qparameters = { 'alpha': 1.0,
+                     'face_enable': 1.0,
                      'flat_color': QColor( 97, 188, 188),
                      'cool_color': QColor( 0, 25, 170 ),
                      'warm_color': QColor( 210, 190, 0),
@@ -277,12 +278,14 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         self.flat_material = self._athenaMaterial( 'flat' )
         self.flat_material.addParameter( self._alphaParam )
+        self.flat_material.addParameter( self._faceEnableParam )
         self.flat_material.addParameter( self._flatColorParam )
         self.flat_material.addParameter( self._lineWidthParam )
         self.flat_material.addParameter( self._lineColorParam )
 
         self.gooch_material = self._athenaMaterial( 'gooch' )
         self.gooch_material.addParameter( self._alphaParam )
+        self.gooch_material.addParameter( self._faceEnableParam )
         self.gooch_material.addParameter( self._lineWidthParam )
         self.gooch_material.addParameter( self._lineColorParam )
         self.gooch_material.addParameter( self._coolColorParam )
@@ -310,6 +313,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def setBackgroundColor( self, color ):
         self.defaultFrameGraph().setClearColor( color )
         self.backgroundColorChanged.emit(color)
+
+    def setFaceEnable( self, boolvalue ):
+        value = 1.0 if boolvalue else 0.0
+        self._faceEnableParam.setValue( value )
+        self.faceEnableChanged.emit(value)
 
     def setAlpha(self, value):
         alpha = float(value) / 255.0
