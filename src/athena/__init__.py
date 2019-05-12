@@ -41,7 +41,7 @@ else:
 
 # Set ATHENA_OUTPUT_DIR, the directory where all tools outputs will be written.
 # The program will halt here if no such directory can be created
-ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_outputs")
+ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_output")
 ATHENA_OUTPUT_DIR.mkdir( parents=False, exist_ok=True )
 print("Athena's output directory will be", ATHENA_OUTPUT_DIR)
 
