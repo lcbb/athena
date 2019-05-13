@@ -1095,6 +1095,7 @@
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionResetViewerOptions"/>
     <addaction name="actionShowLogWindow"/>
    </widget>
    <addaction name="menuAthena"/>
@@ -1131,6 +1132,11 @@
    </property>
    <property name="text">
     <string>Show Log Window</string>
+   </property>
+  </action>
+  <action name="actionResetViewerOptions">
+   <property name="text">
+    <string>Reset Viewer Options</string>
    </property>
   </action>
  </widget>

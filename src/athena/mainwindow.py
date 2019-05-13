@@ -216,8 +216,10 @@ class AthenaWindow(QMainWindow):
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
 
+        self.actionQuit.triggered.connect(self.close)
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
         self.actionAddScaffold.triggered.connect( self.selectAndAddScaffoldFile )
+        self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
 
         self.geometryList.newFileSelected.connect( self.newMesh )
 
@@ -232,16 +234,40 @@ class AthenaWindow(QMainWindow):
         _setupColorButton( self.warmColorButton, self.geomView.setWarmColor, self.geomView.warmColorChanged, self.geomView.warmColor() )
         _setupColorButton( self.coolColorButton, self.geomView.setCoolColor, self.geomView.coolColorChanged, self.geomView.coolColor() )
 
-        self.actionQuit.triggered.connect(self.close)
+        self.alphaSlider.valueChanged.connect( self.setViewerAlpha )
+        self.geomView.alphaChanged.connect( self.handleAlphaChanged )
 
-        self.alphaSlider.valueChanged.connect( self.geomView.setAlpha )
-        self.lineWidthSlider.valueChanged.connect( self.geomView.setLineWidth )
+        self.lineWidthSlider.valueChanged.connect( self.setViewerLinewidth )
+        self.geomView.lineWidthChanged.connect( self.handleViewerLinewidthChanged )
+
         self.lightDial.valueChanged.connect( self.geomView.setLightOrientation )
-        self.controls_2D.toggled.connect( self.toggleFaceRendering )
-        self.controls_3D.toggled.connect( self.toggleFaceRendering )
+        self.geomView.lightOrientationChanged.connect( self.lightDial.setValue )
+
+        self.controls_2D.toggled.connect( self.geomView.toggleFaceRendering )
+        self.controls_3D.toggled.connect( self.geomView.toggleFaceRendering )
+        self.geomView.faceRenderingEnabledChanged.connect( self.controls_2D.setChecked )
+        self.geomView.faceRenderingEnabledChanged.connect( self.controls_3D.setChecked )
+
 
         self.newMesh(None)
         self.show()
+
+
+    def setViewerAlpha(self, value):
+        alpha = float(value) / 255.0
+        self.geomView.setAlpha(alpha)
+
+    def handleAlphaChanged( self, newvalue ):
+        intvalue = newvalue * 255
+        self.alphaSlider.setValue(intvalue)
+
+    def setViewerLinewidth(self, value):
+        new_width = float(value) / 10.
+        self.geomView.setLinewidth( new_width )
+
+    def handleViewerLinewidthChanged( self, newvalue ):
+        intvalue = newvalue * 10
+        self.lineWidthSlider.setValue(intvalue)
 
     def setupToolDefaults( self ):
 
@@ -284,18 +310,13 @@ class AthenaWindow(QMainWindow):
             self.scaffoldBox.view().setMinimumWidth( w )
             self.scaffoldBox.view().reset()
 
-    def toggleFaceRendering( self, show_faces ):
-        self.geomView.setFaceEnable( show_faces )
-
     def enable2DControls( self ):
         self.renderControls.setCurrentIndex( 0 )
         self.toolControls.setCurrentIndex( 0 )
-        self.toggleFaceRendering( self.controls_2D.isChecked() )
 
     def enable3DControls( self ):
         self.renderControls.setCurrentIndex( 1 )
         self.toolControls.setCurrentIndex( 1 )
-        self.toggleFaceRendering( self.controls_3D.isChecked() )
 
     def log( self, text ):
         self.logWindow.appendText( text )

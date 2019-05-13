@@ -1,4 +1,5 @@
 from pathlib import Path
+import math
 
 from PySide2.QtGui import QColor, QVector3D as vec3d
 from PySide2.QtCore import QUrl, QByteArray, Qt, Signal
@@ -166,10 +167,12 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
         return getter
 
     @staticmethod
-    def _mkSetter(attr_name, signal_name):
+    def _mkSetter(attr_name, getter_name, signal_name):
         def setter( self, param ):
-            getattr( self, attr_name ).setValue( param )
-            getattr( self, signal_name ).emit(param)
+            oldvalue = getattr( self, getter_name )()
+            if( oldvalue != param ):
+                getattr( self, attr_name ).setValue( param )
+                getattr( self, signal_name ).emit(param)
         return setter
 
     @staticmethod
@@ -182,11 +185,25 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
         return init
 
     @staticmethod
+    def _mkReset( setter_name, value ):
+        def reset( self ):
+            setter = getattr( self, setter_name )
+            setter( value )
+        return reset
+
+    @staticmethod
     def _mkInitAll(initializers):
         def initAll(self):
             for x in initializers:
                 getattr(self, x)()
         return initAll
+
+    @staticmethod
+    def _mkResetAll(resetters):
+        def resetAll(self):
+            for x in resetters:
+                getattr(self,x)()
+        return resetAll
 
 
     def __new__(cls, name, parents, dct):
@@ -199,6 +216,7 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
             dct[name] = value
 
         initList = list()
+        resetList = list()
         for key, value in params.items():
             # Create API names for each parameter:
             # with a running example for a key named flat_color
@@ -209,15 +227,19 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
             setter_name = 'set'+studly_name  # setFlatColor
             signal_name = api_name+'Changed' # flatColorChanged
             init_name = 'init'+studly_name   # initFlatColor
+            reset_name = 'reset'+studly_name # resetFlatColor
             attr_name = '_'+api_name+'Param' # _flatColorParam 
 
             addMethod( getter_name, _metaParameters._mkGetter(attr_name) )
-            addMethod( setter_name, _metaParameters._mkSetter(attr_name, signal_name) )
+            addMethod( setter_name, _metaParameters._mkSetter(attr_name, getter_name, signal_name) )
             addMethod( signal_name, Signal( type ( value ) ) )
             addMethod( init_name, _metaParameters._mkInit( attr_name, key, value ) )
+            addMethod( reset_name, _metaParameters._mkReset( setter_name, value ) )
             initList.append(init_name)
+            resetList.append(reset_name)
 
         addMethod('initParameters', _metaParameters._mkInitAll( initList ) )
+        addMethod('resetParameters', _metaParameters._mkResetAll( resetList ) )
 
         return super(_metaParameters,cls).__new__(cls,name,parents,dct)
 
@@ -268,13 +290,15 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self._qtrefs = []
 
         self.setBackgroundColor( QColor(63,63,63) )
+        self.lightOrientation = int(0) # Internal integer controlling light.position attribute
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.rootEntity = Qt3DCore.QEntity()
         self.camControl = CameraController(None, None, None)
 
         self.initParameters() # defined in metaclass
-
+        self.faceEnableChanged.connect( self.handleFaceRenderChange )
+        self.lightPositionChanged.connect( self.handleLightPositionChange )
 
         self.flat_material = self._athenaMaterial( 'flat' )
         self.flat_material.addParameter( self._alphaParam )
@@ -314,26 +338,28 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.defaultFrameGraph().setClearColor( color )
         self.backgroundColorChanged.emit(color)
 
-    def setFaceEnable( self, boolvalue ):
-        value = 1.0 if boolvalue else 0.0
-        self._faceEnableParam.setValue( value )
-        self.faceEnableChanged.emit(value)
+    faceRenderingEnabledChanged = Signal( bool )
 
-    def setAlpha(self, value):
-        alpha = float(value) / 255.0
-        self._alphaParam.setValue( alpha )
-        self.alphaChanged.emit(alpha)
+    def faceRenderingEnabled( self ):
+        return self._faceEnableParam.value > 0.0
 
-    def setLineWidth(self, value):
-        new_width = float(value) / 10.
-        self._lineWidthParam.setValue( new_width )
-        self.lineWidthChanged.emit(new_width)
+    def toggleFaceRendering( self, boolvalue ):
+        self.setFaceEnable( 1.0 if boolvalue else 0.0 )
+
+    def handleFaceRenderChange( self, floatvalue ):
+        self.faceRenderingEnabledChanged.emit( True if floatvalue > 0.0 else False )
+
+    lightOrientationChanged = Signal( int )
 
     def setLightOrientation( self, value ):
-        scaled_value = float(value)
-        new_value = geom.rotateAround( vec3d(0,0,100), vec3d(0,1,0), scaled_value )
-        self.setLightPosition( new_value ) 
+        if( value != self.lightOrientation ):
+            scaled_value = float(value)
+            new_value = geom.rotateAround( vec3d(0,0,100), vec3d(0,1,0), scaled_value )
+            self.setLightPosition( new_value ) 
 
+    def handleLightPositionChange( self, new_posn ):
+        new_orientation = math.degrees( math.atan2( new_posn.x(), new_posn.z() ))
+        self.lightOrientationChanged.emit( int(new_orientation) )
 
     def reloadGeom(self, filepath):
         self.meshFilepath = filepath
