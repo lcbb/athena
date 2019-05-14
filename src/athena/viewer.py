@@ -39,12 +39,12 @@ class CameraController:
 class CameraController2D(CameraController):
     def __init__(self, window, camera, geometry):
         super(CameraController2D,self).__init__(window, camera, geometry)
-        self.margin = 1.4
         self.aabb = geom.AABB(self.geometry)
-        self.zpos = self.aabb.max.z() + 10
         self.reset()
 
     def reset(self):
+        self.margin = 1.4
+        self.zpos = self.aabb.max.z() + 10
         self.camera.setViewCenter( self.aabb.center )
         self.camera.setPosition( vec3d( self.aabb.center.x(), self.aabb.center.y(), self.zpos ) )
         self.camera.setUpVector( ATHENA_GEOM_UP )
@@ -360,6 +360,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def handleLightPositionChange( self, new_posn ):
         new_orientation = math.degrees( math.atan2( new_posn.x(), new_posn.z() ))
         self.lightOrientationChanged.emit( int(new_orientation) )
+
+    def resetCamera(self):
+        self.camControl.reset()
 
     def reloadGeom(self, filepath):
         self.meshFilepath = filepath

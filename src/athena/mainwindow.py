@@ -3,6 +3,7 @@ import subprocess
 import os
 import os.path
 import platform
+from datetime import datetime
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
@@ -220,6 +221,7 @@ class AthenaWindow(QMainWindow):
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
         self.actionAddScaffold.triggered.connect( self.selectAndAddScaffoldFile )
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
+        self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
 
         self.geometryList.newFileSelected.connect( self.newMesh )
 
@@ -338,7 +340,8 @@ class AthenaWindow(QMainWindow):
         active_item = self.geometryList.currentItem()
         infile_path = active_item.data(0, Qt.UserRole)
         infile_name = active_item.text(0)
-        outfile_dir_path = ATHENA_OUTPUT_DIR / toolname / infile_name
+        output_subdir = datetime.now().strftime('%y%m%d%H%M%S_'+toolname+'_'+infile_name)
+        outfile_dir_path = ATHENA_OUTPUT_DIR / output_subdir
         return infile_path, outfile_dir_path
 
     def runPERDIX( self ):
