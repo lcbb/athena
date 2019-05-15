@@ -271,7 +271,7 @@ class AthenaWindow(QMainWindow):
 
     def setViewerLinewidth(self, value):
         new_width = float(value) / 10.
-        self.geomView.setLinewidth( new_width )
+        self.geomView.setLineWidth( new_width )
 
     def handleViewerLinewidthChanged( self, newvalue ):
         intvalue = newvalue * 10
