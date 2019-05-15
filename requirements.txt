@@ -1,4 +1,4 @@
-PySide2==5.12.2
+PySide2==5.12.3
 setuptools_scm
-git+git://github.com/sjackso/pyinstaller@athena_support#egg=pyinstaller
+git+git://github.com/pyinstaller/pyinstaller@e6c0f13#egg=pyinstaller
 

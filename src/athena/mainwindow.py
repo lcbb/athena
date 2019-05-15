@@ -12,7 +12,7 @@ from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow
+from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
 
 class AutoResizingStackedWidget( QStackedWidget ):
     '''
@@ -256,9 +256,9 @@ class AthenaWindow(QMainWindow):
         self.geomView.faceRenderingEnabledChanged.connect( self.controls_2D.setChecked )
         self.geomView.faceRenderingEnabledChanged.connect( self.controls_3D.setChecked )
 
-
         self.newMesh(None)
         self.show()
+        self.log("Athena version {}".format(__version__))
 
 
     def setViewerAlpha(self, value):
@@ -330,8 +330,8 @@ class AthenaWindow(QMainWindow):
         self.logWindow.appendText( text )
 
     def newMesh( self, meshFile ):
-        self.log( 'Loading '+str(meshFile) )
         if( meshFile is None ): return
+        self.log( 'Loading '+str(meshFile) )
         mesh_3d = self.geomView.reloadGeom( meshFile )
         if( mesh_3d ):
             self.enable3DControls()
