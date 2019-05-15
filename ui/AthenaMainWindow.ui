@@ -747,7 +747,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>94</width>
-                   <height>137</height>
+                   <height>91</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -857,7 +857,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>94</width>
+                   <width>98</width>
                    <height>181</height>
                   </rect>
                  </property>
@@ -975,8 +975,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>94</width>
-                   <height>137</height>
+                   <width>98</width>
+                   <height>91</height>
                   </rect>
                  </property>
                  <attribute name="label">
@@ -1064,6 +1064,9 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="outputSelectBox"/>
           </item>
          </layout>
         </item>

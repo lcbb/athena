@@ -230,6 +230,7 @@ class AthenaWindow(QMainWindow):
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
 
         self.geometryList.newFileSelected.connect( self.newMesh )
+        self.outputSelectBox.currentIndexChanged.connect( self.selectOutput )
 
         def _setupColorButton( button, setter, signal, init_value ):
             button.colorChosen.connect( setter )
@@ -337,6 +338,22 @@ class AthenaWindow(QMainWindow):
             self.enable3DControls()
         else:
             self.enable2DControls()
+        self.outputSelectBox.clear()
+
+    def newOutputs( self, toolresults ):
+        if toolresults is None or toolresults.bildfiles is None: return
+        bildfiles = toolresults.bildfiles
+        strs = [str(x) for x in bildfiles]
+        prefix = os.path.commonprefix( strs )
+        postfixes = list(x[len(prefix):] for x in strs)
+        for p, f in zip(postfixes, bildfiles):
+            self.outputSelectBox.addItem( p, f )
+        #print(result.bildfiles)
+
+    def selectOutput( self, selection_idx ):
+        if selection_idx == -1: return
+        selection = self.outputSelectBox.itemData(selection_idx)
+        print(selection)
 
     def updateStatus( self, msg ):
         self.log( msg )
@@ -361,6 +378,7 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('PERDIX returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
@@ -375,6 +393,7 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('TALOS returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
     def runDAEDALUS2( self ):
         self.updateStatus('Running DAEDALUS...')
@@ -388,6 +407,7 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('DAEDALUS returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
 
     def runMETIS( self ):
@@ -402,5 +422,6 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('METIS returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
 
