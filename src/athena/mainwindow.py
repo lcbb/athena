@@ -168,7 +168,6 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     else:
         print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
         tool = toolname
-    p1_output_dir = str(p1_output_dir)
     wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
     toolpath = os.path.join( wd, tool )
     tool_call = [toolpath, p1_output_dir, p2_input_file, p3_scaffold, p4_edge_sections,
@@ -176,8 +175,15 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     tool_call_strs = [str(x) for x in tool_call]
 
     print('Calling {} as follows'.format(tool), tool_call_strs)
-    return subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-
+    result = subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+    if result.returncode == 0:
+        result.bildfiles = list( p1_output_dir.glob('*.bild') )
+        #strs = [str(x) for x in result.bildfiles]
+        #prefix = os.path.commonprefix( strs )
+        #print(prefix)
+        #print( list(x[len(prefix):] for x in strs) )
+        #print(result.bildfiles)
+    return result
 
 class AthenaWindow(QMainWindow):
     default_ui_path = os.path.join( ATHENA_DIR, 'ui', 'AthenaMainWindow.ui' )
