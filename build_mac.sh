@@ -8,4 +8,4 @@ pyinstaller ./src/main.py --add-data "ui:ui" --add-data "tools:tools" --add-data
                           --name Athena --icon "icon/athena.icns" --windowed $*
 plutil -insert NSHighResolutionCapable -bool true dist/Athena.app/Contents/Info.plist
 VERSION=`cut -f 2 -d \" athena_version.py`
-lutil -replace CFBundleShortVersionString -string `cut -f 2 -d \" athena_version.py` dist/Athena.app/Contents/Info.plist
+plutil -replace CFBundleShortVersionString -string `cut -f 2 -d \" athena_version.py` dist/Athena.app/Contents/Info.plist
