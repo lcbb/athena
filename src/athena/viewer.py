@@ -398,3 +398,4 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         new_entity = Qt3DCore.QEntity(self.rootEntity)
         for c in components:
             new_entity.addComponent( c )
+        print('new decoration')

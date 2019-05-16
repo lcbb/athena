@@ -354,7 +354,7 @@ class AthenaWindow(QMainWindow):
         if selection_idx == -1: return
         selection = self.outputSelectBox.itemData(selection_idx)
         print(selection)
-        bildparser.parseBildFile( selection )
+        bildparser.parseBildFile( selection, self.geomView )
 
     def updateStatus( self, msg ):
         self.log( msg )
