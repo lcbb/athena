@@ -27,59 +27,49 @@ class OutputDecorations:
         color_key = ' '.join(tokens)
         if color_key not in self.colors:
             if color_key in colorTable.colors:
-                self.colors[color_key] = QColor( *colodTable.colors[color_key] )
+                self.colors[color_key] = QColor( *colorTable.colors[color_key] )
             else:
                 self.colors[color_key] = QColor( *(float(x)*255 for x in tokens) )
         self.current_color = self.colors[color_key]
 
     def addSphere( self, tokens ):
-        self.spheres.append( Sphere( self.current_color, *tokens ) )
+        self.spheres.append( Sphere( self.current_color, *(float(x) for x in tokens) ) )
 
     def addCylinder( self, tokens ):
-        self.cylinders.append( Cylinder( self.current_color, *tokens ) )
+        self.cylinders.append( Cylinder( self.current_color, *(float(x) for x in tokens) ) )
 
     def addArrow( self, tokens ):
-        self.arrows.append( Arrow( self.current_color, *tokens ) )
+        self.arrows.append( Arrow( self.current_color, *(float(x) for x in tokens) ) )
+
+    def debugSummary( self ):
+        pattern =  'parsed BILD: {0} unique colors, {1} spheres, {2} cylinders, {3} arrows' +\
+                   '\n           unknown keywords/counts: {4}' +\
+                   '\n           comment lines: {5}'
+        return pattern.format( len(self.colors), len(self.spheres), len(self.cylinders), len(self.arrows),
+                               self.unknown_keyword_map, len(self.other_line_list) )
 
 
-def parseBildFile( filename, viewer ):
+def parseBildFile( filename ):
+    results = OutputDecorations()
     with open(filename,'r') as bild:
         unknown_keyword_map = dict()
         other_line_list = list()
-        current_color = QColor
-        current_material = None
-        colors = set()
-        sphere = Qt3DExtras.QSphereMesh( viewer.rootEntity)
-        sphere.setRadius(.04)
-        sphere.setSlices(15)
         for line in bild:
             tokens = line.split()
             token0 = tokens[0]
-            if( token0 == '.color' ):
-                table_key = ' '.join(tokens[1:])
-                if table_key in colorTable.colors:
-                    current_color = QColor( *colorTable.colors[table_key] )
-                else:
-                    current_color = QColor( *(float(x)*255 for x in tokens[1:]) )
-                current_material = Qt3DExtras.QPhongMaterial(viewer.rootEntity)
-                current_material.setDiffuse(current_color)
-                colors.add( tuple(tokens[1:]) )
+            if( token0 == '.arrow' ):
+                results.addArrow( tokens[1:] )
+            elif( token0 == '.color' ):
+                results.addColor( tokens[1:] )
             elif token0 == '.cylinder':
-                x1, y1, z1, x2, y2, z2, r = tokens[1:8]
+                results.addCylinder( tokens[1:] )
             elif token0 == '.sphere':
-                x, y, z, r = (float(x)/(42/3.2) for x in tokens[1:5])
-                #m_sphere = Qt3DExtras.QSphereMesh(viewer.rootEntity)
-                #m_sphere.setRadius(r)
-                #m_sphere.setSlices(15)
-                t_sphere = Qt3DCore.QTransform(viewer.rootEntity)
-                t_sphere.setTranslation( vec3d( x, y, z ) )
-                viewer.addDecoration( [sphere, t_sphere, current_material] )
-                
+                results.addSphere( tokens[1:] )
             elif( tokens[0].startswith('.')):
                 v = unknown_keyword_map.get(tokens[0],0)
                 unknown_keyword_map[tokens[0]] = v + 1
             else:
                 other_line_list.append(tokens)
-        print(colors)
-        print(unknown_keyword_map)
-        print(other_line_list)
+        results.unknown_keyword_map = unknown_keyword_map
+        results.other_line_list = other_line_list
+    return results
