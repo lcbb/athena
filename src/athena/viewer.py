@@ -393,3 +393,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def resizeEvent( self, event ):
         newsize = event.size()
         self.camControl.resize(newsize.width(), newsize.height())
+
+    def addDecoration(self, components):
+        new_entity = Qt3DCore.QEntity(self.rootEntity)
+        for c in components:
+            new_entity.addComponent( c )

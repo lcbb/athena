@@ -12,7 +12,7 @@ from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
+from athena import bildparser, viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
 
 class AutoResizingStackedWidget( QStackedWidget ):
     '''
@@ -354,6 +354,7 @@ class AthenaWindow(QMainWindow):
         if selection_idx == -1: return
         selection = self.outputSelectBox.itemData(selection_idx)
         print(selection)
+        bildparser.parseBildFile( selection )
 
     def updateStatus( self, msg ):
         self.log( msg )
