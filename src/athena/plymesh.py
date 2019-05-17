@@ -170,7 +170,7 @@ class PlyMesh(Qt3DCore.QEntity):
 
         self.geometry = Qt3DRender.QGeometry(self)
 
-        # Setup vertex attributes for position and interior flag
+        # Setup vertex attributes for position and interior flags
         position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
         interior_attrname = 'vertexInterior'
 
@@ -181,17 +181,7 @@ class PlyMesh(Qt3DCore.QEntity):
         self.geometry.addAttribute(self.positionAttr)
         self.geometry.addAttribute(self.interiorAttr)
 
-        rawstring = tri_nparr.tobytes()
-        
-        self.qibytes = QByteArray(rawstring)
-        self.qibuf = Qt3DRender.QBuffer(parent)
-        self.qibuf.setData(self.qibytes)
-
-        self.indexAttr = Qt3DRender.QAttribute(self.geometry)
-        self.indexAttr.setVertexBaseType(index_basetype)
-        self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
-        self.indexAttr.setBuffer(self.qibuf)
-        self.indexAttr.setCount(3*total_tris)
+        self.indexAttr = geom.buildIndexAttr( parent, tri_nparr )
         self.geometry.addAttribute(self.indexAttr)
 
         self.lineMesh = Qt3DRender.QGeometryRenderer(parent)

@@ -44,17 +44,7 @@ class SphereDecorations(Qt3DCore.QEntity):
 
         # Create qt3d index buffer
         index_nparr = np.arange(len(vertex_nparr),dtype=geom.basetype_numpy_codes[index_basetype])
-
-        rawstring = index_nparr.tobytes()
-        qibytes = QByteArray(rawstring)
-        qibuf = Qt3DRender.QBuffer(parent)
-        qibuf.setData(qibytes)
-
-        self.indexAttr = Qt3DRender.QAttribute(self.geometry)
-        self.indexAttr.setVertexBaseType(index_basetype)
-        self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
-        self.indexAttr.setBuffer(qibuf)
-        self.indexAttr.setCount(len(vertex_nparr))
+        self.indexAttr = geom.buildIndexAttr( parent, index_nparr )
         self.geometry.addAttribute(self.indexAttr)
 
         self.renderer = Qt3DRender.QGeometryRenderer(parent)

@@ -77,6 +77,26 @@ def buildVertexAttrs(parent, array, attrspecs ):
     return attrs
 
 
+def buildIndexAttr(parent, array):
+
+    basetype = basetype_numpy_codes_reverse[array.dtype.type]
+    basetype_width = basetype_widths[ basetype ]
+
+    basetype_width = array.itemsize
+    rawstring = array.tobytes()
+    byte_array = QByteArray(rawstring)
+    qbuffer = Qt3DRender.QBuffer(parent)
+    qbuffer.setData(byte_array)
+
+    attr = Qt3DRender.QAttribute(parent)
+    attr.setVertexBaseType(basetype)
+    attr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
+    attr.setBuffer(qbuffer)
+    attr.setCount(array.size)
+
+    return attr
+
+
 def iterAttr( att ):
     '''Iterator over a Qt3DRender.QAttribute'''
     basetype = att.vertexBaseType()
