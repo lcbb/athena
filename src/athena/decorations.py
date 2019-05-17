@@ -26,3 +26,41 @@ class SphereDecorations(Qt3DCore.QEntity):
 
         for idx, (color, x, y, z, r) in enumerate(spherelist):
             vertex_nparr[idx,:] = x, y, z, r, color.redF(), color.greenF(), color.blueF()
+
+        self.geometry = Qt3DRender.QGeometry(self)
+
+        position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
+        radius_attrname = 'sphereRadius'
+        color_attrname = Qt3DRender.QAttribute.defaultColorAttributeName()
+
+
+        attrspecs = [geom.AttrSpec(position_attrname, column=0, numcols=3),
+                     geom.AttrSpec(radius_attrname, column=3, numcols=1),
+                     geom.AttrSpec(color_attrname, column=4, numcols=3)]
+
+        self.vtx_attrs = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
+        for va in self.vtx_attrs:
+            self.geometry.addAttribute(va)
+
+        # Create qt3d index buffer
+        index_nparr = np.arange(len(vertex_nparr),dtype=geom.basetype_numpy_codes[index_basetype])
+
+        rawstring = index_nparr.tobytes()
+        qibytes = QByteArray(rawstring)
+        qibuf = Qt3DRender.QBuffer(parent)
+        qibuf.setData(qibytes)
+
+        self.indexAttr = Qt3DRender.QAttribute(self.geometry)
+        self.indexAttr.setVertexBaseType(index_basetype)
+        self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
+        self.indexAttr.setBuffer(qibuf)
+        self.indexAttr.setCount(len(vertex_nparr))
+        self.geometry.addAttribute(self.indexAttr)
+
+        self.renderer = Qt3DRender.QGeometryRenderer(parent)
+        self.renderer.setGeometry(self.geometry)
+        self.renderer.setPrimitiveType(Qt3DRender.QGeometryRenderer.Points)
+
+        self.addComponent(self.renderer)
+
+        

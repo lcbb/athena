@@ -170,33 +170,15 @@ class PlyMesh(Qt3DCore.QEntity):
 
         self.geometry = Qt3DRender.QGeometry(self)
 
-        # Create qt3d vertex buffers
-        rawstring = vertex_nparr.tobytes()
-        self.qvbytes = QByteArray(rawstring)
-        self.qvbuf = Qt3DRender.QBuffer(parent)
-        self.qvbuf.setData(self.qvbytes)
+        # Setup vertex attributes for position and interior flag
+        position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
+        interior_attrname = 'vertexInterior'
 
-        # Position attribute
-        self.positionAttr = Qt3DRender.QAttribute(parent)
-        self.positionAttr.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
-        self.positionAttr.setVertexBaseType(vertex_basetype)
-        self.positionAttr.setVertexSize(3)
-        self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
-        self.positionAttr.setBuffer(self.qvbuf)
-        self.positionAttr.setByteStride(4*geom.basetype_widths[vertex_basetype])
-        self.positionAttr.setCount(len(vertex_nparr))
+        # Each row in the vertex array is [x, y, z, i]
+        attrspecs = [ geom.AttrSpec(position_attrname, column=0, numcols=3 ),
+                      geom.AttrSpec(interior_attrname, column=3, numcols=1) ]
+        self.positionAttr, self.interiorAttr = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
         self.geometry.addAttribute(self.positionAttr)
-
-        # Interior attribute
-        self.interiorAttr = Qt3DRender.QAttribute(parent)
-        self.interiorAttr.setName( 'vertexInterior' )
-        self.interiorAttr.setVertexBaseType(vertex_basetype)
-        self.interiorAttr.setVertexSize(1)
-        self.interiorAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
-        self.interiorAttr.setBuffer(self.qvbuf)
-        self.interiorAttr.setByteStride(4*geom.basetype_widths[vertex_basetype])
-        self.interiorAttr.setByteOffset(3*geom.basetype_widths[vertex_basetype])
-        self.interiorAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.interiorAttr)
 
         rawstring = tri_nparr.tobytes()

@@ -395,4 +395,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.camControl.resize(newsize.width(), newsize.height())
 
     def newDecorations(self, bild_results):
-        spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
+        self.spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
+        self.sphere_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
+        self.spheres.addComponent( self.sphere_material )
+

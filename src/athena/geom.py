@@ -1,5 +1,6 @@
 import struct
 import itertools
+from collections import namedtuple
 
 from plyfile import PlyData, PlyElement
 import numpy as np
@@ -36,9 +37,45 @@ basetype_struct_codes = { k: v[1] for k,v in basetype_data.items()}
 # Map of Qt3D base types to numpy types
 basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in basetype_struct_codes.items()}
 
+# And the reverse
+basetype_numpy_codes_reverse = { np.sctypeDict[v] : k for k, v in basetype_struct_codes.items() }
+
 def rotateAround( v1, v2, angle ):
     q = QQuaternion.fromAxisAndAngle( v2, angle )
     return q.rotatedVector( v1 )
+
+AttrSpec = namedtuple('AttrSpec', 'name, column, numcols')
+
+def buildVertexAttrs(parent, array, attrspecs ):
+
+    # Measure the input array
+    rows = len(array)
+    columns = len(array[0])
+    basetype = basetype_numpy_codes_reverse[array.dtype.type]
+    basetype_width = basetype_widths[ basetype ]
+    row_width = columns * basetype_width
+    #print(columns, rows, basetype, basetype_width, row_width)
+
+    # Convert input to a qt buffer
+    rawstring = array.tobytes()
+    byte_array = QByteArray(rawstring)
+    qbuffer = Qt3DRender.QBuffer(parent)
+    qbuffer.setData(byte_array)
+
+    attrs = list()
+    for asp in attrspecs:
+        attr = Qt3DRender.QAttribute( parent )
+        attr.setName( asp.name )
+        attr.setVertexBaseType( basetype )
+        attr.setVertexSize(asp.numcols)
+        attr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
+        attr.setBuffer(qbuffer)
+        attr.setByteStride(row_width)
+        attr.setByteOffset(asp.column * basetype_width)
+        attr.setCount(rows)
+        attrs.append(attr)
+    return attrs
+
 
 def iterAttr( att ):
     '''Iterator over a Qt3DRender.QAttribute'''
