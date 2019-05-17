@@ -33,7 +33,6 @@ class SphereDecorations(Qt3DCore.QEntity):
         radius_attrname = 'sphereRadius'
         color_attrname = Qt3DRender.QAttribute.defaultColorAttributeName()
 
-
         attrspecs = [geom.AttrSpec(position_attrname, column=0, numcols=3),
                      geom.AttrSpec(radius_attrname, column=3, numcols=1),
                      geom.AttrSpec(color_attrname, column=4, numcols=3)]
@@ -53,4 +52,46 @@ class SphereDecorations(Qt3DCore.QEntity):
 
         self.addComponent(self.renderer)
 
+class CylinderDecorations(Qt3DCore.QEntity):
+
+    def __init__(self, parent, cylinderlist):
+        super().__init__(parent)
+        num_cylinders = len(cylinderlist)
+
+        total_vertices = 2 * num_cylinders
+        vertex_basetype = geom.basetypes.Float
+        if( total_vertices < 30000 ):
+            index_basetype = geom.basetypes.UnsignedShort
+        else:
+            index_basetype = geom.basetypes.UnsignedInt
+
+        vertex_nparr = np.zeros([total_vertices,7],dtype=geom.basetype_numpy_codes[vertex_basetype])
+        for idx, (color, x1, y1, z1, x2, y2, z2, r) in enumerate(cylinderlist):
+            vertex_nparr[2*idx,:] = x1, y1, z1, r, color.redF(), color.greenF(), color.blueF()
+            vertex_nparr[2*idx+1,:] = x2, y2, z2, r, color.redF(), color.greenF(), color.blueF()
         
+        self.geometry = Qt3DRender.QGeometry(self)
+
+        position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
+        radius_attrname = 'radius'
+        color_attrname = Qt3DRender.QAttribute.defaultColorAttributeName()
+
+        attrspecs = [geom.AttrSpec(position_attrname, column=0, numcols=3),
+                     geom.AttrSpec(radius_attrname, column=3, numcols=1),
+                     geom.AttrSpec(color_attrname, column=4, numcols=3)]
+
+        self.vtx_attrs = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
+        for va in self.vtx_attrs:
+            self.geometry.addAttribute(va)
+
+        # Create qt3d index buffer
+        index_nparr = np.arange(len(vertex_nparr),dtype=geom.basetype_numpy_codes[index_basetype])
+        self.indexAttr = geom.buildIndexAttr( parent, index_nparr )
+        self.geometry.addAttribute(self.indexAttr)
+
+        self.renderer = Qt3DRender.QGeometryRenderer(parent)
+        self.renderer.setGeometry(self.geometry)
+        self.renderer.setPrimitiveType(Qt3DRender.QGeometryRenderer.Lines)
+
+        self.addComponent(self.renderer)
+

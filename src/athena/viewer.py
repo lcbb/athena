@@ -399,3 +399,5 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.sphere_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
         self.spheres.addComponent( self.sphere_material )
 
+        self.cylinders = decorations.CylinderDecorations(self.rootEntity, bild_results.cylinders)
+        self.cylinders.addComponent( self.sphere_material )
