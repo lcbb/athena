@@ -355,6 +355,7 @@ class AthenaWindow(QMainWindow):
         selection = self.outputSelectBox.itemData(selection_idx)
         decorations = bildparser.parseBildFile( selection )
         print(decorations.debugSummary())
+        self.geomView.newDecorations( decorations )
 
     def updateStatus( self, msg ):
         self.log( msg )

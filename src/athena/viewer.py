@@ -11,9 +11,9 @@ from PySide2.QtQml import QQmlEngine, QQmlComponent
 
 from plyfile import PlyData, PlyElement
 
-from athena import ATHENA_SRC_DIR, plymesh, geom
+from athena import ATHENA_SRC_DIR, plymesh, geom, decorations
 
-ATHENA_GEOM_UP = vec3d(0, 0, 1)
+ATHENA_GEOM_UP = geom.ATHENA_GEOM_UP
 
 class CameraController:
     def __init__(self, window, camera, geometry):
@@ -394,8 +394,5 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         newsize = event.size()
         self.camControl.resize(newsize.width(), newsize.height())
 
-    def addDecoration(self, components):
-        new_entity = Qt3DCore.QEntity(self.rootEntity)
-        for c in components:
-            new_entity.addComponent( c )
-        print('new decoration')
+    def newDecorations(self, bild_results):
+        spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
