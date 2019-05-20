@@ -8,6 +8,7 @@ out EyeSpaceVertex {
     vec4 position;
     flat float radius;
     flat float radius2;
+    vec4 color;
 } vs_out;
 
 uniform mat4 modelView;
@@ -20,6 +21,7 @@ void main()
     vs_out.position = modelView * vec4( vertexPosition, 1.0 );
     vs_out.radius =  sphereRadius;
     vs_out.radius2 = sphereRadius * sphereRadius;
+    vs_out.color = vertexColor;
 
     gl_Position = mvp * vec4( vertexPosition, 1.0 );
 }
