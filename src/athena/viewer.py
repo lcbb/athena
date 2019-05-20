@@ -283,7 +283,34 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         return material
 
+    def _imposterMaterial(self):
+        engine = QQmlEngine()
+        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'sphere.qml'
+        component = QQmlComponent(engine, main_qml.as_uri() )
+        if ( component.status() != QQmlComponent.Ready ):
+            print ("Error loading QML:")
+            print(component.errorString())
+        material = component.create()
 
+        # Need to hold a reference in python to the QQmlComponent, or else
+        # PySide2 will helpfully delete the material object along with it
+        # after this function ends.
+        self._qtrefs.append(component)
+
+        shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
+        vert_shader = shader_path / 'sphere_imposter.vert'
+        geom_shader = shader_path / 'sphere_imposter.geom'
+        frag_shader = shader_path / 'sphere_imposter.frag'
+        def loadShader( s ):
+            return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
+        shader = Qt3DRender.QShaderProgram(material)
+        shader.setVertexShaderCode( loadShader( vert_shader ) )
+        shader.setGeometryShaderCode( loadShader( geom_shader ) )
+        shader.setFragmentShaderCode( loadShader( frag_shader ) )
+        for rpass in material.effect().techniques()[0].renderPasses():
+            rpass.setShaderProgram( shader )
+
+        return material
 
     def __init__(self):
         super(AthenaViewer, self).__init__()
@@ -316,6 +343,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.gooch_material.addParameter( self._warmColorParam )
         self.gooch_material.addParameter( self._lightPositionParam )
 
+        self.sphere_material = self._imposterMaterial()
+        self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
 
         self.setRootEntity(self.rootEntity)
 
@@ -396,8 +425,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     def newDecorations(self, bild_results):
         self.spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
-        self.sphere_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
         self.spheres.addComponent( self.sphere_material )
 
         self.cylinders = decorations.CylinderDecorations(self.rootEntity, bild_results.cylinders)
-        self.cylinders.addComponent( self.sphere_material )
+        self.cylinders.addComponent( self.cylinder_material )

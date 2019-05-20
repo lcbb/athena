@@ -33,10 +33,10 @@ class OutputDecorations:
         self.current_color = self.colors[color_key]
 
     def addSphere( self, tokens ):
-        self.spheres.append( Sphere( self.current_color, *(float(x) for x in tokens) ) )
+        self.spheres.append( Sphere( self.current_color, *(float(x)/(42*3.2) for x in tokens) ) )
 
     def addCylinder( self, tokens ):
-        self.cylinders.append( Cylinder( self.current_color, *(float(x) for x in tokens) ) )
+        self.cylinders.append( Cylinder( self.current_color, *(float(x)/(42*3.2) for x in tokens) ) )
 
     def addArrow( self, tokens ):
         self.arrows.append( Arrow( self.current_color, *(float(x) for x in tokens) ) )
