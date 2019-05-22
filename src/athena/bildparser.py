@@ -16,12 +16,13 @@ Cylinder = namedtuple ( 'Cylinder', 'color, x1, y1, z1, x2, y2, z2, r' )
 Arrow = namedtuple ( 'Arrow', 'color, x1, y1, z1, x2, y2, z2, r1, r2, rho', defaults=[0.1,0.4,0.75] )
 
 class OutputDecorations:
-    def __init__(self):
+    def __init__(self, scale_factor):
         self.colors = dict() # maps normalized bild strings to QColors
         self.current_color = None
         self.spheres = list()
         self.cylinders = list()
         self.arrows = list()
+        self.scale_factor = scale_factor / 3.2
 
     def addColor( self, tokens ):
         color_key = ' '.join(tokens)
@@ -33,10 +34,10 @@ class OutputDecorations:
         self.current_color = self.colors[color_key]
 
     def addSphere( self, tokens ):
-        self.spheres.append( Sphere( self.current_color, *(float(x)/(42*3.2) for x in tokens) ) )
+        self.spheres.append( Sphere( self.current_color, *(float(x)*(self.scale_factor) for x in tokens) ) )
 
     def addCylinder( self, tokens ):
-        self.cylinders.append( Cylinder( self.current_color, *(float(x)/(42*3.2) for x in tokens) ) )
+        self.cylinders.append( Cylinder( self.current_color, *(float(x)*(self.scale_factor) for x in tokens) ) )
 
     def addArrow( self, tokens ):
         self.arrows.append( Arrow( self.current_color, *(float(x) for x in tokens) ) )
@@ -49,8 +50,8 @@ class OutputDecorations:
                                self.unknown_keyword_map, len(self.other_line_list) )
 
 
-def parseBildFile( filename ):
-    results = OutputDecorations()
+def parseBildFile( filename, scale_factor ):
+    results = OutputDecorations(scale_factor)
     with open(filename,'r') as bild:
         unknown_keyword_map = dict()
         other_line_list = list()

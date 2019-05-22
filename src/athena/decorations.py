@@ -25,7 +25,7 @@ class SphereDecorations(Qt3DCore.QEntity):
         vertex_nparr = np.zeros([total_vertices,7],dtype=geom.basetype_numpy_codes[vertex_basetype])
 
         for idx, (color, x, y, z, r) in enumerate(spherelist):
-            vertex_nparr[idx,:] = x, y, z, r*50, color.redF(), color.greenF(), color.blueF()
+            vertex_nparr[idx,:] = x, y, z, r, color.redF(), color.greenF(), color.blueF()
 
         self.geometry = Qt3DRender.QGeometry(self)
 

@@ -156,6 +156,23 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
+def parseLCBBToolOutput( output ):
+    # Find and parse the scaling factor from text with a format like this: 
+    # 2.7. Find the scale factor to adjust polyhedra size
+    #   * The minumum edge length     : 42
+    #   * Scale factor to adjust size : .196
+    result = dict()
+    iter_out = iter(output.split('\n'))
+    for line in iter_out:
+        if line.strip().startswith('2.7.'):
+            print(line)
+            line27a = next(iter_out)
+            line27b = next(iter_out)
+            result['edge_length'] = float( line27a.split(':')[1].strip() )
+            result['scale_factor'] = float( line27b.split(':')[1].strip() )
+            break
+    return result
+
 
 def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'),
                  p3_scaffold='m13', p4_edge_sections=1, p5_vertex_design=1, p6_edge_number=0,
@@ -178,6 +195,7 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     result = subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
     if result.returncode == 0:
         result.bildfiles = list( p1_output_dir.glob('*.bild') )
+        result.toolinfo= parseLCBBToolOutput( result.stdout )
         #strs = [str(x) for x in result.bildfiles]
         #prefix = os.path.commonprefix( strs )
         #print(prefix)
@@ -347,13 +365,13 @@ class AthenaWindow(QMainWindow):
         prefix = os.path.commonprefix( strs )
         postfixes = list(x[len(prefix):] for x in strs)
         for p, f in zip(postfixes, bildfiles):
-            self.outputSelectBox.addItem( p, f )
+            self.outputSelectBox.addItem( p, (f,toolresults.toolinfo['scale_factor']) )
         #print(result.bildfiles)
 
     def selectOutput( self, selection_idx ):
         if selection_idx == -1: return
-        selection = self.outputSelectBox.itemData(selection_idx)
-        decorations = bildparser.parseBildFile( selection )
+        (bildfile, scale_factor) = self.outputSelectBox.itemData(selection_idx)
+        decorations = bildparser.parseBildFile( bildfile, scale_factor )
         print(decorations.debugSummary())
         self.geomView.newDecorations( decorations )
 
