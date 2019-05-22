@@ -57,6 +57,6 @@ void main()
 
     gl_FragDepth = depth;
 
-    fragColor = fs_in.color;
+    fragColor = fs_in.color * min( 1, dot( -ray_direction, normal ) );
 
 }
