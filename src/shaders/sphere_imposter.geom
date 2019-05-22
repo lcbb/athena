@@ -47,14 +47,6 @@ vec2 outer_tangent_adjustment(vec3 center, float radius_sq) {
     return min(adjustment, 10.);
 }
 
-/*
-vec4 imposter_corner( vec4 tmppos, float radius, float radius2, vec2 corner_offset ){
-    corner_offset *= outer_tangent_adjustment(tmppos.xyz, radius2);
-    vec4 eye_space_pos = tmppos;
-    eye_space_pos.xy += radius * corner_offset;
-    return eye_space_pos;
-}*/
-
 void main()
 {
 
