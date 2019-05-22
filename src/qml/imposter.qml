@@ -4,7 +4,7 @@ import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 
 Material {
-    id: sphereImpostermaterial
+    id: impostermaterial
     effect: Effect { 
         id: root
 

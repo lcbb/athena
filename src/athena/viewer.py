@@ -283,9 +283,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         return material
 
-    def _imposterMaterial(self):
+    def _imposterMaterial(self, flavor):
         engine = QQmlEngine()
-        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'sphere.qml'
+        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'imposter.qml'
         component = QQmlComponent(engine, main_qml.as_uri() )
         if ( component.status() != QQmlComponent.Ready ):
             print ("Error loading QML:")
@@ -297,10 +297,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         # after this function ends.
         self._qtrefs.append(component)
 
+        flavor_str = flavor + '_imposter'
         shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
-        vert_shader = shader_path / 'sphere_imposter.vert'
-        geom_shader = shader_path / 'sphere_imposter.geom'
-        frag_shader = shader_path / 'sphere_imposter.frag'
+        vert_shader = shader_path / (flavor_str + '.vert')
+        geom_shader = shader_path / (flavor_str + '.geom')
+        frag_shader = shader_path / (flavor_str + '.frag')
         def loadShader( s ):
             return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
         shader = Qt3DRender.QShaderProgram(material)
@@ -343,8 +344,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.gooch_material.addParameter( self._warmColorParam )
         self.gooch_material.addParameter( self._lightPositionParam )
 
-        self.sphere_material = self._imposterMaterial()
-        self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
+        self.sphere_material = self._imposterMaterial('sphere')
+        #self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
+        self.cylinder_material = self._imposterMaterial('cylinder')
 
         self.setRootEntity(self.rootEntity)
 
