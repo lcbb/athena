@@ -28,6 +28,7 @@ Material {
                     RenderPass {
                         // populated with a shader within geomview.py, since qml cannot usefully work with
                         // relative file paths for shader loading
+                        renderStates: [ MultiSampleAntiAliasing{} ]
                     } ]
         }
     ]

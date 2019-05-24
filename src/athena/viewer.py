@@ -317,6 +317,15 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         super(AthenaViewer, self).__init__()
         self._qtrefs = []
 
+        self.renderStateSet = Qt3DRender.QRenderStateSet()
+        self.msaa = Qt3DRender.QMultiSampleAntiAliasing()
+        self.renderStateSet.addRenderState(self.msaa)
+        self.depthTest = Qt3DRender.QDepthTest()
+        self.renderStateSet.addRenderState(self.depthTest)
+        self.activeFrameGraph().setParent(self.renderStateSet)
+        self.setActiveFrameGraph( self.renderStateSet )
+
+
         self.setBackgroundColor( QColor(63,63,63) )
         self.lightOrientation = int(0) # Internal integer controlling light.position attribute
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
