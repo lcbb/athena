@@ -117,13 +117,13 @@ void main(){
     for( int i = 0; i < 14; ++i ){
 
         vec4 vertex = vec4(attr_vertex1, 1.0); 
-        //float packed_flags = box_tristrip_indices[i];
-        //float out_v = get_bit_and_shift(packed_flags);
-        //float up_v = get_bit_and_shift(packed_flags);
-        //float right_v = get_bit_and_shift(packed_flags);
-        float out_v = idx_out[i];
-        float up_v = idx_up[i];
-        float right_v = idx_right[i];
+        float packed_flags = box_tristrip_indices[i];
+        float out_v = get_bit_and_shift(packed_flags);
+        float up_v = get_bit_and_shift(packed_flags);
+        float right_v = get_bit_and_shift(packed_flags);
+        //float out_v = idx_out[i];
+        //float up_v = idx_up[i];
+        //float right_v = idx_right[i];
         vertex.xyz += up_v * attr_axis;
         vertex.xyz += (2.0 * right_v - 1.0) * radius * u;
         vertex.xyz += (2.0 * out_v - 1.0) * radius * v;
