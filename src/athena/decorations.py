@@ -37,13 +37,13 @@ class SphereDecorations(Qt3DCore.QEntity):
                      geom.AttrSpec(radius_attrname, column=3, numcols=1),
                      geom.AttrSpec(color_attrname, column=4, numcols=3)]
 
-        self.vtx_attrs = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
+        self.vtx_attrs = geom.buildVertexAttrs( self, vertex_nparr, attrspecs )
         for va in self.vtx_attrs:
             self.geometry.addAttribute(va)
 
         # Create qt3d index buffer
         index_nparr = np.arange(len(vertex_nparr),dtype=geom.basetype_numpy_codes[index_basetype])
-        self.indexAttr = geom.buildIndexAttr( parent, index_nparr )
+        self.indexAttr = geom.buildIndexAttr( self, index_nparr )
         self.geometry.addAttribute(self.indexAttr)
 
         self.renderer = Qt3DRender.QGeometryRenderer(parent)
@@ -80,13 +80,13 @@ class CylinderDecorations(Qt3DCore.QEntity):
                      geom.AttrSpec(radius_attrname, column=3, numcols=1),
                      geom.AttrSpec(color_attrname, column=4, numcols=3)]
 
-        self.vtx_attrs = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
+        self.vtx_attrs = geom.buildVertexAttrs( self, vertex_nparr, attrspecs )
         for va in self.vtx_attrs:
             self.geometry.addAttribute(va)
 
         # Create qt3d index buffer
         index_nparr = np.arange(len(vertex_nparr),dtype=geom.basetype_numpy_codes[index_basetype])
-        self.indexAttr = geom.buildIndexAttr( parent, index_nparr )
+        self.indexAttr = geom.buildIndexAttr( self, index_nparr )
         self.geometry.addAttribute(self.indexAttr)
 
         self.renderer = Qt3DRender.QGeometryRenderer(parent)

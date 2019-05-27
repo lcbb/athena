@@ -77,7 +77,7 @@ void main(){
     gs_out.radius = radius;
     gs_out.color = gs_in[0].color;
 
-    float cap = 0;
+    gs_out.cap = 0;
     float uniformglscale = 1;
 
     // calculate reciprocal of squared height
