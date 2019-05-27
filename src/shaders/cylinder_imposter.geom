@@ -53,10 +53,11 @@ uniform mat4 mvp;
 
 // static unsigned char cyl_flags[] = { 0, 4, 6, 2, 1, 5, 7, 3 }; // right(4)/up(2)/out(1) 
 const int box_vertices[]  = int[]( 0, 4, 6, 2, 1, 5, 7, 3 );
-const float box_tristrip_indices[] = float[]( 3, 2, 6, 7, 4, 2, 0, 3, 1, 6, 5, 4, 1, 0 );
-const float idx_right[] = float[]( 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0 );
-const float idx_up[] =    float[]( 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 );
-const float idx_out[] =   float[]( 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0 );
+const float box_tristrip_indices[] = float[]( 3, 7, 1, 5, 4, 7, 6, 3, 2, 1, 0, 6, 3, 5 );
+//const float box_tristrip_indices[] =   float[]( );
+const float idx_right[] = float[]( 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1 );
+const float idx_up[] =    float[]( 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1 );
+const float idx_out[] =   float[]( 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0 );
 
 // get_bit_and_shift: returns 0 or 1
 float get_bit_and_shift(inout float bits) {
@@ -77,7 +78,7 @@ void main(){
     gs_out.radius = radius;
     gs_out.color = gs_in[0].color;
 
-    gs_out.cap = 0;
+    gs_out.cap = 3;
     float uniformglscale = 1;
 
     // calculate reciprocal of squared height
@@ -118,12 +119,12 @@ void main(){
 
         vec4 vertex = vec4(attr_vertex1, 1.0); 
         float packed_flags = box_tristrip_indices[i];
-        float out_v = get_bit_and_shift(packed_flags);
-        float up_v = get_bit_and_shift(packed_flags);
-        float right_v = get_bit_and_shift(packed_flags);
-        //float out_v = idx_out[i];
-        //float up_v = idx_up[i];
-        //float right_v = idx_right[i];
+        //float out_v = get_bit_and_shift(packed_flags);
+        //float up_v = get_bit_and_shift(packed_flags);
+        //float right_v = get_bit_and_shift(packed_flags);
+        float out_v = idx_out[i];
+        float up_v = idx_up[i];
+        float right_v = idx_right[i];
         vertex.xyz += up_v * attr_axis;
         vertex.xyz += (2.0 * right_v - 1.0) * radius * u;
         vertex.xyz += (2.0 * out_v - 1.0) * radius * v;
@@ -140,7 +141,7 @@ void main(){
         // clamp z on front clipping plane if impostor box would be clipped.
         // (we ultimatly want to clip on the calculated depth in the fragment
         // shader, not the depth of the box face)
-        /*if (gl_Position.z / gl_Position.w < -1.0) {
+        if (gl_Position.z / gl_Position.w < -1.0) {
             // upper bound of possible cylinder z extend
             float diff = abs(base4.z - end4.z) + radius * 3.5;
 
@@ -153,7 +154,7 @@ void main(){
             if (inset.z / inset.w > -1.0) {
                 gl_Position.z = -gl_Position.w;
             }
-        }*/
+        }
         EmitVertex();
     }
 

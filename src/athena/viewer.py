@@ -457,8 +457,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         self.clearDecorations()
 
-        self.spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
-        self.spheres.addComponent( self.sphere_material )
+        if( bild_results.spheres ):
+            self.spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
+            self.spheres.addComponent( self.sphere_material )
 
-        self.cylinders = decorations.CylinderDecorations(self.rootEntity, bild_results.cylinders)
-        self.cylinders.addComponent( self.cylinder_material )
+        if( bild_results.cylinders ):
+            self.cylinders = decorations.CylinderDecorations(self.rootEntity, bild_results.cylinders)
+            self.cylinders.addComponent( self.cylinder_material )
