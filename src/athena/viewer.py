@@ -366,7 +366,12 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         # which keeps Qt3D from deleting it.  I don't know if this is the best approach, but it works.
         self.rootEntity.addComponent(self.flat_material)
         self.rootEntity.addComponent(self.gooch_material)
+        self.rootEntity.addComponent(self.sphere_material)
+        self.rootEntity.addComponent(self.cylinder_material)
+
         self.meshEntity = None
+        self.spheres = None
+        self.cylinders = None
         self.lastpos = None
 
     backgroundColorChanged = Signal( QColor )
@@ -404,11 +409,25 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def resetCamera(self):
         self.camControl.reset()
 
-    def reloadGeom(self, filepath):
-        self.meshFilepath = filepath
-        self.plydata = PlyData.read(filepath)
+    def clearAllGeometry( self ):
         if( self.meshEntity ):
             self.meshEntity.deleteLater()
+            self.meshEntity = None
+        self.clearDecorations()
+
+    def clearDecorations( self ):
+        if( self.spheres ):
+            self.spheres.deleteLater()
+            self.spheres = None
+        if (self.cylinders ):
+            self.cylinders.deleteLater()
+            self.cylinders = None
+
+    def reloadGeom(self, filepath):
+
+        self.meshFilepath = filepath
+        self.plydata = PlyData.read(filepath)
+        self.clearAllGeometry()
         self.meshEntity = plymesh.PlyMesh(self.rootEntity, self.plydata)
         mesh_3d = self.meshEntity.dimensions == 3
         if( mesh_3d ):
@@ -435,6 +454,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.camControl.resize(newsize.width(), newsize.height())
 
     def newDecorations(self, bild_results):
+
+        self.clearDecorations()
+
         self.spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
         self.spheres.addComponent( self.sphere_material )
 
