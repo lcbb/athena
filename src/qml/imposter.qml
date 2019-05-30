@@ -20,7 +20,8 @@ Material {
                     minorVersion: 1
                 }
 
-                filterKeys: [ FilterKey { name: "renderingStyle"; value: "forward" } ]
+                filterKeys: [ //FilterKey { name: "renderingStyle"; value: "forward" },
+                              FilterKey { name: "pass"; value: "solid" } ]
 
                 parameters: []
 

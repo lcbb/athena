@@ -2,7 +2,7 @@ from pathlib import Path
 import math
 
 from PySide2.QtGui import QColor, QVector3D as vec3d
-from PySide2.QtCore import QUrl, QByteArray, Qt, Signal
+from PySide2.QtCore import QUrl, QByteArray, Qt, Signal, QRectF
 
 from PySide2.Qt3DExtras import Qt3DExtras
 from PySide2.Qt3DRender import Qt3DRender
@@ -254,20 +254,23 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                      'line.color': QColor( 200, 10, 10),
                      'light.position': vec3d( 0, 0, 100) }
 
-    def _athenaMaterial( self, flavor ):
+    def _qmlLoad( self, qmlfile ):
         engine = QQmlEngine()
-        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'main.qml'
+        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / qmlfile
         component = QQmlComponent(engine, main_qml.as_uri() )
         if ( component.status() != QQmlComponent.Ready ):
             print ("Error loading QML:")
             print(component.errorString())
-        material = component.create()
-
+        result = component.create()
         # Need to hold a reference in python to the QQmlComponent, or else
         # PySide2 will helpfully delete the material object along with it
         # after this function ends.
         self._qtrefs.append(component)
+        return result
 
+
+    def _athenaMaterial( self, flavor ):
+        material = self._qmlLoad( 'main.qml' )
         shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
         vert_shader = shader_path / 'wireframe.vert'
         geom_shader = shader_path / 'wireframe.geom'
@@ -284,20 +287,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         return material
 
     def _imposterMaterial(self, flavor):
-        engine = QQmlEngine()
-        main_qml = Path(ATHENA_SRC_DIR) / 'qml' / 'imposter.qml'
-        component = QQmlComponent(engine, main_qml.as_uri() )
-        if ( component.status() != QQmlComponent.Ready ):
-            print ("Error loading QML:")
-            print(component.errorString())
-        material = component.create()
-
-        # Need to hold a reference in python to the QQmlComponent, or else
-        # PySide2 will helpfully delete the material object along with it
-        # after this function ends.
-        self._qtrefs.append(component)
-
         flavor_str = flavor + '_imposter'
+        material = self._qmlLoad( 'imposter.qml' )
         shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
         vert_shader = shader_path / (flavor_str + '.vert')
         geom_shader = shader_path / (flavor_str + '.geom')
@@ -317,14 +308,40 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         super(AthenaViewer, self).__init__()
         self._qtrefs = []
 
-        self.renderStateSet = Qt3DRender.QRenderStateSet()
-        self.msaa = Qt3DRender.QMultiSampleAntiAliasing()
-        self.renderStateSet.addRenderState(self.msaa)
-        self.depthTest = Qt3DRender.QDepthTest()
-        self.renderStateSet.addRenderState(self.depthTest)
-        self.activeFrameGraph().setParent(self.renderStateSet)
-        self.setActiveFrameGraph( self.renderStateSet )
+        # Manually set up a framegraph so that we can do two rendering passes
+        # Dear qt3d: this absolutely should not have been this hard.
+        self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector()
+        self.surfaceSelector.setSurface(self)
+        self.viewport = Qt3DRender.QViewport(self.surfaceSelector)
+        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+        self.cameraSelector = Qt3DRender.QCameraSelector(self.viewport)
+        self.cameraSelector.setCamera(self.camera())
+        self.clearBuffers = Qt3DRender.QClearBuffers(self.cameraSelector)
+        self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
+        self.clearBuffers.setClearColor(Qt.white)
+        
+        self.qfilt = Qt3DRender.QTechniqueFilter(self.clearBuffers)
+        self.solidPassFilter = Qt3DRender.QFilterKey(self.qfilt)
+        self.solidPassFilter.setName('pass')
+        self.solidPassFilter.setValue('solid')
+        self.qfilt.addMatch(self.solidPassFilter)
 
+        self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
+        self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
+        self.transPassFilter.setName('pass')
+        self.transPassFilter.setValue('transp')
+        self.qfilt2.addMatch(self.transPassFilter)
+
+        fg = self.activeFrameGraph()
+        def frameGraphLeaf(node, prefix=' '):
+            print(prefix, node, node.objectName())
+            children = node.children()
+            for c in children:
+                frameGraphLeaf(c, prefix+'-')
+
+        frameGraphLeaf(fg)
+        self.setActiveFrameGraph(self.surfaceSelector)
+        frameGraphLeaf(self.activeFrameGraph())
 
         self.setBackgroundColor( QColor(63,63,63) )
         self.lightOrientation = int(0) # Internal integer controlling light.position attribute
@@ -336,6 +353,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.initParameters() # defined in metaclass
         self.faceEnableChanged.connect( self.handleFaceRenderChange )
         self.lightPositionChanged.connect( self.handleLightPositionChange )
+
+        self.sphere_material = self._imposterMaterial('sphere')
+        #self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
+        self.cylinder_material = self._imposterMaterial('cylinder')
 
         self.flat_material = self._athenaMaterial( 'flat' )
         self.flat_material.addParameter( self._alphaParam )
@@ -353,10 +374,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.gooch_material.addParameter( self._warmColorParam )
         self.gooch_material.addParameter( self._lightPositionParam )
 
-        self.sphere_material = self._imposterMaterial('sphere')
-        #self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
-        self.cylinder_material = self._imposterMaterial('cylinder')
-
         self.setRootEntity(self.rootEntity)
 
         # Each time a mesh is loaded, we create a new Plymesh and add a material as a component.
@@ -369,10 +386,16 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.rootEntity.addComponent(self.sphere_material)
         self.rootEntity.addComponent(self.cylinder_material)
 
+        self.decorationEntity = Qt3DCore.QEntity( self.rootEntity )
+        self.meshEntityParent = Qt3DCore.QEntity( self.rootEntity )
+
         self.meshEntity = None
         self.spheres = None
         self.cylinders = None
         self.lastpos = None
+
+        #import IPython
+        #IPython.embed()
 
     backgroundColorChanged = Signal( QColor )
 
@@ -428,7 +451,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.meshFilepath = filepath
         self.plydata = PlyData.read(filepath)
         self.clearAllGeometry()
-        self.meshEntity = plymesh.PlyMesh(self.rootEntity, self.plydata)
+        self.meshEntity = plymesh.PlyMesh(self.meshEntityParent, self.plydata)
         mesh_3d = self.meshEntity.dimensions == 3
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
@@ -458,9 +481,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearDecorations()
 
         if( bild_results.spheres ):
-            self.spheres = decorations.SphereDecorations(self.rootEntity, bild_results.spheres)
+            self.spheres = decorations.SphereDecorations(self.decorationEntity, bild_results.spheres)
             self.spheres.addComponent( self.sphere_material )
 
         if( bild_results.cylinders ):
-            self.cylinders = decorations.CylinderDecorations(self.rootEntity, bild_results.cylinders)
+            self.cylinders = decorations.CylinderDecorations(self.decorationEntity, bild_results.cylinders)
             self.cylinders.addComponent( self.cylinder_material )
