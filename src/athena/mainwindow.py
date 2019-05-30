@@ -12,7 +12,7 @@ from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
+from athena import bildparser, viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
 
 class AutoResizingStackedWidget( QStackedWidget ):
     '''
@@ -156,6 +156,22 @@ class UiLoader(QUiLoader):
         finally:
             ui_file.close()
 
+def parseLCBBToolOutput( output ):
+    # Find and parse the scaling factor from text with a format like this: 
+    # 2.7. Find the scale factor to adjust polyhedra size
+    #   * The minumum edge length     : 42
+    #   * Scale factor to adjust size : .196
+    result = dict()
+    iter_out = iter(output.split('\n'))
+    for line in iter_out:
+        if line.strip().startswith('2.7.'):
+            line27a = next(iter_out)
+            line27b = next(iter_out)
+            result['edge_length'] = float( line27a.split(':')[1].strip() )
+            result['scale_factor'] = float( line27b.split(':')[1].strip() )
+            break
+    return result
+
 
 def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'),
                  p3_scaffold='m13', p4_edge_sections=1, p5_vertex_design=1, p6_edge_number=0,
@@ -178,6 +194,7 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     result = subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
     if result.returncode == 0:
         result.bildfiles = list( p1_output_dir.glob('*.bild') )
+        result.toolinfo= parseLCBBToolOutput( result.stdout )
         #strs = [str(x) for x in result.bildfiles]
         #prefix = os.path.commonprefix( strs )
         #print(prefix)
@@ -230,6 +247,7 @@ class AthenaWindow(QMainWindow):
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
 
         self.geometryList.newFileSelected.connect( self.newMesh )
+        self.outputSelectBox.currentIndexChanged.connect( self.selectOutput )
 
         def _setupColorButton( button, setter, signal, init_value ):
             button.colorChosen.connect( setter )
@@ -337,6 +355,24 @@ class AthenaWindow(QMainWindow):
             self.enable3DControls()
         else:
             self.enable2DControls()
+        self.outputSelectBox.clear()
+
+    def newOutputs( self, toolresults ):
+        if toolresults is None or toolresults.bildfiles is None: return
+        bildfiles = toolresults.bildfiles
+        strs = [str(x) for x in bildfiles]
+        prefix = os.path.commonprefix( strs )
+        postfixes = list(x[len(prefix):] for x in strs)
+        for p, f in zip(postfixes, bildfiles):
+            self.outputSelectBox.addItem( p, (f,toolresults.toolinfo['scale_factor']) )
+        #print(result.bildfiles)
+
+    def selectOutput( self, selection_idx ):
+        if selection_idx == -1: return
+        (bildfile, scale_factor) = self.outputSelectBox.itemData(selection_idx)
+        decorations = bildparser.parseBildFile( bildfile, scale_factor )
+        #print(decorations.debugSummary())
+        self.geomView.newDecorations( decorations )
 
     def updateStatus( self, msg ):
         self.log( msg )
@@ -361,6 +397,7 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('PERDIX returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
     def runTALOS( self ):
         self.updateStatus('Running TALOS...')
@@ -375,6 +412,7 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('TALOS returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
     def runDAEDALUS2( self ):
         self.updateStatus('Running DAEDALUS...')
@@ -388,6 +426,7 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('DAEDALUS returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
 
     def runMETIS( self ):
@@ -402,5 +441,6 @@ class AthenaWindow(QMainWindow):
         human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
         self.updateStatus('METIS returned {}.'.format(human_retval))
+        self.newOutputs(process)
 
 

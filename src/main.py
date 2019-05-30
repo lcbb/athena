@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import sys
+from PySide2.QtGui import QSurfaceFormat
 from PySide2.QtWidgets import QApplication
 from athena.mainwindow import AthenaWindow
 
@@ -61,6 +62,10 @@ def fix_macos_nswindow_tabbing():
         )
 
 fix_macos_nswindow_tabbing()
+f = QSurfaceFormat()
+f.setDepthBufferSize(24)
+f.setSamples(4)
+QSurfaceFormat.setDefaultFormat(f)
 app = QApplication(sys.argv)
 window = AthenaWindow( )
 sys.exit(app.exec_())

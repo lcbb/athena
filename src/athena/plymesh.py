@@ -14,27 +14,6 @@ import numpy as np
 from athena import geom
 from earcut import earcut
 
-# The base types enumeration
-_basetypes = Qt3DRender.QAttribute.VertexBaseType
-
-# Map from the enumeration to (byte_width, struct_code) pairs
-# This dict is unzipped into two convenience dicts below.
-_basetype_data = { _basetypes.Byte : (1,'b'), _basetypes.UnsignedByte : (1,'B'),
-                     _basetypes.Short: (2, 'h'), _basetypes.UnsignedShort : (2,'H'),
-                     _basetypes.Int  : (4, 'i'), _basetypes.UnsignedInt : (4,'I'),
-                     _basetypes.HalfFloat : (2, 'e'),
-                     _basetypes.Float : (4, 'f'),
-                     _basetypes.Double : (8, 'd') }
-
-# Map of Qt3D base types to byte widths
-_basetype_widths = { k: v[0] for k,v in _basetype_data.items()}
-
-# Map of Qt3D base types to codes for struct.unpack
-_basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
-
-# Map of Qt3D base types to numpy types
-_basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in _basetype_struct_codes.items()}
-
 def tri_norm(a,b,c):
     tri_normal = np.cross( a-b, a-c)
     tri_normal /= np.linalg.norm(tri_normal)
@@ -88,23 +67,23 @@ class PlyMesh(Qt3DCore.QEntity):
         total_vertices = len(vertices) + (num_interior_tris * 3)
         total_tris = num_tris + num_interior_tris
 
-        vertex_basetype = _basetypes.Float
+        vertex_basetype = geom.basetypes.Float
         if( total_tris < 30000 ):
-            index_basetype = _basetypes.UnsignedShort
+            index_basetype = geom.basetypes.UnsignedShort
         else:
-            index_basetype = _basetypes.UnsignedInt
+            index_basetype = geom.basetypes.UnsignedInt
 
         flat_xy = np.all( 0 == vertices['z'] )
         self.dimensions = 2 if flat_xy else 3
 
-        vertex_nparr = np.zeros([total_vertices,4],dtype=_basetype_numpy_codes[vertex_basetype])
+        vertex_nparr = np.zeros([total_vertices,4],dtype=geom.basetype_numpy_codes[vertex_basetype])
         # Fill with the input vertices
         vertex_nparr[:len(vertices),0] = vertices['x']
         vertex_nparr[:len(vertices),1] = vertices['y']
         vertex_nparr[:len(vertices),2] = vertices['z']
         vtx_idx = len(vertices)
 
-        tri_nparr = np.zeros([total_tris,3],dtype=_basetype_numpy_codes[index_basetype])
+        tri_nparr = np.zeros([total_tris,3],dtype=geom.basetype_numpy_codes[index_basetype])
         tri_idx = 0
 
 
@@ -191,46 +170,18 @@ class PlyMesh(Qt3DCore.QEntity):
 
         self.geometry = Qt3DRender.QGeometry(self)
 
-        # Create qt3d vertex buffers
-        rawstring = vertex_nparr.tobytes()
-        self.qvbytes = QByteArray(rawstring)
-        self.qvbuf = Qt3DRender.QBuffer(parent)
-        self.qvbuf.setData(self.qvbytes)
+        # Setup vertex attributes for position and interior flags
+        position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
+        interior_attrname = 'vertexInterior'
 
-        # Position attribute
-        self.positionAttr = Qt3DRender.QAttribute(parent)
-        self.positionAttr.setName( Qt3DRender.QAttribute.defaultPositionAttributeName() )
-        self.positionAttr.setVertexBaseType(vertex_basetype)
-        self.positionAttr.setVertexSize(3)
-        self.positionAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
-        self.positionAttr.setBuffer(self.qvbuf)
-        self.positionAttr.setByteStride(4*_basetype_widths[vertex_basetype])
-        self.positionAttr.setCount(len(vertex_nparr))
+        # Each row in the vertex array is [x, y, z, i]
+        attrspecs = [ geom.AttrSpec(position_attrname, column=0, numcols=3 ),
+                      geom.AttrSpec(interior_attrname, column=3, numcols=1) ]
+        self.positionAttr, self.interiorAttr = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
         self.geometry.addAttribute(self.positionAttr)
-
-        # Interior attribute
-        self.interiorAttr = Qt3DRender.QAttribute(parent)
-        self.interiorAttr.setName( 'vertexInterior' )
-        self.interiorAttr.setVertexBaseType(vertex_basetype)
-        self.interiorAttr.setVertexSize(1)
-        self.interiorAttr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
-        self.interiorAttr.setBuffer(self.qvbuf)
-        self.interiorAttr.setByteStride(4*_basetype_widths[vertex_basetype])
-        self.interiorAttr.setByteOffset(3*_basetype_widths[vertex_basetype])
-        self.interiorAttr.setCount(len(vertex_nparr))
         self.geometry.addAttribute(self.interiorAttr)
 
-        rawstring = tri_nparr.tobytes()
-        
-        self.qibytes = QByteArray(rawstring)
-        self.qibuf = Qt3DRender.QBuffer(parent)
-        self.qibuf.setData(self.qibytes)
-
-        self.indexAttr = Qt3DRender.QAttribute(self.geometry)
-        self.indexAttr.setVertexBaseType(index_basetype)
-        self.indexAttr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
-        self.indexAttr.setBuffer(self.qibuf)
-        self.indexAttr.setCount(3*total_tris)
+        self.indexAttr = geom.buildIndexAttr( parent, tri_nparr )
         self.geometry.addAttribute(self.indexAttr)
 
         self.lineMesh = Qt3DRender.QGeometryRenderer(parent)
@@ -278,7 +229,7 @@ class WireOutline(Qt3DCore.QEntity):
         #  use the same basetype as the Qt3D mesh, since presumably that file loader chose a suitable type
         iatt = geom.getQAttribute(geometry, att_type=Qt3DRender.QAttribute.IndexAttribute)
         index_type = iatt.vertexBaseType()
-        index_buffer_np = np.array(list(unique_edges), dtype=_basetype_numpy_codes[index_type])
+        index_buffer_np = np.array(list(unique_edges), dtype=geom.basetype_numpy_codes[index_type])
         rawstring = index_buffer_np.tobytes()
         
         self.qibytes = QByteArray(rawstring)

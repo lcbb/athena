@@ -127,6 +127,7 @@ vec4 shadeLine( const in vec4 color )
 void main()
 {
     // Calculate the color from the phong model
+    if( face_enable == 0. ) discard;
     float effective_alpha = min( alpha, face_enable );
     vec4 color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), effective_alpha );
     fragColor = shadeLine( color );

@@ -1,5 +1,6 @@
 import struct
 import itertools
+from collections import namedtuple
 
 from plyfile import PlyData, PlyElement
 import numpy as np
@@ -16,35 +17,91 @@ from athena import plymesh
 ATHENA_GEOM_UP = vec3d(0, 0, 1)
 
 # The base types enumeration
-_basetypes = Qt3DRender.QAttribute.VertexBaseType
+basetypes = Qt3DRender.QAttribute.VertexBaseType
 
 # Map from the enumeration to (byte_width, struct_code) pairs
 # This dict is unzipped into two convenience dicts below.
-_basetype_data = { _basetypes.Byte : (1,'b'), _basetypes.UnsignedByte : (1,'B'),
-                     _basetypes.Short: (2, 'h'), _basetypes.UnsignedShort : (2,'H'),
-                     _basetypes.Int  : (4, 'i'), _basetypes.UnsignedInt : (4,'I'),
-                     _basetypes.HalfFloat : (2, 'e'),
-                     _basetypes.Float : (4, 'f'),
-                     _basetypes.Double : (8, 'd') }
+basetype_data = { basetypes.Byte : (1,'b'), basetypes.UnsignedByte : (1,'B'),
+                  basetypes.Short: (2, 'h'), basetypes.UnsignedShort : (2,'H'),
+                  basetypes.Int  : (4, 'i'), basetypes.UnsignedInt : (4,'I'),
+                  basetypes.HalfFloat : (2, 'e'),
+                  basetypes.Float : (4, 'f'),
+                  basetypes.Double : (8, 'd') }
 
 # Map of Qt3D base types to byte widths
-_basetype_widths = { k: v[0] for k,v in _basetype_data.items()}
+basetype_widths = { k: v[0] for k,v in basetype_data.items()}
 
 # Map of Qt3D base types to codes for struct.unpack
-_basetype_struct_codes = { k: v[1] for k,v in _basetype_data.items()}
+basetype_struct_codes = { k: v[1] for k,v in basetype_data.items()}
 
 # Map of Qt3D base types to numpy types
-_basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in _basetype_struct_codes.items()}
+basetype_numpy_codes = { k: np.sctypeDict[v] for k,v in basetype_struct_codes.items()}
+
+# And the reverse
+basetype_numpy_codes_reverse = { np.sctypeDict[v] : k for k, v in basetype_struct_codes.items() }
 
 def rotateAround( v1, v2, angle ):
     q = QQuaternion.fromAxisAndAngle( v2, angle )
     return q.rotatedVector( v1 )
 
+AttrSpec = namedtuple('AttrSpec', 'name, column, numcols')
+
+def buildVertexAttrs(parent, array, attrspecs ):
+
+    # Measure the input array
+    rows = len(array)
+    columns = len(array[0])
+    basetype = basetype_numpy_codes_reverse[array.dtype.type]
+    basetype_width = basetype_widths[ basetype ]
+    row_width = columns * basetype_width
+    #print(columns, rows, basetype, basetype_width, row_width)
+
+    # Convert input to a qt buffer
+    rawstring = array.tobytes()
+    byte_array = QByteArray(rawstring)
+    qbuffer = Qt3DRender.QBuffer(parent)
+    qbuffer.setData(byte_array)
+
+    attrs = list()
+    for asp in attrspecs:
+        attr = Qt3DRender.QAttribute( parent )
+        attr.setName( asp.name )
+        attr.setVertexBaseType( basetype )
+        attr.setVertexSize(asp.numcols)
+        attr.setAttributeType(Qt3DRender.QAttribute.VertexAttribute)
+        attr.setBuffer(qbuffer)
+        attr.setByteStride(row_width)
+        attr.setByteOffset(asp.column * basetype_width)
+        attr.setCount(rows)
+        attrs.append(attr)
+    return attrs
+
+
+def buildIndexAttr(parent, array):
+
+    basetype = basetype_numpy_codes_reverse[array.dtype.type]
+    basetype_width = basetype_widths[ basetype ]
+
+    basetype_width = array.itemsize
+    rawstring = array.tobytes()
+    byte_array = QByteArray(rawstring)
+    qbuffer = Qt3DRender.QBuffer(parent)
+    qbuffer.setData(byte_array)
+
+    attr = Qt3DRender.QAttribute(parent)
+    attr.setVertexBaseType(basetype)
+    attr.setAttributeType(Qt3DRender.QAttribute.IndexAttribute)
+    attr.setBuffer(qbuffer)
+    attr.setCount(array.size)
+
+    return attr
+
+
 def iterAttr( att ):
     '''Iterator over a Qt3DRender.QAttribute'''
     basetype = att.vertexBaseType()
-    width = _basetype_widths[ basetype ]
-    struct_code = _basetype_struct_codes[ basetype ]
+    width = basetype_widths[ basetype ]
+    struct_code = basetype_struct_codes[ basetype ]
     att_data = att.buffer().data().data()
     byteOffset = att.byteOffset()
     byteStride = att.byteStride()
@@ -82,8 +139,8 @@ def dumpGeometry( geom, dumpf=print ):
         basetype = att.vertexBaseType()
         dumpf('{type} "{name}" '.format( type=str(att_type).split('AttributeType.')[-1], name=att.name()), end='' )
         dumpf( 'with base type {basetype}'.format(basetype = str(basetype).split('BaseType.')[-1]) )
-        width = _basetype_widths[ basetype ]
-        code = _basetype_struct_codes[ basetype ]
+        width = basetype_widths[ basetype ]
+        code = basetype_struct_codes[ basetype ]
 
         if( att_type == Qt3DRender.QAttribute.AttributeType.VertexAttribute ):
             for vtx in iterAttr( att ):
