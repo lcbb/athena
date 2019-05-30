@@ -332,16 +332,17 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.transPassFilter.setValue('transp')
         self.qfilt2.addMatch(self.transPassFilter)
 
-        fg = self.activeFrameGraph()
-        def frameGraphLeaf(node, prefix=' '):
-            print(prefix, node, node.objectName())
-            children = node.children()
-            for c in children:
-                frameGraphLeaf(c, prefix+'-')
+        # Framegraph display and testing code
+        #fg = self.activeFrameGraph()
+        #def frameGraphLeaf(node, prefix=' '):
+            #print(prefix, node, node.objectName())
+            #children = node.children()
+            #for c in children:
+                #frameGraphLeaf(c, prefix+'-')
 
-        frameGraphLeaf(fg)
+        #frameGraphLeaf(fg)
         self.setActiveFrameGraph(self.surfaceSelector)
-        frameGraphLeaf(self.activeFrameGraph())
+        #frameGraphLeaf(self.activeFrameGraph())
 
         self.setBackgroundColor( QColor(63,63,63) )
         self.lightOrientation = int(0) # Internal integer controlling light.position attribute
@@ -400,10 +401,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     backgroundColorChanged = Signal( QColor )
 
     def backgroundColor( self ):
-        return self.defaultFrameGraph().clearColor()
+        return self.clearBuffers.clearColor()
 
     def setBackgroundColor( self, color ):
-        self.defaultFrameGraph().setClearColor( color )
+        self.clearBuffers.setClearColor( color )
         self.backgroundColorChanged.emit(color)
 
     faceRenderingEnabledChanged = Signal( bool )
@@ -481,9 +482,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearDecorations()
 
         if( bild_results.spheres ):
-            self.spheres = decorations.SphereDecorations(self.decorationEntity, bild_results.spheres)
+            self.spheres = decorations.SphereDecorations(self.decorationEntity, bild_results)
             self.spheres.addComponent( self.sphere_material )
 
         if( bild_results.cylinders ):
-            self.cylinders = decorations.CylinderDecorations(self.decorationEntity, bild_results.cylinders)
+            self.cylinders = decorations.CylinderDecorations(self.decorationEntity, bild_results)
             self.cylinders.addComponent( self.cylinder_material )

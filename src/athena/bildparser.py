@@ -40,7 +40,7 @@ class OutputDecorations:
         self.cylinders.append( Cylinder( self.current_color, *(float(x)*(self.scale_factor) for x in tokens) ) )
 
     def addArrow( self, tokens ):
-        self.arrows.append( Arrow( self.current_color, *(float(x) for x in tokens) ) )
+        self.arrows.append( Arrow( self.current_color, *(float(x)*(self.scale_factor) for x in tokens) ) )
 
     def debugSummary( self ):
         pattern =  'parsed BILD: {0} unique colors, {1} spheres, {2} cylinders, {3} arrows' +\

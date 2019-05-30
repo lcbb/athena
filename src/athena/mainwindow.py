@@ -165,7 +165,6 @@ def parseLCBBToolOutput( output ):
     iter_out = iter(output.split('\n'))
     for line in iter_out:
         if line.strip().startswith('2.7.'):
-            print(line)
             line27a = next(iter_out)
             line27b = next(iter_out)
             result['edge_length'] = float( line27a.split(':')[1].strip() )
@@ -372,7 +371,7 @@ class AthenaWindow(QMainWindow):
         if selection_idx == -1: return
         (bildfile, scale_factor) = self.outputSelectBox.itemData(selection_idx)
         decorations = bildparser.parseBildFile( bildfile, scale_factor )
-        print(decorations.debugSummary())
+        #print(decorations.debugSummary())
         self.geomView.newDecorations( decorations )
 
     def updateStatus( self, msg ):

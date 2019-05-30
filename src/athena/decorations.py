@@ -11,9 +11,12 @@ from athena import geom
 
 class SphereDecorations(Qt3DCore.QEntity):
 
-    def __init__(self, parent, spherelist):
+    def __init__(self, parent, bildfile):
         super().__init__(parent)
+        spherelist = bildfile.spheres
         num_spheres = len(spherelist)
+
+        if num_spheres == 0: return
 
         total_vertices = num_spheres
         vertex_basetype = geom.basetypes.Float
@@ -25,6 +28,7 @@ class SphereDecorations(Qt3DCore.QEntity):
         vertex_nparr = np.zeros([total_vertices,7],dtype=geom.basetype_numpy_codes[vertex_basetype])
 
         for idx, (color, x, y, z, r) in enumerate(spherelist):
+            if color is None: color = QColor('white')
             vertex_nparr[idx,:] = x, y, z, r, color.redF(), color.greenF(), color.blueF()
 
         self.geometry = Qt3DRender.QGeometry(self)
@@ -54,9 +58,13 @@ class SphereDecorations(Qt3DCore.QEntity):
 
 class CylinderDecorations(Qt3DCore.QEntity):
 
-    def __init__(self, parent, cylinderlist):
+    def __init__(self, parent, bildfile):
         super().__init__(parent)
+        # Draw the arrow bodies as cylinders too
+        cylinderlist = bildfile.cylinders + [ Cylinder(*x[:8]) for x in bildfile.arrows]
         num_cylinders = len(cylinderlist)
+
+        if num_cylinders == 0: return
 
         total_vertices = 2 * num_cylinders
         vertex_basetype = geom.basetypes.Float
@@ -67,6 +75,7 @@ class CylinderDecorations(Qt3DCore.QEntity):
 
         vertex_nparr = np.zeros([total_vertices,7],dtype=geom.basetype_numpy_codes[vertex_basetype])
         for idx, (color, x1, y1, z1, x2, y2, z2, r) in enumerate(cylinderlist):
+            if color is None: color = QColor('white')
             vertex_nparr[2*idx,:] = x1, y1, z1, r, color.redF(), color.greenF(), color.blueF()
             vertex_nparr[2*idx+1,:] = x2, y2, z2, r, color.redF(), color.greenF(), color.blueF()
         
