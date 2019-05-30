@@ -13,5 +13,5 @@ echo "Deploying as version" $VERSION
 
 ./build_mac.sh --clean
 
-zip -j dist/athena_mac_${VERSION}.zip dist/athena
+(cd dist; zip -r athena_mac_${VERSION}.zip Athena.app)
 
