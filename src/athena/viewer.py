@@ -387,12 +387,20 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.rootEntity.addComponent(self.sphere_material)
         self.rootEntity.addComponent(self.cylinder_material)
 
-        self.decorationEntity = Qt3DCore.QEntity( self.rootEntity )
         self.meshEntityParent = Qt3DCore.QEntity( self.rootEntity )
 
         self.meshEntity = None
-        self.spheres = None
-        self.cylinders = None
+
+        class DecorationEntity(Qt3DCore.QEntity):
+            def __init__(self, parent):
+                super().__init__(parent)
+                self.spheres = None
+                self.cylinders = None
+
+        self.cylModelEntity = DecorationEntity( self.rootEntity )
+        self.routModelEntity = DecorationEntity( self.rootEntity )
+        self.atomModelEntity = DecorationEntity( self.rootEntity )
+
         self.lastpos = None
 
         #import IPython
@@ -440,12 +448,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearDecorations()
 
     def clearDecorations( self ):
-        if( self.spheres ):
-            self.spheres.deleteLater()
-            self.spheres = None
-        if (self.cylinders ):
-            self.cylinders.deleteLater()
-            self.cylinders = None
+        for ent in [self.cylModelEntity, self.routModelEntity, self.atomModelEntity]:
+            if( ent.spheres ):
+                ent.spheres.deleteLater()
+                ent.spheres = None
+            if (ent.cylinders ):
+                ent.cylinders.deleteLater()
+                ent.cylinders = None
 
     def reloadGeom(self, filepath):
 
@@ -477,14 +486,30 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         newsize = event.size()
         self.camControl.resize(newsize.width(), newsize.height())
 
-    def newDecorations(self, bild_results):
-
-        self.clearDecorations()
+    def newDecoration(self, parent, bild_results):
 
         if( bild_results.spheres ):
-            self.spheres = decorations.SphereDecorations(self.decorationEntity, bild_results)
-            self.spheres.addComponent( self.sphere_material )
+            parent.spheres = decorations.SphereDecorations(parent, bild_results)
+            parent.spheres.addComponent( self.sphere_material )
 
         if( bild_results.cylinders ):
-            self.cylinders = decorations.CylinderDecorations(self.decorationEntity, bild_results)
-            self.cylinders.addComponent( self.cylinder_material )
+            parent.cylinders = decorations.CylinderDecorations(parent, bild_results)
+            parent.cylinders.addComponent( self.cylinder_material )
+
+    def setCylDisplay(self, bild_results):
+        self.newDecoration( self.cylModelEntity, bild_results )
+
+    def setRoutDisplay(self, bild_results):
+        self.newDecoration( self.routModelEntity, bild_results )
+
+    def setAtomDisplay(self, bild_results):
+        self.newDecoration( self.atomModelEntity, bild_results )
+
+    def toggleCylDisplay(self, value):
+        self.cylModelEntity.setEnabled( value )
+
+    def toggleRoutDisplay(self, value):
+        self.routModelEntity.setEnabled( value )
+
+    def toggleAtomDisplay(self, value):
+        self.atomModelEntity.setEnabled( value )

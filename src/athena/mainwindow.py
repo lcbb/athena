@@ -215,6 +215,8 @@ class AthenaWindow(QMainWindow):
 
         self.logWindow = logwindow.LogWindow(self)
         self.actionShowLogWindow.toggled.connect( self.logWindow.setVisible )
+        self.actionShowInputSidebar.toggled.connect( self.inputSidebar.setVisible )
+        self.actionShowOutputSidebar.toggled.connect( self.outputSidebar.setVisible )
 
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
         # so do that here.
@@ -248,8 +250,14 @@ class AthenaWindow(QMainWindow):
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
 
+        self.displayCylinderBox.toggled.connect( self.geomView.toggleCylDisplay )
+        self.geomView.toggleCylDisplay(self.displayCylinderBox.isChecked())
+        self.displayRoutingBox.toggled.connect( self.geomView.toggleRoutDisplay )
+        self.geomView.toggleRoutDisplay(self.displayRoutingBox.isChecked())
+        self.displayPAtomBox.toggled.connect( self.geomView.toggleAtomDisplay )
+        self.geomView.toggleAtomDisplay(self.displayPAtomBox.isChecked())
+
         self.geometryList.newFileSelected.connect( self.newMesh )
-        self.outputSelectBox.currentIndexChanged.connect( self.selectOutput )
 
         def _setupColorButton( button, setter, signal, init_value ):
             button.colorChosen.connect( setter )
@@ -277,6 +285,7 @@ class AthenaWindow(QMainWindow):
         self.geomView.faceRenderingEnabledChanged.connect( self.controls_3D.setChecked )
 
         self.newMesh(None)
+        self.toggleOutputControls(False)
         self.show()
         self.log("Athena version {}".format(__version__))
 
@@ -301,7 +310,6 @@ class AthenaWindow(QMainWindow):
 
         perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "2D")
         for ply in sorted(perdix_inputs.glob('*.ply')):
-            print(ply)
             self.geometryList.add2DExampleFile( ply )
 
         perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "3D")
@@ -340,6 +348,10 @@ class AthenaWindow(QMainWindow):
         self.renderControls.setCurrentIndex( 1 )
         self.toolControls.setCurrentIndex( 1 )
 
+    def toggleOutputControls( self, value ):
+        self.saveResultsBox.setEnabled( value )
+        self.showResultsBox.setEnabled( value )
+
     def log( self, text ):
         self.logWindow.appendText( text )
 
@@ -351,24 +363,19 @@ class AthenaWindow(QMainWindow):
             self.enable3DControls()
         else:
             self.enable2DControls()
-        self.outputSelectBox.clear()
+        self.toggleOutputControls(False)
 
     def newOutputs( self, toolresults ):
         if toolresults is None or toolresults.bildfiles is None: return
-        bildfiles = toolresults.bildfiles
-        strs = [str(x) for x in bildfiles]
-        prefix = os.path.commonprefix( strs )
-        postfixes = list(x[len(prefix):] for x in strs)
-        for p, f in zip(postfixes, bildfiles):
-            self.outputSelectBox.addItem( p, (f,toolresults.toolinfo['scale_factor']) )
-        #print(result.bildfiles)
-
-    def selectOutput( self, selection_idx ):
-        if selection_idx == -1: return
-        (bildfile, scale_factor) = self.outputSelectBox.itemData(selection_idx)
-        decorations = bildparser.parseBildFile( bildfile, scale_factor )
-        #print(decorations.debugSummary())
-        self.geomView.newDecorations( decorations )
+        scale_factor = toolresults.toolinfo['scale_factor']
+        for path in toolresults.bildfiles:
+            if path.match('*06_cylinder_final.bild'):
+                self.geomView.setCylDisplay( bildparser.parseBildFile( path, scale_factor ) )
+            elif path.match('*09_atomic_model.bild'):
+                self.geomView.setAtomDisplay( bildparser.parseBildFile( path, scale_factor ) )
+            elif path.match('*12_routing_all.bild'):
+                self.geomView.setRoutDisplay( bildparser.parseBildFile( path, scale_factor ) )
+        self.toggleOutputControls(True)
 
     def updateStatus( self, msg ):
         self.log( msg )
