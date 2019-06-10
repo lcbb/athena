@@ -36,4 +36,15 @@ class LogWindow(QDialog):
         self.textView.appendPlainText( text )
         self.textView.verticalScrollBar().setValue( self.textView.verticalScrollBar().maximum() )
 
+class WriteWrapper:
+    '''A file-like wrapper for the log window, useful to pass to an external
+    tool that wants to write to a log file (i.e. pdbgen)'''
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+    def write(self, string):
+        stripped = string.strip()
+        if(len(stripped) > 0):
+            self.wrapped.appendText(stripped)
+    def close(self): pass
+
 

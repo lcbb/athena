@@ -4,6 +4,10 @@ from numpy import *
 import numpy as np
 import os
 import sys
+import os.path
+from athena import ATHENA_DIR
+
+_na_lib_dir = os.path.join( ATHENA_DIR, 'tools', 'na_library')
 
 """
 PDBGen Version 1.5
@@ -128,7 +132,7 @@ class BDNA(object):
 
     def AAA(self):
 
-        AAAtemp = np.loadtxt('./na_library/bdna_ath.pdb', dtype=object)
+        AAAtemp = np.loadtxt( os.path.join(_na_lib_dir, 'bdna_ath.pdb'), dtype=object)
 
         AAAlen = len(AAAtemp)
 
@@ -176,7 +180,7 @@ class BDNA(object):
     
     def CCC(self):
 
-        CCCtemp = np.loadtxt('./na_library/bdna_cgh.pdb', dtype=object)
+        CCCtemp = np.loadtxt(os.path.join(_na_lib_dir, 'bdna_cgh.pdb'), dtype=object)
 
         CCClen = len(CCCtemp)
 
@@ -226,7 +230,7 @@ class BDNA(object):
 
     def GGG(self):
 
-        GGGtemp = np.loadtxt('./na_library/bdna_gch.pdb', dtype=object)
+        GGGtemp = np.loadtxt(os.path.join(_na_lib_dir, 'bdna_gch.pdb'), dtype=object)
 
         GGGlen = len(GGGtemp)
 
@@ -272,7 +276,7 @@ class BDNA(object):
 
     def TTT(self):
 
-        TTTtemp = np.loadtxt('./na_library/bdna_tah.pdb', dtype=object)
+        TTTtemp = np.loadtxt(os.path.join(_na_lib_dir, 'bdna_tah.pdb'), dtype=object)
 
         TTTlen = len(TTTtemp)
 
@@ -668,7 +672,7 @@ def hybrid36encode(number,digits):
 
 # VI. Main PDBGen Function Definition
 
-def pdbgen(filename,abtype,natype,inputdir,outputdir):
+def pdbgen(filename,abtype,natype,inputdir,outputdir,log):
     
     """
     This function creates PDB files for a data structure input as a .cndo
@@ -697,11 +701,8 @@ def pdbgen(filename,abtype,natype,inputdir,outputdir):
         sys.stdout.write('\nNucleic acid type not currently available. Aborting...\n\n')
         return
     
-    # Find current working directory
-    workdir = os.getcwd()
-
-    # Open PDBGen logging file
-    fid = open(outputdir + filename + '-pdbgen.log', 'w')
+    # Use the given file-like logging object
+    fid = log
 
     # Initialization block
     fid.write('\n\n')
@@ -729,7 +730,7 @@ def pdbgen(filename,abtype,natype,inputdir,outputdir):
     cndofilename = filename
 
     # Parse .cndo file to get dnaInfo
-    dnaTop, dNode, triad, id_nt = cndo_to_dnainfo(cndofilename, inputdir)
+    dnaTop, dNode, triad, id_nt = cndo_to_dnainfo(cndofilename, str(inputdir))
     
     # Create array for dNode, triad
     dNode = np.asarray(dNode)

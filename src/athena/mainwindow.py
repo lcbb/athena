@@ -14,6 +14,7 @@ from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
 from athena import bildparser, viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
+from pdbgen import pdbgen
 
 class AutoResizingStackedWidget( QStackedWidget ):
     '''
@@ -196,6 +197,7 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     result = subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
     if result.returncode == 0:
         result.bildfiles = list( p1_output_dir.glob('*.bild') )
+        result.cndofile = next( p1_output_dir.glob('*.cndo') )
         result.toolinfo= parseLCBBToolOutput( result.stdout )
         #strs = [str(x) for x in result.bildfiles]
         #prefix = os.path.commonprefix( strs )
@@ -243,6 +245,7 @@ class AthenaWindow(QMainWindow):
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
+        self.saveButton.clicked.connect(self.generatePDB)
 
         self.actionQuit.triggered.connect(self.close)
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
@@ -285,7 +288,6 @@ class AthenaWindow(QMainWindow):
         self.geomView.faceRenderingEnabledChanged.connect( self.controls_3D.setChecked )
 
         self.newMesh(None)
-        self.toggleOutputControls(False)
         self.show()
         self.log("Athena version {}".format(__version__))
 
@@ -356,14 +358,15 @@ class AthenaWindow(QMainWindow):
         self.logWindow.appendText( text )
 
     def newMesh( self, meshFile ):
-        if( meshFile is None ): return
-        self.log( 'Loading '+str(meshFile) )
-        mesh_3d = self.geomView.reloadGeom( meshFile )
-        if( mesh_3d ):
-            self.enable3DControls()
-        else:
-            self.enable2DControls()
+        if( meshFile ):
+            self.log( 'Loading '+str(meshFile) )
+            mesh_3d = self.geomView.reloadGeom( meshFile )
+            if( mesh_3d ):
+                self.enable3DControls()
+            else:
+                self.enable2DControls()
         self.toggleOutputControls(False)
+        self.currentCNDO = None
 
     def newOutputs( self, toolresults ):
         if toolresults is None or toolresults.bildfiles is None: return
@@ -376,6 +379,16 @@ class AthenaWindow(QMainWindow):
             elif path.match('*12_routing_all.bild'):
                 self.geomView.setRoutDisplay( bildparser.parseBildFile( path, scale_factor ) )
         self.toggleOutputControls(True)
+        self.currentCNDO = toolresults.cndofile
+
+    def generatePDB( self ):
+        if( self.currentCNDO ):
+            cndofile = self.currentCNDO
+            dirstr = str(cndofile.parent.resolve()) + os.path.sep
+            pdbgen.pdbgen( cndofile.stem, 'B', 'DNA', dirstr, dirstr, logwindow.WriteWrapper(self.logWindow) )
+        else:
+            print("ERROR: No current pdb file")
+      
 
     def updateStatus( self, msg ):
         self.log( msg )
