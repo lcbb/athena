@@ -1,4 +1,5 @@
 import sys
+from string import capwords
 import subprocess
 import os
 import os.path
@@ -57,9 +58,10 @@ class FileSelectionTreeWidget( QTreeWidget ):
     def prettyNameFromPath( input_path ):
         # make words from the file stem, capitalize them, omit a leading number if possible
         # e.g. path/to/06_rhombic_tiling -> 'Rhombic Tiling'
+        # Hyphens are treated like underscores but not replaced with a space
         words = input_path.stem.split('_')
         if len(words) > 1 and words[0].isdigit(): words = words[1:]
-        return ' '.join( word.capitalize() for word in words )
+        return ' '.join( capwords(word,'-') for word in words )
 
     def _addFile( self, heading, name, filepath ):
         item = QTreeWidgetItem( heading )
@@ -297,21 +299,15 @@ class AthenaWindow(QMainWindow):
 
     def setupToolDefaults( self ):
 
-        perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "PERDIX")
+        perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "2D")
         for ply in sorted(perdix_inputs.glob('*.ply')):
+            print(ply)
             self.geometryList.add2DExampleFile( ply )
 
-        metis_inputs = Path(ATHENA_DIR, "sample_inputs", "METIS" )
-        for ply in sorted(metis_inputs.glob("*.ply")):
-            self.geometryList.add2DExampleFile( ply )
-
-        talos_inputs = Path(ATHENA_DIR, "sample_inputs", "TALOS")
-        for ply in sorted(talos_inputs.glob("*.ply")):
+        perdix_inputs = Path(ATHENA_DIR, "sample_inputs", "3D")
+        for ply in sorted(perdix_inputs.glob('*.ply')):
             self.geometryList.add3DExampleFile( ply )
 
-        daedalus_inputs = Path(ATHENA_DIR, "sample_inputs", "DAEDALUS2" )
-        for ply in sorted(daedalus_inputs.glob("*.ply")):
-            self.geometryList.add3DExampleFile( ply )
 
 
     def selectAndAddFileToGeomList( self ):
