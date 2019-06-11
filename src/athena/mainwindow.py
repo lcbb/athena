@@ -353,6 +353,10 @@ class AthenaWindow(QMainWindow):
     def toggleOutputControls( self, value ):
         self.saveResultsBox.setEnabled( value )
         self.showResultsBox.setEnabled( value )
+        # On Mac, the child widgets don't seem to be properly repainted
+        # unless we insist on it here
+        self.saveResultsBox.repaint()
+        self.showResultsBox.repaint()
 
     def log( self, text ):
         self.logWindow.appendText( text )
