@@ -358,6 +358,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.sphere_material = self._imposterMaterial('sphere')
         #self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
         self.cylinder_material = self._imposterMaterial('cylinder')
+        self.cone_material = self._imposterMaterial('cone')
 
         self.flat_material = self._athenaMaterial( 'flat' )
         self.flat_material.addParameter( self._alphaParam )
@@ -386,6 +387,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.rootEntity.addComponent(self.gooch_material)
         self.rootEntity.addComponent(self.sphere_material)
         self.rootEntity.addComponent(self.cylinder_material)
+        self.rootEntity.addComponent(self.cone_material)
 
         self.meshEntityParent = Qt3DCore.QEntity( self.rootEntity )
 
@@ -396,6 +398,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                 super().__init__(parent)
                 self.spheres = None
                 self.cylinders = None
+                self.cones = None
 
         self.cylModelEntity = DecorationEntity( self.rootEntity )
         self.routModelEntity = DecorationEntity( self.rootEntity )
@@ -455,6 +458,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
             if (ent.cylinders ):
                 ent.cylinders.deleteLater()
                 ent.cylinders = None
+            if (ent.cones ):
+                ent.cones.deleteLater()
+                ent.cones = None
 
     def reloadGeom(self, filepath):
 
@@ -495,6 +501,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         if( bild_results.cylinders ):
             parent.cylinders = decorations.CylinderDecorations(parent, bild_results)
             parent.cylinders.addComponent( self.cylinder_material )
+            
+        if( bild_results.arrows ):
+            parent.cones = decorations.ConeDecorations(parent, bild_results)
+            parent.cones.addComponent( self.cone_material )
 
     def setCylDisplay(self, bild_results):
         self.newDecoration( self.cylModelEntity, bild_results )
