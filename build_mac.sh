@@ -1,5 +1,12 @@
 #! /bin/sh
-python ./build_preflight.py
+set -e
+
+if [ ! -f "athena_version.py" ] ; then
+    echo "Warning: didn't find athena_version.py, so running build_preflight.py first"
+    python ./build_preflight.py
+fi
+VERSION=`python athena_version.py`
+
 pyinstaller ./src/main.py --add-data "ui:ui" --add-data "tools:tools" --add-data "sample_inputs:sample_inputs" \
                           --add-data "src/qml:qml" --add-data "src/shaders:shaders" \
                           --add-data "athena_version.py:." \
@@ -7,5 +14,4 @@ pyinstaller ./src/main.py --add-data "ui:ui" --add-data "tools:tools" --add-data
                           --osx-bundle-identifier="edu.mit.lcbb.athena" \
                           --name Athena --icon "icon/athena.icns" --windowed $*
 plutil -insert NSHighResolutionCapable -bool true dist/Athena.app/Contents/Info.plist
-VERSION=`cut -f 2 -d \" athena_version.py`
-plutil -replace CFBundleShortVersionString -string `cut -f 2 -d \" athena_version.py` dist/Athena.app/Contents/Info.plist
+plutil -replace CFBundleShortVersionString -string ${VERSION} dist/Athena.app/Contents/Info.plist

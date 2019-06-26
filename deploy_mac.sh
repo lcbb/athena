@@ -1,17 +1,16 @@
 #!/bin/sh
 set -e
 
-if [ -z "$1" ]
-  then
-    echo "You must supply a version string"
-    exit 1
-fi
+python build_preflight.py
 
-VERSION=${1}
+VERSION=`python athena_version.py`
 
 echo "Deploying as version" $VERSION
 
-./build_mac.sh --clean
+./build_mac.sh --clean --noconfirm
+./sign_mac.sh "LCBB"
 
-(cd dist; zip -r athena_mac_${VERSION}.zip Athena.app)
+ZIPFILE=athena_mac_${VERSION}.zip
+echo "Creating dist/${ZIPFILE}"
+(cd dist; zip -q -r ${ZIPFILE} Athena.app)
 

@@ -12,7 +12,10 @@ print(version_hunks)
 assert( hunk.isdigit() for hunk in version_hunks[0:2] )
 
 def writeAthenaVersionFile():
-    template = 'version = "{}"\n'
+    template = '''
+version = "{}"
+if __name__=='__main__': print (version)
+'''
     content = template.format(athena_version)
     filename = 'athena_version.py'
     open(filename,'w+').write(content)
@@ -69,11 +72,9 @@ VSVersionInfo(
         f.write(content)
     print("Wrote windows exe version info to", filename)
 
-def writeOSXPlistFile():
-    pass
-
 writeAthenaVersionFile()
 if platform.system() ==  'Windows':
     writeWindowsVersionFile(version_hunks)
 elif platform.system() == 'Darwin':
-    writeOSXPlistFile()
+    # Nothing specific for mac right now
+    pass
