@@ -17,6 +17,7 @@ out CylinderPoint {
     vec3 end_cyl;
     vec3 U;
     vec3 V;
+    float H;
     float radius;
     float cap;
     float inv_sqr_height;
@@ -78,7 +79,7 @@ void main(){
     gs_out.radius = radius;
     gs_out.color = gs_in[0].color;
 
-    gs_out.cap = 3;
+    gs_out.cap = 1;
     float uniformglscale = 1;
 
     // calculate reciprocal of squared height
@@ -124,6 +125,7 @@ void main(){
         //float right_v = get_bit_and_shift(packed_flags);
         float out_v = idx_out[i];
         float up_v = idx_up[i];
+        gs_out.H = 1.0 - up_v;
         float right_v = idx_right[i];
         vertex.xyz += up_v * attr_axis;
         vertex.xyz += (2.0 * right_v - 1.0) * radius * u;

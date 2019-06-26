@@ -8,6 +8,7 @@ in CylinderPoint {
     vec3 end_cyl;
     vec3 U;
     vec3 V;
+    float H;
     float radius;
     float cap;
     float inv_sqr_height;
@@ -45,7 +46,8 @@ void main(void)
     vec2 P = ((ray_target - fs_in.base) * basis).xy;
     vec2 D = (ray_direction * basis).xy;
 
-    float radius2 = fs_in.radius*fs_in.radius;
+    float radius = fs_in.radius * fs_in.H;
+    float radius2 = radius * radius;
 
     // calculate distance to the cylinder from ray origin
     float a0 = P.x*P.x + P.y*P.y - radius2;
