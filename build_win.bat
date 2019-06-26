@@ -1,4 +1,7 @@
-python .\build_preflight.py
+IF NOT EXIST "athena_version.py" (
+    echo "Warning: didn't find athena_version.py, so running build_preflight.py first"
+    python .\build_preflight.py
+)
 pyinstaller .\src\main.py --add-data "ui;ui" --add-data "tools;tools" --add-data "sample_inputs;sample_inputs" ^
                           --add-data "src/qml;qml" --add-data "src/shaders;shaders" ^
                           --add-data "athena_version.py;version.py" ^

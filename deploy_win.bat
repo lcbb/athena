@@ -1,5 +1,9 @@
-echo Deploying as version %1%
+python build_preflight.py
 
-call .\build_win.bat --clean --onefile
+for /f %%i in ('python athena_version.py') do set VERSION=%%i
 
-zip -j .\dist\athena_win_%1%.zip .\dist\athena.exe
+echo Deploying as version %VERSION%
+
+call .\build_win.bat --clean --noconfirm --onefile
+
+zip -j .\dist\athena_win_%VERSION%.zip .\dist\athena.exe
