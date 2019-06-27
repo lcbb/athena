@@ -38,6 +38,9 @@ void main(void)
     vec3 ray_origin = vec3(0, 0, 0);
     vec3 ray_direction = normalize(-ray_target);
 
+    // refer to the helpful derivation at 
+    // http://www.illusioncatalyst.com/notes_files/mathematics/line_cone_intersection.php
+
     float len = length(fs_in.end_cyl - fs_in.base);
     float radius2 = fs_in.radius * fs_in.radius;
     float m = (radius2) / ( len * len );
@@ -66,8 +69,11 @@ void main(void)
 
     // point of intersection on cylinder surface
     vec3 new_point = ray_origin + dist * ray_direction;
-    vec3 tmp_point = new_point - fs_in.base;
-    vec3 normal = normalize(tmp_point - fs_in.axis * dot(tmp_point, fs_in.axis));
+    vec3 tmp_point = fs_in.end_cyl - new_point;
+    vec3 tangent = -cross( tmp_point, fs_in.axis ); // tangent to cone
+    vec3 normal = normalize( cross( tmp_point, tangent ) ); 
+
+    //vec3 normal = normalize(tmp_point - fs_in.axis * dot(tmp_point, fs_in.axis));
     vec4 color = fs_in.color;
 
 
