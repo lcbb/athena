@@ -35,35 +35,41 @@ bool get_bit_and_shift(inout float bits) {
 void main(void)
 {
     vec3 ray_target = fs_in.surface_point;
-
     vec3 ray_origin = vec3(0, 0, 0);
     vec3 ray_direction = normalize(-ray_target);
 
-    // basis is local system of coordinates for the cylinder
-    mat3 basis = mat3(fs_in.U, fs_in.V, fs_in.axis);
+    float len = length(fs_in.end_cyl - fs_in.base);
+    float m = (fs_in.radius * fs_in.radius) / ( len * len );
 
-    // vectors in cylinder xy-plane
-    vec2 P = ((ray_target - fs_in.base) * basis).xy;
-    vec2 D = (ray_direction * basis).xy;
+    vec3 v = -ray_direction;
+    vec3 w = fs_in.end_cyl;
+    vec3 h = fs_in.axis;
+    vec3 H = fs_in.end_cyl - fs_in.base;
 
-    float radius = fs_in.radius * fs_in.H;
-    float radius2 = radius * radius;
+    float vdoth = dot( v, h );
+    float vdoth2 = vdoth * vdoth;
+    float wdoth = dot( w, h );
+    float wdoth2 = wdoth * wdoth;
 
-    // calculate distance to the cylinder from ray origin
-    float a0 = P.x*P.x + P.y*P.y - radius2;
-    float a1 = P.x*D.x + P.y*D.y;
-    float a2 = D.x*D.x + D.y*D.y;
-    // calculate a dicriminant of the above quadratic equation
-    float d = a1*a1 - a0*a2;
+    float a = dot( v, v ) - m * vdoth2 - vdoth2;
+    float b = 2 * ( dot( v, w ) - m * vdoth * wdoth - vdoth*wdoth );
+    float c = dot( w, w ) - m * (wdoth2) - wdoth2;
+    float d = b*b - 4 * a *c;
+
     if (d < 0.0){
         // outside of the cylinder
         discard;
     }
 
-    float dist = (-a1 + sqrt(d))/a2;
+    float dist = (-b + sqrt(d)) / (2 * a);
 
     // point of intersection on cylinder surface
-    vec3 new_point = ray_target + dist * ray_direction;
+    vec3 new_point = ray_origin + dist * ray_direction;
+
+
+    float HH = dot( (new_point - fs_in.base) , h );
+    //if ( HH < 0 ){ discard; }
+    //if ( HH > length(H) ){ discard; }
 
     vec3 tmp_point = new_point - fs_in.base;
     vec3 normal = normalize(tmp_point - fs_in.axis * dot(tmp_point, fs_in.axis));
@@ -100,8 +106,9 @@ void main(void)
     color = mix(color1, color2, ratio);*/
 
     bool cap_test_base = 0.0 > dot((new_point - fs_in.base), fs_in.axis);
-    bool cap_test_end  = 0.0 < dot((new_point - fs_in.end_cyl), fs_in.axis);
+    bool cap_test_end  = false; //  0.0 < dot((new_point - fs_in.end_cyl), fs_in.axis);
 
+    /*
     if (cap_test_base || cap_test_end) {
       vec3 thisaxis = -fs_in.axis;
       vec3 thisbase = fs_in.base;
@@ -140,7 +147,7 @@ void main(void)
 
         normal = thisaxis;
       }
-    }
+    }*/
 
     vec2 clipZW = new_point.z * projectionMatrix[2].zw +
         projectionMatrix[3].zw;

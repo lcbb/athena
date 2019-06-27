@@ -104,15 +104,18 @@ void main(){
       u = cross(h, vec3(0.0, 1.0, 0.0));
     u = normalize(u);
     vec3 v = normalize(cross(u, h));
-
+    
     // transform to modelview coordinates
     gs_out.U = normalize(modelViewNormal * u);
     gs_out.V = normalize(modelViewNormal * v);
+    gs_out.radius = length( modelViewNormal * (v * radius ) );
 
     vec4 base4 = modelView * vec4(attr_vertex1, 1.0);
     gs_out.base = base4.xyz;
     vec4 end4 = modelView * vec4(attr_vertex2, 1.0);
     gs_out.end_cyl = end4.xyz;
+    //vec4 rad4 = modelView * vec4(attr_vertex1 + (v*radius) , 1.0);
+    //gs_out.radius = length( rad4.xyz );
 
     // compute properties of each of the 12 vertices of imposter box as tristrip
     //for( int i = 11; i >= 0; --i ){
