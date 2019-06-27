@@ -61,46 +61,50 @@ void main(void)
     float d = b*b - 4 * a *c;
 
     if (d < 0.0){
-        // outside of the cylinder
+        // outside of the cone
         discard;
     }
 
     float dist = (-b + sqrt(d)) / (2 * a);
+    //if( dist < 0 ) discard;
 
     // point of intersection on cylinder surface
     vec3 new_point = ray_origin + dist * ray_direction;
     vec3 tmp_point = fs_in.end_cyl - new_point;
     vec3 tangent = -cross( tmp_point, fs_in.axis ); // tangent to cone
     vec3 normal = normalize( cross( tmp_point, tangent ) ); 
+    bool visible_normal = dot( normal, ray_direction) > 0;
+    //if( !visible_normal ){ normal = -normal; }
 
     //vec3 normal = normalize(tmp_point - fs_in.axis * dot(tmp_point, fs_in.axis));
     vec4 color = fs_in.color;
 
 
+    bool in_cone = true;
+    bool in_base = false;
     float HH = dot( (new_point - fs_in.base) , h );
-    if ( HH > length(H) ){ discard; }  // below the base -- treat as end cap.
-    if ( HH < 0 ){ //discard; } // above the point
+    if( HH < 0 || HH > length(H) ) { in_cone = false; }
 
-        bool cap_test_base = 0.0 > dot((new_point - fs_in.base), fs_in.axis);
+    // now test for intersection with the base cap
+    vec3 thisaxis = -fs_in.axis;
+    vec3 thisbase = fs_in.base;
 
-        if (cap_test_base) {
-          vec3 thisaxis = -fs_in.axis;
-          vec3 thisbase = fs_in.base;
-
-          // ray-plane intersection
-          float dNV = dot(thisaxis, ray_direction);
-          if (dNV < 0.0)
-            discard;
-
-          float near = dot(thisaxis, thisbase - ray_origin) / dNV;
-          new_point = ray_direction * near + ray_origin;
-          // within the cap radius?
-          if (dot(new_point - thisbase, new_point - thisbase) > radius2)
-            discard;
-
-          normal = thisaxis;
-          }
+    // ray-plane intersection
+    float dNV = dot(thisaxis, ray_direction);
+    if (dNV >= 0.0 ){
+        float cap_dist = dot( thisaxis, thisbase - ray_origin) / dNV;
+        vec3 cap_point = ray_direction * cap_dist + ray_origin;
+        if( dot(cap_point - thisbase, cap_point - thisbase) <= radius2 ){
+            if( cap_dist < dist || in_cone == false ){
+                new_point = cap_point;
+                normal = thisaxis;
+                in_base = true;
+            }
         }
+    }
+    if( in_base == false && in_cone == false ){
+        discard;
+    }
 
     vec2 clipZW = new_point.z * projectionMatrix[2].zw +
         projectionMatrix[3].zw;
