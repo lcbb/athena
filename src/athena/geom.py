@@ -153,8 +153,13 @@ def dumpGeometry( geom, dumpf=print ):
                 dumpf(tri)
 class AABB:
     def __init__(self, geom):
-        vertices = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
-        it = iterAttr(vertices)
+        if hasattr(geom, 'allVertices'):
+            # Something lke bildparser.OutputDecorations
+            it = geom.allVertices()
+        else:
+            # assume it's a qt3d geometry
+            vertices = getQAttribute( geom, att_name = Qt3DRender.QAttribute.defaultPositionAttributeName() )
+            it = iterAttr(vertices)
         v0 = next(it)
         self.min = vec3d( v0[0], v0[1], v0[2])
         self.max = vec3d( self.min  )
@@ -166,6 +171,33 @@ class AABB:
             self.max.setY( max( self.max.y(), v[1] ) )
             self.max.setZ( max( self.max.z(), v[2] ) )
         self.center = (self.min+self.max) / 2.0
+
+    def iterCorners(self, cons = vec3d ):
+        for x in [self.min.x(), self.max.x()]:
+            for y in [self.min.y(), self.max.y()]:
+                for z in [self.min.z(), self.max.z()]:
+                    yield cons(x, y, z)
+
+def transformBetween( aabb1, aabb2 ):
+
+        def np_coords_from_aabb(aabb):
+            return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x])) ) )
+
+        coord_from = np_coords_from_aabb( aabb1 )
+        coord_to = np_coords_from_aabb( aabb2 )
+
+        n = coord_from.shape[0]
+        pad = lambda x: np.hstack([x, np.ones((x.shape[0],1))])
+        unpad = lambda x: x[:,:-1]
+
+        X = pad(coord_from)
+        Y = pad(coord_to)
+
+        A, res, rank, s = np.linalg.lstsq(X, Y, rcond=None)
+
+        transform = lambda x: unpad(np.dot(pad(x), A))
+
+        return transform
 
 
 

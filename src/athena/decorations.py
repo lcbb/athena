@@ -11,7 +11,7 @@ from athena import geom
 
 class SphereDecorations(Qt3DCore.QEntity):
 
-    def __init__(self, parent, bildfile):
+    def __init__(self, parent, bildfile, transform=None):
         super().__init__(parent)
         spherelist = bildfile.spheres
         num_spheres = len(spherelist)
@@ -30,6 +30,12 @@ class SphereDecorations(Qt3DCore.QEntity):
         for idx, (color, x, y, z, r) in enumerate(spherelist):
             if color is None: color = QColor('white')
             vertex_nparr[idx,:] = x, y, z, r, color.redF(), color.greenF(), color.blueF()
+
+        if( transform ):
+            vertex_nparr[:,0:3] = transform(vertex_nparr[:,0:3])
+            # Transform radii by the equivalent scaling factor (assume it's equal in all dimensions)
+            scale = transform(np.ones((1,3)))[0,0]
+            vertex_nparr[:,3] *= scale
 
         self.geometry = Qt3DRender.QGeometry(self)
 
@@ -58,7 +64,7 @@ class SphereDecorations(Qt3DCore.QEntity):
 
 class CylinderDecorations(Qt3DCore.QEntity):
 
-    def __init__(self, parent, bildfile):
+    def __init__(self, parent, bildfile, transform=None):
         super().__init__(parent)
         # Draw the arrow bodies as cylinders too
         cylinderlist = bildfile.cylinders + list( bildfile.cylindersFromArrows() )
@@ -78,7 +84,13 @@ class CylinderDecorations(Qt3DCore.QEntity):
             if color is None: color = QColor('white')
             vertex_nparr[2*idx,:] = x1, y1, z1, r, color.redF(), color.greenF(), color.blueF()
             vertex_nparr[2*idx+1,:] = x2, y2, z2, r, color.redF(), color.greenF(), color.blueF()
-        
+
+        if( transform ):
+            vertex_nparr[:,0:3] = transform(vertex_nparr[:,0:3])
+            # Transform radii by the equivalent scaling factor (assume it's equal in all dimensions)
+            scale = transform(np.ones((1,3)))[0,0]
+            vertex_nparr[:,3] *= scale
+
         self.geometry = Qt3DRender.QGeometry(self)
 
         position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
@@ -106,7 +118,7 @@ class CylinderDecorations(Qt3DCore.QEntity):
 
 class ConeDecorations(Qt3DCore.QEntity):
 
-    def __init__(self, parent, bildfile):
+    def __init__(self, parent, bildfile, transform=None):
         super().__init__(parent)
         conelist = list( bildfile.conesFromArrows() )
         num_cones = len(conelist)
@@ -125,7 +137,12 @@ class ConeDecorations(Qt3DCore.QEntity):
             if color is None: color = QColor('white')
             vertex_nparr[2*idx,:] = x1, y1, z1, r, color.redF(), color.greenF(), color.blueF()
             vertex_nparr[2*idx+1,:] = x2, y2, z2, 0, color.redF(), color.greenF(), color.blueF()
-        
+
+        if( transform ):
+            vertex_nparr[:,0:3] = transform(vertex_nparr[:,0:3])
+            scale = transform(np.ones((1,3)))[0,0]
+            vertex_nparr[:,3] *= scale
+
         self.geometry = Qt3DRender.QGeometry(self)
 
         position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()

@@ -1,5 +1,6 @@
 from pathlib import Path
 import math
+import numpy as np
 
 from PySide2.QtGui import QColor, QVector3D as vec3d
 from PySide2.QtCore import QUrl, QByteArray, Qt, Signal, QRectF
@@ -22,7 +23,7 @@ class CameraController:
         self.geometry = geometry
 
     def _windowAspectRatio(self):
-        return self.window.width() / self.window.height()
+        return self.window.width() / (2 * self.window.height())
 
     def reset(self):
         pass
@@ -135,7 +136,7 @@ class CameraController3D(CameraController):
         self.camera.setFieldOfView( new_fov )
 
     def resize(self, new_width, new_height):
-        new_ratio = new_width / new_height
+        new_ratio = new_width / (2 * new_height)
         self.camera.setAspectRatio(new_ratio)
 
 class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
@@ -312,9 +313,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         # Dear qt3d: this absolutely should not have been this hard.
         self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector()
         self.surfaceSelector.setSurface(self)
-        self.viewport = Qt3DRender.QViewport(self.surfaceSelector)
-        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
-        self.cameraSelector = Qt3DRender.QCameraSelector(self.viewport)
+        self.cameraSelector = Qt3DRender.QCameraSelector(self.surfaceSelector)
         self.cameraSelector.setCamera(self.camera())
         self.clearBuffers = Qt3DRender.QClearBuffers(self.cameraSelector)
         self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
@@ -325,23 +324,26 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.solidPassFilter.setName('pass')
         self.solidPassFilter.setValue('solid')
         self.qfilt.addMatch(self.solidPassFilter)
+        self.viewport = Qt3DRender.QViewport(self.qfilt)
+        self.viewport.setNormalizedRect(QRectF(.5, 0, 0.5, 1.0))
 
         self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
         self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
         self.transPassFilter.setName('pass')
         self.transPassFilter.setValue('transp')
         self.qfilt2.addMatch(self.transPassFilter)
+        self.viewport2 = Qt3DRender.QViewport(self.qfilt2)
+        self.viewport2.setNormalizedRect(QRectF(0, 0, .5, 1.0))
+
+        self.setActiveFrameGraph(self.surfaceSelector)
 
         # Framegraph display and testing code
-        #fg = self.activeFrameGraph()
-        #def frameGraphLeaf(node, prefix=' '):
-            #print(prefix, node, node.objectName())
-            #children = node.children()
-            #for c in children:
-                #frameGraphLeaf(c, prefix+'-')
+        def frameGraphLeaf(node, prefix=' '):
+            print(prefix, node, node.objectName())
+            children = node.children()
+            for c in children:
+                frameGraphLeaf(c, prefix+'-')
 
-        #frameGraphLeaf(fg)
-        self.setActiveFrameGraph(self.surfaceSelector)
         #frameGraphLeaf(self.activeFrameGraph())
 
         self.setBackgroundColor( QColor(63,63,63) )
@@ -494,16 +496,21 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     def newDecoration(self, parent, bild_results):
 
+        decoration_aabb = geom.AABB( bild_results )
+        geom_aabb = self.camControl.aabb
+
+        T = geom.transformBetween( decoration_aabb, geom_aabb )
+
         if( bild_results.spheres ):
-            parent.spheres = decorations.SphereDecorations(parent, bild_results)
+            parent.spheres = decorations.SphereDecorations(parent, bild_results, T)
             parent.spheres.addComponent( self.sphere_material )
 
         if( bild_results.cylinders ):
-            parent.cylinders = decorations.CylinderDecorations(parent, bild_results)
+            parent.cylinders = decorations.CylinderDecorations(parent, bild_results, T)
             parent.cylinders.addComponent( self.cylinder_material )
             
         if( bild_results.arrows ):
-            parent.cones = decorations.ConeDecorations(parent, bild_results)
+            parent.cones = decorations.ConeDecorations(parent, bild_results, T)
             parent.cones.addComponent( self.cone_material )
 
     def setCylDisplay(self, bild_results):

@@ -69,6 +69,16 @@ class OutputDecorations:
             base = end + axis
             yield Cone( arrow.color, base.x(), base.y(), base.z(), end.x(), end.y(), end.z(), arrow.r2 )
 
+    def allVertices( self ):
+        for s in self.spheres:
+            yield (s.x, s.y, s.z)
+        for c in self.cylinders:
+            yield (c.x1, c.y1, c.z1)
+            yield (c.x2, c.y2, c.z2)
+        for c in self.arrows:
+            yield (c.x1, c.y1, c.z1)
+            yield (c.x2, c.y2, c.z2)
+
 
 def parseBildFile( filename, scale_factor ):
     results = OutputDecorations(scale_factor)
