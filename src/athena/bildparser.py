@@ -56,7 +56,7 @@ class OutputDecorations:
         for arrow in self.arrows:
             xyz1 = vec3d( arrow.x1, arrow.y1, arrow.z1)
             axis = vec3d( arrow.x2, arrow.y2, arrow.z2 ) - xyz1
-            axis *= 1.0 - arrow.rho
+            axis *= arrow.rho
             xyz2 = xyz1 + axis
             yield Cylinder(arrow.color, xyz1.x(), xyz1.y(), xyz1.z(), xyz2.x(), xyz2.y(), xyz2.z(), arrow.r1 )
 
@@ -65,7 +65,7 @@ class OutputDecorations:
             xyz1 = vec3d( arrow.x1, arrow.y1, arrow.z1)
             end = vec3d( arrow.x2, arrow.y2, arrow.z2)
             axis = xyz1 - end
-            axis *= arrow.rho
+            axis *= 1.0 - arrow.rho
             base = end + axis
             yield Cone( arrow.color, base.x(), base.y(), base.z(), end.x(), end.y(), end.z(), arrow.r2 )
 
