@@ -84,7 +84,7 @@ class CameraController2D(CameraController):
         self._orient()
 
     def resize(self, new_width, new_height):
-        new_ratio = new_width / new_height
+        new_ratio = new_width / (2 * new_height)
         self._orient(new_ratio)
 
 class CameraController3D(CameraController):
