@@ -61,7 +61,7 @@ class CylinderDecorations(Qt3DCore.QEntity):
     def __init__(self, parent, bildfile):
         super().__init__(parent)
         # Draw the arrow bodies as cylinders too
-        cylinderlist = bildfile.cylinders # + [ Cylinder(*x[:8]) for x in bildfile.arrows]
+        cylinderlist = bildfile.cylinders + list( bildfile.cylindersFromArrows() )
         num_cylinders = len(cylinderlist)
 
         if num_cylinders == 0: return
@@ -108,7 +108,7 @@ class ConeDecorations(Qt3DCore.QEntity):
 
     def __init__(self, parent, bildfile):
         super().__init__(parent)
-        conelist = [ Cylinder(*x[:7],x[8]) for x in bildfile.arrows]
+        conelist = list( bildfile.conesFromArrows() )
         num_cones = len(conelist)
 
         if num_cones == 0: return
