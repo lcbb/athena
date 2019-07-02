@@ -10,13 +10,19 @@ in SphereVertex {
 out vec4 fragColor;
 
 uniform mat4 projectionMatrix;
+uniform float proj_orthographic;
 
 void main()
 {
-    //fragColor = vec4(0, 1, 0, 1);
     vec3 ray_origin = vec3(0, 0, 0);
     vec3 ray_direction = normalize( fs_in.point );
     vec3 sphere_direction = fs_in.sphere_center;
+
+    if( proj_orthographic > 0.5 ){
+        ray_origin = fs_in.point;
+        ray_direction = vec3(0., 0., -1.);
+        sphere_direction = ray_origin - fs_in.sphere_center;
+    }
 
     // Calculate sphere-ray intersection
     float b = dot(sphere_direction, ray_direction);

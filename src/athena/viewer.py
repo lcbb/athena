@@ -41,11 +41,13 @@ class CameraController2D(CameraController):
     def __init__(self, window, camera, geometry):
         super(CameraController2D,self).__init__(window, camera, geometry)
         self.aabb = geom.AABB(self.geometry)
+        self.aabb.min.setZ( self.aabb.min.z() - 5 )
+        self.aabb.max.setZ( self.aabb.max.z() + 5 )
         self.reset()
 
     def reset(self):
         self.margin = 1.4
-        self.zpos = self.aabb.max.z() + 10
+        self.zpos = self.aabb.max.z()
         self.camera.setViewCenter( self.aabb.center )
         self.camera.setPosition( vec3d( self.aabb.center.x(), self.aabb.center.y(), self.zpos ) )
         self.camera.setUpVector( ATHENA_GEOM_UP )
@@ -66,8 +68,8 @@ class CameraController2D(CameraController):
         xmax = self.aabb.center.x() + x_view / 2
         ymin = self.aabb.center.y() - y_view / 2
         ymax = self.aabb.center.y() + y_view / 2
-        zmin = self.aabb.min.z() - 20
-        zmax = self.aabb.max.z() + 20
+        zmin = self.aabb.min.z() - 10 
+        zmax = self.aabb.max.z() + 10
 
         self.camera.lens().setOrthographicProjection( xmin, xmax, ymin, ymax, zmin, zmax )
 
@@ -248,6 +250,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     _qparameters = { 'alpha': 1.0,
                      'face_enable': 1.0,
+                     'proj_orthographicc': 1.0,
                      'flat_color': QColor( 97, 188, 188),
                      'cool_color': QColor( 0, 25, 170 ),
                      'warm_color': QColor( 210, 190, 0),
@@ -303,6 +306,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         for rpass in material.effect().techniques()[0].renderPasses():
             rpass.setShaderProgram( shader )
 
+        material.addParameter( self._projOrthographiccParam )
         return material
 
     def __init__(self):

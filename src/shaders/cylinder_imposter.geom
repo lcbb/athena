@@ -18,7 +18,6 @@ out CylinderPoint {
     vec3 U;
     vec3 V;
     float radius;
-    float cap;
     float inv_sqr_height;
     vec4 color;
 } gs_out;
@@ -78,7 +77,6 @@ void main(){
     gs_out.radius = radius;
     gs_out.color = gs_in[0].color;
 
-    gs_out.cap = 3;
     float uniformglscale = 1;
 
     // calculate reciprocal of squared height

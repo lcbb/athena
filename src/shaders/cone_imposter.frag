@@ -19,6 +19,7 @@ in CylinderPoint {
 out vec4 fragColor;
 
 uniform mat4 projectionMatrix;
+uniform float proj_orthographic;
 
     //fragColor = fs_in.color;
 /*
@@ -38,6 +39,11 @@ void main(void)
     vec3 ray_origin = vec3(0, 0, 0);
     vec3 ray_direction = normalize(-ray_target);
 
+    if( proj_orthographic > 0.5 ){
+        ray_direction = vec3(0., 0, 1);
+        ray_origin = fs_in.surface_point;
+    }
+
     // refer to the helpful derivation at 
     // http://www.illusioncatalyst.com/notes_files/mathematics/line_cone_intersection.php
 
@@ -45,8 +51,8 @@ void main(void)
     float radius2 = fs_in.radius * fs_in.radius;
     float m = (radius2) / ( len * len );
 
-    vec3 v = -ray_direction;
-    vec3 w = fs_in.end_cyl;
+    vec3 v = ray_direction;
+    vec3 w = ray_origin - fs_in.end_cyl;
     vec3 h = fs_in.axis;
     vec3 H = fs_in.end_cyl - fs_in.base;
 
@@ -60,9 +66,15 @@ void main(void)
     float c = dot( w, w ) - m * (wdoth2) - wdoth2;
     float d = b*b - 4 * a *c;
 
+    vec4 color = fs_in.color;
+
+    bool in_cone = true;
+
     if (d < 0.0){
         // outside of the cone
         discard;
+        color = vec4( 0, 1, 0, 1 );
+        in_cone = false;
     }
 
     float dist = (-b + sqrt(d)) / (2 * a);
@@ -73,19 +85,12 @@ void main(void)
     vec3 tmp_point = fs_in.end_cyl - new_point;
     vec3 tangent = -cross( tmp_point, fs_in.axis ); // tangent to cone
     vec3 normal = normalize( cross( tmp_point, tangent ) ); 
-    bool visible_normal = dot( normal, ray_direction) > 0;
-    //if( !visible_normal ){ normal = -normal; }
 
-    //vec3 normal = normalize(tmp_point - fs_in.axis * dot(tmp_point, fs_in.axis));
-    vec4 color = fs_in.color;
-
-
-    bool in_cone = true;
-    bool in_base = false;
     float HH = dot( (new_point - fs_in.base) , h );
     if( HH < 0 || HH > length(H) ) { in_cone = false; }
 
     // now test for intersection with the base cap
+    bool in_base = false;
     vec3 thisaxis = -fs_in.axis;
     vec3 thisbase = fs_in.base;
 
@@ -116,6 +121,6 @@ void main(void)
       discard;
 
     gl_FragDepth = depth;
-    fragColor = fs_in.color * min( 1, dot( ray_direction, normal ) );
+    fragColor = color * min(1, dot(ray_direction, normal));
 
 }
