@@ -478,9 +478,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
             self.camControl = CameraController3D(self, self.camera(), self.meshEntity.geometry)
+            self.setProjOrthographic(0.0)
         else:
             self.meshEntity.addComponent(self.flat_material)
             self.camControl = CameraController2D(self, self.camera(), self.meshEntity.geometry)
+            self.setProjOrthographic(1.0)
         self.camControl.reset()
         return mesh_3d
 
