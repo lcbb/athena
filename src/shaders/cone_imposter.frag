@@ -68,17 +68,12 @@ void main(void)
 
     vec4 color = fs_in.color;
 
-    bool in_cone = true;
-
     if (d < 0.0){
         // outside of the cone
         discard;
-        color = vec4( 0, 1, 0, 1 );
-        in_cone = false;
     }
 
     float dist = (-b + sqrt(d)) / (2 * a);
-    //if( dist < 0 ) discard;
 
     // point of intersection on cone surface
     vec3 new_point = ray_origin + dist * ray_direction;
@@ -86,6 +81,7 @@ void main(void)
     vec3 tangent = -cross( tmp_point, fs_in.axis ); // tangent to cone
     vec3 normal = normalize( cross( tmp_point, tangent ) ); 
 
+    bool in_cone = true;
     float HH = dot( (new_point - fs_in.base) , h );
     if( HH < 0 || HH > length(H) ) { in_cone = false; }
 
