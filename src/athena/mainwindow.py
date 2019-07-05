@@ -13,7 +13,7 @@ from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import bildparser, viewer, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
+from athena import bildparser, viewer, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
 from pdbgen import pdbgen
 
 class AutoResizingStackedWidget( QStackedWidget ):
@@ -376,12 +376,16 @@ class AthenaWindow(QMainWindow):
         if toolresults is None or toolresults.bildfiles is None: return
         scale_factor = toolresults.toolinfo['scale_factor']
         for path in toolresults.bildfiles:
+            if path.match('*01_target_geometry.bild'):
+                base_bild = bildparser.parseBildFile( path, scale_factor )
+                base_aabb = geom.AABB( base_bild )
+        for path in toolresults.bildfiles:
             if path.match('*06_cylinder_final.bild'):
-                self.geomView.setCylDisplay( bildparser.parseBildFile( path, scale_factor ) )
+                self.geomView.setCylDisplay( bildparser.parseBildFile( path ), base_aabb )
             elif path.match('*09_atomic_model.bild'):
-                self.geomView.setAtomDisplay( bildparser.parseBildFile( path, scale_factor ) )
+                self.geomView.setAtomDisplay( bildparser.parseBildFile( path ), base_aabb )
             elif path.match('*12_routing_all.bild'):
-                self.geomView.setRoutDisplay( bildparser.parseBildFile( path, scale_factor ) )
+                self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb )
         self.toggleOutputControls(True)
         self.currentCNDO = toolresults.cndofile
 

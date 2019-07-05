@@ -18,13 +18,13 @@ Cone = namedtuple('Cone', 'color, x1, y1, z1, x2, y2, z2, r' )
 Arrow = namedtuple ( 'Arrow', 'color, x1, y1, z1, x2, y2, z2, r1, r2, rho', defaults=[0.1,0.4,0.75] )
 
 class OutputDecorations:
-    def __init__(self, scale_factor):
+    def __init__(self, scale_factor ):
         self.colors = dict() # maps normalized bild strings to QColors
         self.current_color = None
         self.spheres = list()
         self.cylinders = list()
         self.arrows = list()
-        self.scale_factor = scale_factor / 3.2
+        self.scale_factor = scale_factor
 
     def addColor( self, tokens ):
         color_key = ' '.join(tokens)
@@ -80,7 +80,7 @@ class OutputDecorations:
             yield (c.x2, c.y2, c.z2)
 
 
-def parseBildFile( filename, scale_factor ):
+def parseBildFile( filename, scale_factor = 1.0 ):
     results = OutputDecorations(scale_factor)
     with open(filename,'r') as bild:
         unknown_keyword_map = dict()

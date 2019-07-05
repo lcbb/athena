@@ -500,9 +500,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         newsize = event.size()
         self.camControl.resize(newsize.width(), newsize.height())
 
-    def newDecoration(self, parent, bild_results):
+    def newDecoration(self, parent, bild_results, decoration_aabb = None):
 
-        decoration_aabb = geom.AABB( bild_results )
+        if decoration_aabb is None:
+            decoration_aabb = geom.AABB( bild_results )
         geom_aabb = self.camControl.aabb
 
         T = geom.transformBetween( decoration_aabb, geom_aabb )
@@ -519,14 +520,14 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
             parent.cones = decorations.ConeDecorations(parent, bild_results, T)
             parent.cones.addComponent( self.cone_material )
 
-    def setCylDisplay(self, bild_results):
-        self.newDecoration( self.cylModelEntity, bild_results )
+    def setCylDisplay(self, bild_results, map_aabb):
+        self.newDecoration( self.cylModelEntity, bild_results, map_aabb )
 
-    def setRoutDisplay(self, bild_results):
-        self.newDecoration( self.routModelEntity, bild_results )
+    def setRoutDisplay(self, bild_results, map_aabb):
+        self.newDecoration( self.routModelEntity, bild_results, map_aabb )
 
-    def setAtomDisplay(self, bild_results):
-        self.newDecoration( self.atomModelEntity, bild_results )
+    def setAtomDisplay(self, bild_results, map_aabb):
+        self.newDecoration( self.atomModelEntity, bild_results, map_aabb )
 
     def toggleCylDisplay(self, value):
         self.cylModelEntity.setEnabled( value )
