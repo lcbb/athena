@@ -250,7 +250,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     _qparameters = { 'alpha': 1.0,
                      'face_enable': 1.0,
-                     'proj_orthographicc': 1.0,
+                     'proj_orthographic': 1.0,
                      'flat_color': QColor( 97, 188, 188),
                      'cool_color': QColor( 0, 25, 170 ),
                      'warm_color': QColor( 210, 190, 0),
@@ -306,7 +306,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         for rpass in material.effect().techniques()[0].renderPasses():
             rpass.setShaderProgram( shader )
 
-        material.addParameter( self._projOrthographiccParam )
+        material.addParameter( self._projOrthographicParam )
         return material
 
     def __init__(self):

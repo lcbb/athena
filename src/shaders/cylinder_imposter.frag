@@ -1,5 +1,7 @@
 #version 330 core
 
+uniform mat4 projectionMatrix;
+uniform float proj_orthographic;
 
 in CylinderPoint {
     vec3 surface_point;
@@ -9,27 +11,25 @@ in CylinderPoint {
     vec3 U;
     vec3 V;
     float radius;
-    float inv_sqr_height;
     vec4 color;
 } fs_in;
 
 
 out vec4 fragColor;
 
-uniform float proj_orthographicc;
-uniform mat4 projectionMatrix;
-
 void main(void)
 {
     vec3 ray_target = fs_in.surface_point;
-    vec3 ray_origin = fs_in.surface_point;
-    vec3 ray_direction = vec3(0, 0, 1);
 
-    if( proj_orthographicc >= 0.5f ){
-        ray_direction = vec3(0., 0., 1.);
+    vec3 ray_origin;
+    vec3 ray_direction;
+    if( proj_orthographic >= 0.5f ){
+        // orthographic projection
         ray_origin = fs_in.surface_point;
+        ray_direction = vec3(0., 0., 1.);
     }
     else{
+        // perspective projection
         ray_origin = vec3(0, 0, 0);
         ray_direction = normalize(-ray_target);
     }

@@ -80,7 +80,7 @@ void main(void)
     float dist = (-b + sqrt(d)) / (2 * a);
     //if( dist < 0 ) discard;
 
-    // point of intersection on cylinder surface
+    // point of intersection on cone surface
     vec3 new_point = ray_origin + dist * ray_direction;
     vec3 tmp_point = fs_in.end_cyl - new_point;
     vec3 tangent = -cross( tmp_point, fs_in.axis ); // tangent to cone
