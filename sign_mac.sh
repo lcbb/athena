@@ -6,8 +6,8 @@ set -e
 echo "Running path fixup script"
 python ./fix_app_qt_folder_names.py dist/Athena.app
 echo "Signing Athena.app with certificate" ${1}
-codesign --deep -s "${1}" dist/Athena.app
+codesign -vvvv --deep -s "${1}" dist/Athena.app
 echo "Assessing signature of Athena.app"
 # Workaround for code signing issues: deploy_mac.sh won't build a zip unless this script succeeds,
 # so force a successful return here.
-spctl --assess -vv dist/Athena.app || echo "Signature assessment failed, but that was expected."
+spctl --assess -vv dist/Athena.app

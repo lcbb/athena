@@ -12,5 +12,5 @@ echo "Deploying as version" $VERSION
 
 ZIPFILE=athena_mac_${VERSION}.zip
 echo "Creating dist/${ZIPFILE}"
-(cd dist; zip -q -r ${ZIPFILE} Athena.app)
+(cd dist; zip -y -q -r ${ZIPFILE} Athena.app)
 
