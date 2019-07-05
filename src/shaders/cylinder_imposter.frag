@@ -78,7 +78,7 @@ void main(void)
 
       // ray-plane intersection
       float dNV = dot(thisaxis, ray_direction);
-      if (dNV < 0.0)
+      if (dNV <= 0.0)
         discard;
 
       float near = dot(thisaxis, thisbase - ray_origin) / dNV;
