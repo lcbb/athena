@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
@@ -253,6 +253,12 @@ class AthenaWindow(QMainWindow):
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
 
+        # action groups cannot be set up in Qt Designer, so do that here
+        self.resultsActionGroup = QActionGroup(self)
+        self.resultsActionGroup.addAction( self.actionOverlayResults )
+        self.resultsActionGroup.addAction( self.actionSeparateResults )
+        self.resultsActionGroup.triggered.connect( self._setViewSplit )
+
         self.displayCylinderBox.toggled.connect( self.geomView.toggleCylDisplay )
         self.geomView.toggleCylDisplay(self.displayCylinderBox.isChecked())
         self.displayRoutingBox.toggled.connect( self.geomView.toggleRoutDisplay )
@@ -307,6 +313,14 @@ class AthenaWindow(QMainWindow):
     def handleViewerLinewidthChanged( self, newvalue ):
         intvalue = newvalue * 10
         self.lineWidthSlider.setValue(intvalue)
+
+    def _setViewSplit( self, action ):
+        if action is self.actionOverlayResults:
+            self.geomView.setSplitViewEnabled( False )
+        elif action is self.actionSeparateResults:
+            self.geomView.setSplitViewEnabled( True )
+        else:
+            print("ERROR in _setViewSplit")
 
     def setupToolDefaults( self ):
 

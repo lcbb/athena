@@ -17,13 +17,17 @@ from athena import ATHENA_SRC_DIR, plymesh, geom, decorations
 ATHENA_GEOM_UP = geom.ATHENA_GEOM_UP
 
 class CameraController:
-    def __init__(self, window, camera, geometry):
+    def __init__(self, window, camera, geometry, split):
         self.window = window
         self.camera = camera
         self.geometry = geometry
+        self.split = split
 
     def _windowAspectRatio(self):
-        return self.window.width() / (2 * self.window.height())
+        w = self.window.width()
+        h = self.window.height()
+        if self.split: h = 2 * h
+        return w / h
 
     def reset(self):
         pass
@@ -34,12 +38,12 @@ class CameraController:
     def drag(self, dx, dy):
         pass
 
-    def resize(self, newsize_x, newsize_y):
+    def resize(self):
         pass
 
 class CameraController2D(CameraController):
-    def __init__(self, window, camera, geometry):
-        super(CameraController2D,self).__init__(window, camera, geometry)
+    def __init__(self, window, camera, geometry, split):
+        super(CameraController2D,self).__init__(window, camera, geometry, split)
         self.aabb = geom.AABB(self.geometry)
         self.aabb.min.setZ( self.aabb.min.z() - 5 )
         self.aabb.max.setZ( self.aabb.max.z() + 5 )
@@ -53,16 +57,16 @@ class CameraController2D(CameraController):
         self.camera.setUpVector( ATHENA_GEOM_UP )
         self._orient()
 
-    def _extents(self, ratio=None):
+    def _extents(self):
         # Return the visible x,y dimensions
-        ratio = ratio if ratio else self._windowAspectRatio()
+        ratio = self._windowAspectRatio()
         mesh_extents = self.aabb.max - self.aabb.min
         view_extents = mesh_extents * self.margin
         view_extents.setX( view_extents.y() * ratio )
         return view_extents.x(), view_extents.y()
 
-    def _orient(self, ratio=None):
-        x_view, y_view = self._extents(ratio)
+    def _orient(self):
+        x_view, y_view = self._extents()
 
         xmin = self.aabb.center.x() - x_view / 2
         xmax = self.aabb.center.x() + x_view / 2
@@ -85,13 +89,12 @@ class CameraController2D(CameraController):
         self.margin *= delta
         self._orient()
 
-    def resize(self, new_width, new_height):
-        new_ratio = new_width / (2 * new_height)
-        self._orient(new_ratio)
+    def resize(self):
+        self._orient()
 
 class CameraController3D(CameraController):
-    def __init__(self, window, camera, geometry):
-        super(CameraController3D,self).__init__(window, camera, geometry)
+    def __init__(self, window, camera, geometry, split):
+        super(CameraController3D,self).__init__(window, camera, geometry, split)
         self.aabb = geom.AABB(self.geometry)
         self.reset()
 
@@ -137,9 +140,8 @@ class CameraController3D(CameraController):
         new_fov = clamp (5, 150, fov - delta)
         self.camera.setFieldOfView( new_fov )
 
-    def resize(self, new_width, new_height):
-        new_ratio = new_width / (2 * new_height)
-        self.camera.setAspectRatio(new_ratio)
+    def resize(self):
+        self.camera.setAspectRatio(self._windowAspectRatio())
 
 class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
     '''
@@ -329,7 +331,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.solidPassFilter.setValue('solid')
         self.qfilt.addMatch(self.solidPassFilter)
         self.viewport = Qt3DRender.QViewport(self.qfilt)
-        self.viewport.setNormalizedRect(QRectF(.5, 0, 0.5, 1.0))
+        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
 
         self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
         self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
@@ -337,7 +339,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.transPassFilter.setValue('transp')
         self.qfilt2.addMatch(self.transPassFilter)
         self.viewport2 = Qt3DRender.QViewport(self.qfilt2)
-        self.viewport2.setNormalizedRect(QRectF(0, 0, .5, 1.0))
+        self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
 
         self.setActiveFrameGraph(self.surfaceSelector)
 
@@ -355,7 +357,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.rootEntity = Qt3DCore.QEntity()
-        self.camControl = CameraController(None, None, None)
+        self.camControl = CameraController(None, None, None, False)
 
         self.initParameters() # defined in metaclass
         self.faceEnableChanged.connect( self.handleFaceRenderChange )
@@ -447,6 +449,18 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         new_orientation = math.degrees( math.atan2( new_posn.x(), new_posn.z() ))
         self.lightOrientationChanged.emit( int(new_orientation) )
 
+    def setSplitViewEnabled( self, enabled ):
+
+        if( enabled ):
+            self.viewport.setNormalizedRect( QRectF( 0.5, 0, 0.5, 1.0) )
+            self.viewport2.setNormalizedRect( QRectF( 0, 0, 0.5, 1.0 ) )
+        else:
+            whole_screen = QRectF( 0, 0, 1, 1 )
+            self.viewport.setNormalizedRect( whole_screen )
+            self.viewport2.setNormalizedRect( whole_screen )
+        self.camControl.split = enabled
+        self.camControl.resize()
+
     def resetCamera(self):
         self.camControl.reset()
 
@@ -475,13 +489,14 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearAllGeometry()
         self.meshEntity = plymesh.PlyMesh(self.meshEntityParent, self.plydata)
         mesh_3d = self.meshEntity.dimensions == 3
+        split = self.camControl.split
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
-            self.camControl = CameraController3D(self, self.camera(), self.meshEntity.geometry)
+            self.camControl = CameraController3D(self, self.camera(), self.meshEntity.geometry, split)
             self.setProjOrthographic(0.0)
         else:
             self.meshEntity.addComponent(self.flat_material)
-            self.camControl = CameraController2D(self, self.camera(), self.meshEntity.geometry)
+            self.camControl = CameraController2D(self, self.camera(), self.meshEntity.geometry, split)
             self.setProjOrthographic(1.0)
         self.camControl.reset()
         return mesh_3d
@@ -497,8 +512,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.camControl.zoom( event.angleDelta().y() )
 
     def resizeEvent( self, event ):
-        newsize = event.size()
-        self.camControl.resize(newsize.width(), newsize.height())
+        self.camControl.resize()
 
     def newDecoration(self, parent, bild_results, decoration_aabb = None):
 

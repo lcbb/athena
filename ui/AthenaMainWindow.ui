@@ -878,7 +878,7 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>94</width>
+                    <width>98</width>
                     <height>181</height>
                    </rect>
                   </property>
@@ -996,7 +996,7 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>88</width>
+                    <width>98</width>
                     <height>91</height>
                    </rect>
                   </property>
@@ -1171,6 +1171,9 @@
     </property>
     <addaction name="actionResetViewerOptions"/>
     <addaction name="actionShowLogWindow"/>
+    <addaction name="separator"/>
+    <addaction name="actionOverlayResults"/>
+    <addaction name="actionSeparateResults"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -1241,6 +1244,25 @@
    </property>
    <property name="text">
     <string>Show Output Sidebar</string>
+   </property>
+  </action>
+  <action name="actionOverlayResults">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Overlay Results</string>
+   </property>
+  </action>
+  <action name="actionSeparateResults">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Separate Results</string>
    </property>
   </action>
  </widget>
