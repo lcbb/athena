@@ -396,6 +396,7 @@ class AthenaWindow(QMainWindow):
     def newOutputs( self, toolresults ):
         if toolresults is None or toolresults.bildfiles is None: return
         scale_factor = toolresults.toolinfo['scale_factor']
+        self.geomView.clearDecorations()
         for path in toolresults.bildfiles:
             if path.match('*01_target_geometry.bild'):
                 base_bild = bildparser.parseBildFile( path, scale_factor )
