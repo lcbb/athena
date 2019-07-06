@@ -212,6 +212,7 @@ class AthenaWindow(QMainWindow):
         super().__init__(None)
         UiLoader.populateUI( self, ui_filepath )
 
+
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
 
@@ -258,6 +259,12 @@ class AthenaWindow(QMainWindow):
         self.resultsActionGroup.addAction( self.actionOverlayResults )
         self.resultsActionGroup.addAction( self.actionSeparateResults )
         self.resultsActionGroup.triggered.connect( self._setViewSplit )
+
+        # On OSX, add a separator to the bottom of the view menu, which
+        # will isolate the appkit default "full screen" option on its own.
+        if platform.system() == 'Darwin':
+            self.menuView.setSeparatorsCollapsible(False)
+            self.menuView.addSeparator()
 
         self.displayCylinderBox.toggled.connect( self.geomView.toggleCylDisplay )
         self.geomView.toggleCylDisplay(self.displayCylinderBox.isChecked())
