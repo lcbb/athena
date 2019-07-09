@@ -8,12 +8,12 @@ from datetime import datetime
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup, QMessageBox
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import bildparser, viewer, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, logwindow, __version__
+from athena import bildparser, viewer, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, ATHENA_SRC_DIR, logwindow, __version__
 from pdbgen import pdbgen
 
 class AutoResizingStackedWidget( QStackedWidget ):
@@ -249,6 +249,7 @@ class AthenaWindow(QMainWindow):
         self.saveButton.clicked.connect(self.generatePDB)
 
         self.actionQuit.triggered.connect(self.close)
+        self.actionAbout.triggered.connect(self.showAbout)
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
         self.actionAddScaffold.triggered.connect( self.selectAndAddScaffoldFile )
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
@@ -489,4 +490,7 @@ class AthenaWindow(QMainWindow):
         self.updateStatus('METIS returned {}.'.format(human_retval))
         self.newOutputs(process)
 
-
+    def showAbout(self):
+        about_text = open(Path(ATHENA_SRC_DIR)/'txt'/'About.txt','r', encoding='utf8').read()
+        about_text = about_text.format( version=__version__ )
+        QMessageBox.about(self, "About Athena", about_text )

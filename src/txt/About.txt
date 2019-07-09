@@ -1,0 +1,8 @@
+Athena version {version}, by Steve Jackson
+
+[[PUBLIC ATHENA URL TO GO HERE]]
+
+Copyright © 2019, Laboratory for Computational Biology and Biophysics, MIT
+
+Licensed under the General Public License; see the file LICENSE for details.
+

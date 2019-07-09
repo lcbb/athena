@@ -1160,6 +1160,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionAbout"/>
+    <addaction name="separator"/>
     <addaction name="actionOpen"/>
     <addaction name="actionAddScaffold"/>
     <addaction name="separator"/>
@@ -1168,6 +1170,9 @@
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
+    </property>
+    <property name="separatorsCollapsible">
+     <bool>false</bool>
     </property>
     <addaction name="actionResetViewerOptions"/>
     <addaction name="actionShowLogWindow"/>
@@ -1263,6 +1268,11 @@
    </property>
    <property name="text">
     <string>Separate Results</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About Athena</string>
    </property>
   </action>
  </widget>
