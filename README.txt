@@ -2,10 +2,15 @@ Athena: A Toolkit for DNA Construction
 
 ### Restrictions on input files ###
 
-PERDIX and METIS expect all inputs to be in the XY plane.
+Only PLY files are accepted.
 
-All tools will reject PLY input files that define a vertex
-that is not used in at least one polygon.
+PERDIX and METIS, the 2D sequence tools, require all
+input geometry to be in the XY plane with Z=0 for all vertices.
+All other input files will be treated as 3D.
+
+All sequence tools will reject PLY input files which define a vertex
+that is not used in at least one polygon.  Athena can display such
+files, but they cannot be processed to generate output files.
 
 ### Setting up a development environment ###
 

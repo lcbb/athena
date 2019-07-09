@@ -10,7 +10,13 @@ echo "Deploying as version" $VERSION
 ./build_mac.sh --clean --noconfirm
 ./sign_mac.sh "LCBB"
 
-ZIPFILE=athena_mac_${VERSION}.zip
-echo "Creating dist/${ZIPFILE}"
-(cd dist; zip -y -q -r ${ZIPFILE} Athena.app)
+rm -rf Athena
+mkdir Athena
+cp -a dist/Athena.app Athena
+cp README.txt Athena
+cp LICENSE Athena
+
+ZIPFILE=dist/athena_mac_${VERSION}.zip
+echo "Creating ${ZIPFILE}"
+zip -y -q -r ${ZIPFILE} Athena
 
