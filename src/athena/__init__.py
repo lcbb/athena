@@ -1,5 +1,7 @@
 import sys
 import os, os.path
+import platform
+import tempfile
 from pathlib import Path
 
 # Set up Athena's global data
@@ -28,20 +30,17 @@ if getattr(sys, 'frozen', False):
     # We're inside a PyInstaller bundle of some kind
     ATHENA_DIR = sys._MEIPASS
     ATHENA_SRC_DIR = ATHENA_DIR
-    try:
-        ATHENA_OUTPUT_HOME = Path( sys.executable ).parent.relative_to(Path.cwd())
-    except ValueError:
-        # This can occur on OSX: the cwd will be ~ but the binary might be in /Applications
-        ATHENA_OUTPUT_HOME = Path.cwd()
 else:
     # Not bundled, __file__ is within src/athena
     ATHENA_SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ATHENA_DIR = os.path.dirname(ATHENA_SRC_DIR)
-    ATHENA_OUTPUT_HOME = '.'
 
-# Set ATHENA_OUTPUT_DIR, the directory where all tools outputs will be written.
-# The program will halt here if no such directory can be created
-ATHENA_OUTPUT_DIR = Path( ATHENA_OUTPUT_HOME, "athena_output")
-ATHENA_OUTPUT_DIR.mkdir( parents=False, exist_ok=True )
+ATHENA_OUTPUT_HOME = tempfile.TemporaryDirectory(prefix='Athena')
+ATHENA_OUTPUT_DIR = Path(ATHENA_OUTPUT_HOME.name)
+
+def athena_cleanup():
+    ATHENA_OUTPUT_HOME.cleanup()
+    print("I have cleaned up")
+
 print("Athena's output directory will be", ATHENA_OUTPUT_DIR)
 

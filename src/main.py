@@ -3,6 +3,7 @@
 import sys
 from PySide2.QtGui import QSurfaceFormat
 from PySide2.QtWidgets import QApplication
+from athena import athena_cleanup
 from athena.mainwindow import AthenaWindow
 
 # Workaround function borrowed from https://github.com/biolab/orange3/blob/master/Orange/canvas/__main__.py
@@ -67,5 +68,6 @@ f.setDepthBufferSize(24)
 f.setSamples(4)
 QSurfaceFormat.setDefaultFormat(f)
 app = QApplication(sys.argv)
+app.aboutToQuit.connect( athena_cleanup )
 window = AthenaWindow( )
 sys.exit(app.exec_())
