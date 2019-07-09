@@ -1,8 +1,14 @@
-Athena version {version}, by Steve Jackson
+<h3 align="center">Athena</h3>
 
-[[PUBLIC ATHENA URL TO GO HERE]]
+<tt>
+<p>by Steve Jackson</p>
 
-Copyright © 2019, Laboratory for Computational Biology and Biophysics, MIT
+<p> Version: {version} </p>
 
-Licensed under the General Public License; see the file LICENSE for details.
+<p><a href="https://github.com/lcbb/athena">https://github.com/lcbb/athena</a></p>
+
+<p>Copyright © 2019, Laboratory for Computational Biology and Biophysics, MIT</p>
+
+<p>Licensed under the General Public License; see the file LICENSE for details.</p>
+</tt>
 
