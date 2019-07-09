@@ -4,6 +4,7 @@ import subprocess
 import os
 import os.path
 import platform
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -199,6 +200,7 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
         result.bildfiles = list( p1_output_dir.glob('*.bild') )
         result.cndofile = next( p1_output_dir.glob('*.cndo') )
         result.toolinfo= parseLCBBToolOutput( result.stdout )
+        result.output_dir = p1_output_dir
         #strs = [str(x) for x in result.bildfiles]
         #prefix = os.path.commonprefix( strs )
         #print(prefix)
@@ -212,6 +214,7 @@ class AthenaWindow(QMainWindow):
         super().__init__(None)
         UiLoader.populateUI( self, ui_filepath )
 
+        self.toolresults = None
 
         self.statusMsg = QLabel("Ready.")
         self.statusBar().addWidget(self.statusMsg)
@@ -246,7 +249,7 @@ class AthenaWindow(QMainWindow):
         self.talosRunButton.clicked.connect(self.runTALOS)
         self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
         self.metisRunButton.clicked.connect(self.runMETIS)
-        self.saveButton.clicked.connect(self.generatePDB)
+        self.saveButton.clicked.connect(self.saveOutput)
 
         self.actionQuit.triggered.connect(self.close)
         self.actionAbout.triggered.connect(self.showAbout)
@@ -392,7 +395,7 @@ class AthenaWindow(QMainWindow):
             else:
                 self.enable2DControls()
         self.toggleOutputControls(False)
-        self.currentCNDO = None
+        self.toolresults = None
 
     def newOutputs( self, toolresults ):
         if toolresults is None or toolresults.bildfiles is None: return
@@ -410,16 +413,28 @@ class AthenaWindow(QMainWindow):
             elif path.match('*12_routing_all.bild'):
                 self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb )
         self.toggleOutputControls(True)
-        self.currentCNDO = toolresults.cndofile
+        self.toolresults = toolresults
 
     def generatePDB( self ):
-        if( self.currentCNDO ):
-            cndofile = self.currentCNDO
+        if( self.toolresults and self.toolresults.cndofile ):
+            cndofile = self.toolresults.cndofile
             dirstr = str(cndofile.parent.resolve()) + os.path.sep
             pdbgen.pdbgen( cndofile.stem, 'B', 'DNA', dirstr, dirstr, logwindow.WriteWrapper(self.logWindow) )
         else:
             print("ERROR: No current pdb file")
-      
+
+    def saveOutput( self ):
+        if( self.toolresults ):
+            container_dir = QFileDialog.getExistingDirectory(self, "Save Location" )
+            new_output_dir = Path(container_dir) / self.toolresults.output_dir.name
+            if( self.includePDBBox.isChecked()):
+                self.generatePDB()
+            print(self.toolresults.output_dir,'->',container_dir)
+            newdir = shutil.copytree( self.toolresults.output_dir, new_output_dir )
+            self.updateStatus('Saved results to {}'.format(newdir))
+        else:
+            print("ERROR: No current results to save")
+
 
     def updateStatus( self, msg ):
         self.log( msg )
