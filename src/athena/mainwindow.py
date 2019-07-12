@@ -70,6 +70,7 @@ class FileSelectionTreeWidget( QTreeWidget ):
         item = QTreeWidgetItem( heading )
         item.setText( 0, name )
         item.setData( 0, Qt.UserRole, filepath.resolve() )
+        item.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEnabled )
         return item
 
     def add2DExampleFile( self, filepath ):
@@ -89,6 +90,10 @@ class FileSelectionTreeWidget( QTreeWidget ):
         data = current_item.data( 0, Qt.UserRole )
         if data is not None:
             self.newFileSelected.emit( data )
+
+    def mousePressEvent( self, event ):
+        super().mousePressEvent(event)
+        self.repaint()
 
 class ColorButton(QPushButton):
     def __init__( self, *args, **kw ):
