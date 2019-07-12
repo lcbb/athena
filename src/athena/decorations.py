@@ -167,3 +167,41 @@ class ConeDecorations(Qt3DCore.QEntity):
         self.renderer.setPrimitiveType(Qt3DRender.QGeometryRenderer.Lines)
 
         self.addComponent(self.renderer)
+
+class LineDecoration(Qt3DCore.QEntity):
+
+    def __init__(self, parent, vtx1, vtx2, color ):
+        super().__init__(parent)
+
+        total_vertices = 2
+        vertex_basetype = geom.basetypes.Float
+        index_basetype = geom.basetypes.UnsignedShort
+
+        vertex_nparr = np.zeros([total_vertices,7],dtype=geom.basetype_numpy_codes[vertex_basetype])
+        vertex_nparr[0,:] = *vtx1[:], *color[:]
+        vertex_nparr[1,:] = *vtx2[:], *color[:]
+
+        self.geometry = Qt3DRender.QGeometry(self)
+
+        position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
+        color_attrname = Qt3DRender.QAttribute.defaultColorAttributeName()
+
+        attrspecs = [geom.AttrSpec(position_attrname, column=0, numcols=3),
+                     geom.AttrSpec(color_attrname, column=3, numcols=3)]
+
+        self.vtx_attrs = geom.buildVertexAttrs( self, vertex_nparr, attrspecs )
+        for va in self.vtx_attrs:
+            self.geometry.addAttribute(va)
+
+        # Create qt3d index buffer
+        index_nparr = np.arange(2,dtype=geom.basetype_numpy_codes[index_basetype])
+        self.indexAttr = geom.buildIndexAttr( self, index_nparr )
+        self.geometry.addAttribute(self.indexAttr)
+
+        self.renderer = Qt3DRender.QGeometryRenderer(parent)
+        self.renderer.setGeometry(self.geometry)
+        self.renderer.setPrimitiveType(Qt3DRender.QGeometryRenderer.Lines)
+
+        self.addComponent(self.renderer)
+
+

@@ -311,9 +311,25 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         material.addParameter( self._projOrthographicParam )
         return material
 
+    def _overlayMaterial( self ):
+        material = self._qmlLoad( 'overlay.qml' )
+        shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
+        vert_shader = shader_path / 'overlay.vert'
+        frag_shader = shader_path / 'overlay.frag'
+        def loadShader( s ):
+            return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
+        shader = Qt3DRender.QShaderProgram(material)
+        shader.setVertexShaderCode( loadShader( vert_shader ) )
+        shader.setFragmentShaderCode( loadShader( frag_shader ) )
+        for rpass in material.effect().techniques()[0].renderPasses():
+            rpass.setShaderProgram( shader )
+        return material
+
+
     def __init__(self):
         super(AthenaViewer, self).__init__()
         self._qtrefs = []
+        self.overlayCamera = Qt3DRender.QCamera()
 
         # Manually set up a framegraph so that we can do two rendering passes
         # Dear qt3d: this absolutely should not have been this hard.
@@ -324,7 +340,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearBuffers = Qt3DRender.QClearBuffers(self.cameraSelector)
         self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
         self.clearBuffers.setClearColor(Qt.white)
-        
+
+        # Framegraph branch for solid 3d objects
         self.qfilt = Qt3DRender.QTechniqueFilter(self.clearBuffers)
         self.solidPassFilter = Qt3DRender.QFilterKey(self.qfilt)
         self.solidPassFilter.setName('pass')
@@ -333,6 +350,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.viewport = Qt3DRender.QViewport(self.qfilt)
         self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
 
+        # Branch for transparent 3d objects
         self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
         self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
         self.transPassFilter.setName('pass')
@@ -341,7 +359,24 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.viewport2 = Qt3DRender.QViewport(self.qfilt2)
         self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
 
+        # Branch for 2d on-screen overlays
+        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.surfaceSelector)
+        self.cameraSelector2.setCamera(self.overlayCamera)
+        self.qfilt3 = Qt3DRender.QTechniqueFilter(self.cameraSelector2)
+        self.overlayPassFilter = Qt3DRender.QFilterKey(self.cameraSelector2)
+        self.overlayPassFilter.setName('pass')
+        self.overlayPassFilter.setValue('overlay')
+        self.qfilt3.addMatch(self.overlayPassFilter)
+        self.viewport3 = Qt3DRender.QViewport(self.qfilt3)
+        self.viewport3.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+
         self.setActiveFrameGraph(self.surfaceSelector)
+
+
+        self.overlayCamera.setViewCenter( vec3d() )
+        self.overlayCamera.setPosition( vec3d( 0, 0, -1 ) )
+        self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
+        self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
 
         # Framegraph display and testing code
         def frameGraphLeaf(node, prefix=' '):
@@ -384,7 +419,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.gooch_material.addParameter( self._warmColorParam )
         self.gooch_material.addParameter( self._lightPositionParam )
 
-        self.setRootEntity(self.rootEntity)
+        # The vertical split line enabled for split-screen view
+        self.overlay_material = self._overlayMaterial()
+
+        self.splitLineEntity = decorations.LineDecoration( self.rootEntity, [0,-1,0], [0,1,0], [1,1,1,1] )
+        self.splitLineEntity.addComponent( self.overlay_material )
+        self.splitLineEntity.setEnabled(False)
+
 
         # Each time a mesh is loaded, we create a new Plymesh and add a material as a component.
         # Old meshes are deleteLater()-ed.  A problem with this approach is that the deleted QEntities
@@ -396,6 +437,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.rootEntity.addComponent(self.sphere_material)
         self.rootEntity.addComponent(self.cylinder_material)
         self.rootEntity.addComponent(self.cone_material)
+
+        self.setRootEntity(self.rootEntity)
 
         self.meshEntityParent = Qt3DCore.QEntity( self.rootEntity )
 
@@ -454,10 +497,12 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         if( enabled ):
             self.viewport.setNormalizedRect( QRectF( 0.5, 0, 0.5, 1.0) )
             self.viewport2.setNormalizedRect( QRectF( 0, 0, 0.5, 1.0 ) )
+            self.splitLineEntity.setEnabled( True )
         else:
             whole_screen = QRectF( 0, 0, 1, 1 )
             self.viewport.setNormalizedRect( whole_screen )
             self.viewport2.setNormalizedRect( whole_screen )
+            self.splitLineEntity.setEnabled( False )
         self.camControl.split = enabled
         self.camControl.resize()
 
