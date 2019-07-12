@@ -77,23 +77,3 @@ colors = {
   "white": (255, 255, 255),
   "yellow": (255, 255, 0),
 }
-
-def getColorByName(name):
-	# can raise KeyError
-	import chimera
-	color = chimera.Color.lookup(name)
-	if not color:
-		r, g, b = colors[name]
-		color = chimera.MaterialColor(r/255.0, g/255.0, b/255.0)
-		color.save(name)
-	return color
-
-def getTkColorByName(name):
-	# can raise KeyError
-	import chimera
-	color = chimera.Color.lookup(name)
-	if color:
-		rgb = tuple([int(255 * v + 0.5) for v in color.rgba()[:3]])
-	else:
-		rgb = colors[name]
-	return "#%02x%02x%02x" % rgb
