@@ -78,6 +78,12 @@
              <property name="textElideMode">
               <enum>Qt::ElideNone</enum>
              </property>
+             <property name="indentation">
+              <number>10</number>
+             </property>
+             <property name="allColumnsShowFocus">
+              <bool>true</bool>
+             </property>
              <attribute name="headerShowSortIndicator" stdset="0">
               <bool>false</bool>
              </attribute>
