@@ -240,6 +240,9 @@ class AthenaWindow(QMainWindow):
         self.actionOpen.setShortcut( QKeySequence.StandardKey.Open )
         self.actionQuit.setShortcut( QKeySequence.StandardKey.Quit )
 
+        self.actionOverlayResults.setShortcut( QKeySequence (Qt.CTRL + Qt.Key_1 ) )
+        self.actionSeparateResults.setShortcut( QKeySequence(Qt.CTRL + Qt.Key_2 ) )
+
 
         self.scaffoldBox.setItemData(0,"m13")
         self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
