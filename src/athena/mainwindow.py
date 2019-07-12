@@ -5,6 +5,7 @@ import os
 import os.path
 import platform
 import shutil
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -188,6 +189,21 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
     else:
         print("WARNING: unknown platform '{}' for LCBB tool!".format(platform.system()), file=sys.stderr)
         tool = toolname
+
+    # Tools have problems reading files on read-only partitions, so workaround that.
+    # This occurs commonly under OSX app translocation
+    if hasattr(os, 'statvfs'): # There's no statvfs on Windows
+        in_file_stat = os.statvfs( p2_input_file )
+        if( bool(in_file_stat.f_flag & os.ST_RDONLY ) ):
+            print("Input file is on a read-only filesystem; making temporary copy elsewhere")
+            filestem, fileext = os.path.splitext( os.path.basename( p2_input_file ) )
+            newfile, newfilename = tempfile.mkstemp( suffix=fileext, prefix=filestem, dir=ATHENA_OUTPUT_DIR)
+            # mkstemp returns an open file; close it and then copy to its path.
+            os.close(newfile)
+            shutil.copy( p2_input_file, newfilename )
+            # Ok to leave new file undeleted because athena_cleanup() will remove ATHENA_OUTPUT_DIR.
+            p2_input_file = newfilename
+
     wd = os.path.join( ATHENA_DIR, 'tools', tooldir )
     toolpath = os.path.join( wd, tool )
     tool_call = [toolpath, p1_output_dir, p2_input_file, p3_scaffold, p4_edge_sections,
@@ -201,11 +217,6 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
         result.cndofile = next( p1_output_dir.glob('*.cndo') )
         result.toolinfo= parseLCBBToolOutput( result.stdout )
         result.output_dir = p1_output_dir
-        #strs = [str(x) for x in result.bildfiles]
-        #prefix = os.path.commonprefix( strs )
-        #print(prefix)
-        #print( list(x[len(prefix):] for x in strs) )
-        #print(result.bildfiles)
     return result
 
 class AthenaWindow(QMainWindow):

@@ -40,7 +40,7 @@ ATHENA_OUTPUT_DIR = Path(ATHENA_OUTPUT_HOME.name)
 
 def athena_cleanup():
     ATHENA_OUTPUT_HOME.cleanup()
-    print("I have cleaned up")
+    print("Athena cleanup complete")
 
 print("Athena's output directory will be", ATHENA_OUTPUT_DIR)
 
