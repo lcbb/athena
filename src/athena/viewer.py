@@ -2,7 +2,7 @@ from pathlib import Path
 import math
 import numpy as np
 
-from PySide2.QtGui import QColor, QVector3D as vec3d
+from PySide2.QtGui import QColor, QVector3D as vec3d, QImageWriter
 from PySide2.QtCore import QUrl, QByteArray, Qt, Signal, QRectF
 
 from PySide2.Qt3DExtras import Qt3DExtras
@@ -148,6 +148,93 @@ class CameraController3D(CameraController):
 
     def resize(self):
         self.camera.setAspectRatio(self._windowAspectRatio())
+
+class ScreenshotMonger:
+    def __init__(self, gamma = None):
+        self.pendingScreenshot = None
+        self.window_gamma = gamma
+
+    def register( self, screenshot ):
+        print("Registering", screenshot)
+        assert( self.pendingScreenshot == None )
+        self.pendingScreenshot = screenshot
+        screenshot.completed.connect( self.handleCompleted )
+        assert( screenshot.isComplete() == False )
+
+    def handleCompleted( self ):
+        print("Completed", self.pendingScreenshot.captureId())
+        iw = QImageWriter()
+        if self.window_gamma: iw.setGamma( self.window_gamma )
+        iw.setFileName( "img{}.png".format(self.pendingScreenshot.captureId()) )
+        iw.write( self.pendingScreenshot.image() )
+
+        self.pendingScreenshot.completed.disconnect( self.handleCompleted )
+        self.pendingScreenshot = None
+
+class AthenaFrameGraph:
+
+    def __init__(self, window):
+        # Three-pass rendering: first opaque solids, then transparent solids, then
+        # a 2d overlay pass to draw annotations on top of all.
+
+        self.overlayCamera = Qt3DRender.QCamera()
+
+        self.renderCapture = Qt3DRender.QRenderCapture()
+        self.root = self.renderCapture
+        self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector(self.renderCapture)
+        self.surfaceSelector.setSurface(window)
+        self.cameraSelector = Qt3DRender.QCameraSelector(self.surfaceSelector)
+        self.cameraSelector.setCamera(window.camera())
+        self.clearBuffers = Qt3DRender.QClearBuffers(self.cameraSelector)
+        self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
+        self.clearBuffers.setClearColor(Qt.white)
+
+        # Framegraph branch for solid 3d objects
+        self.qfilt = Qt3DRender.QTechniqueFilter(self.cameraSelector)
+        self.solidPassFilter = Qt3DRender.QFilterKey(self.qfilt)
+        self.solidPassFilter.setName('pass')
+        self.solidPassFilter.setValue('solid')
+        self.qfilt.addMatch(self.solidPassFilter)
+        self.viewport = Qt3DRender.QViewport(self.qfilt)
+        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+
+        # Branch for transparent 3d objects
+        self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
+        self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
+        self.transPassFilter.setName('pass')
+        self.transPassFilter.setValue('transp')
+        self.qfilt2.addMatch(self.transPassFilter)
+        self.viewport2 = Qt3DRender.QViewport(self.qfilt2)
+        self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+
+        # Branch for 2d on-screen overlays
+        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.surfaceSelector)
+        self.cameraSelector2.setCamera(self.overlayCamera)
+        self.qfilt3 = Qt3DRender.QTechniqueFilter(self.cameraSelector2)
+        self.overlayPassFilter = Qt3DRender.QFilterKey(self.cameraSelector2)
+        self.overlayPassFilter.setName('pass')
+        self.overlayPassFilter.setValue('overlay')
+        self.qfilt3.addMatch(self.overlayPassFilter)
+        self.viewport3 = Qt3DRender.QViewport(self.qfilt3)
+        self.viewport3.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+
+        self.overlayCamera.setViewCenter( vec3d() )
+        self.overlayCamera.setPosition( vec3d( 0, 0, -1 ) )
+        self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
+        self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
+
+
+    def dump(self):
+        # Framegraph display and testing code
+        def frameGraphLeaf(node, prefix=' '):
+            print(prefix, node, node.objectName())
+            children = node.children()
+            for c in children:
+                frameGraphLeaf(c, prefix+'-')
+
+        frameGraphLeaf(self.root)
+
+
 
 class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
     '''
@@ -335,63 +422,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def __init__(self):
         super(AthenaViewer, self).__init__()
         self._qtrefs = []
-        self.overlayCamera = Qt3DRender.QCamera()
 
-        # Manually set up a framegraph so that we can do two rendering passes
-        # Dear qt3d: this absolutely should not have been this hard.
-        self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector()
-        self.surfaceSelector.setSurface(self)
-        self.cameraSelector = Qt3DRender.QCameraSelector(self.surfaceSelector)
-        self.cameraSelector.setCamera(self.camera())
-        self.clearBuffers = Qt3DRender.QClearBuffers(self.cameraSelector)
-        self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
-        self.clearBuffers.setClearColor(Qt.white)
+        self.framegraph = AthenaFrameGraph(self)
+        self.setActiveFrameGraph(self.framegraph.root)
+        self.screenshots = ScreenshotMonger( self.framegraph.viewport.gamma() )
 
-        # Framegraph branch for solid 3d objects
-        self.qfilt = Qt3DRender.QTechniqueFilter(self.clearBuffers)
-        self.solidPassFilter = Qt3DRender.QFilterKey(self.qfilt)
-        self.solidPassFilter.setName('pass')
-        self.solidPassFilter.setValue('solid')
-        self.qfilt.addMatch(self.solidPassFilter)
-        self.viewport = Qt3DRender.QViewport(self.qfilt)
-        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
-
-        # Branch for transparent 3d objects
-        self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
-        self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
-        self.transPassFilter.setName('pass')
-        self.transPassFilter.setValue('transp')
-        self.qfilt2.addMatch(self.transPassFilter)
-        self.viewport2 = Qt3DRender.QViewport(self.qfilt2)
-        self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
-
-        # Branch for 2d on-screen overlays
-        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.surfaceSelector)
-        self.cameraSelector2.setCamera(self.overlayCamera)
-        self.qfilt3 = Qt3DRender.QTechniqueFilter(self.cameraSelector2)
-        self.overlayPassFilter = Qt3DRender.QFilterKey(self.cameraSelector2)
-        self.overlayPassFilter.setName('pass')
-        self.overlayPassFilter.setValue('overlay')
-        self.qfilt3.addMatch(self.overlayPassFilter)
-        self.viewport3 = Qt3DRender.QViewport(self.qfilt3)
-        self.viewport3.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
-
-        self.setActiveFrameGraph(self.surfaceSelector)
-
-
-        self.overlayCamera.setViewCenter( vec3d() )
-        self.overlayCamera.setPosition( vec3d( 0, 0, -1 ) )
-        self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
-        self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
-
-        # Framegraph display and testing code
-        def frameGraphLeaf(node, prefix=' '):
-            print(prefix, node, node.objectName())
-            children = node.children()
-            for c in children:
-                frameGraphLeaf(c, prefix+'-')
-
-        #frameGraphLeaf(self.activeFrameGraph())
 
         self.setBackgroundColor( QColor(63,63,63) )
         self.lightOrientation = int(0) # Internal integer controlling light.position attribute
@@ -469,10 +504,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     backgroundColorChanged = Signal( QColor )
 
     def backgroundColor( self ):
-        return self.clearBuffers.clearColor()
+        return self.framegraph.clearBuffers.clearColor()
 
     def setBackgroundColor( self, color ):
-        self.clearBuffers.setClearColor( color )
+        self.framegraph.clearBuffers.setClearColor( color )
         self.backgroundColorChanged.emit(color)
 
     faceRenderingEnabledChanged = Signal( bool )
@@ -551,6 +586,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
             self.setProjOrthographic(1.0)
         self.camControl.reset()
         return mesh_3d
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        print("Click")
+        capture = self.framegraph.renderCapture.requestCapture()
+        self.screenshots.register( capture )
+
 
     def mouseMoveEvent(self, event):
         if( self.lastpos ):
