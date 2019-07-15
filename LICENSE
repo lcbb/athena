@@ -1,7 +1,7 @@
 Athena is copyright (c) 2019, Massachusetts Institute of Technology,
 and is licensed under the terms of the GNU GPL version 3.
 
-Athena includes a python implementation the Earcut library, 
+Athena includes a Python implementation the Earcut library,
 copied from https://github.com/joshuaskelly/earcut-python
 Earcut is copyright (c) 2016, MapBox [ISC License]
 
@@ -13,9 +13,8 @@ Athena includes code adapted from Qt3D's published example projects.
 Qt's example project are copyright (c) 2018 The Qt Company Ltd. [BSD License]
 
 Athena includes a portion of colorTable.py from UCSF Chimera,
-which is copyright (c) 2000 Regents of the University of California.
-Chimera is released under a non-commercial license agreement given at
-http://www.cgl.ucsf.edu/chimera/license.html
+by permission of the Chimera developers.  Chimera is copyright
+(c) 2000 the Regents of the University of California.
 
 ===============================================================================
 

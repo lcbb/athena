@@ -7,6 +7,9 @@
 # software or any revisions or derivations thereof.
 # --- UCSF Chimera Copyright ---
 #
+# Permission has been given by the Chimera team to distribute
+# this file with Athena.
+#
 # $Id: colorTable.py 26655 2009-01-07 22:02:30Z pett $
 
 colors = {
