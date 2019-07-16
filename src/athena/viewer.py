@@ -102,12 +102,14 @@ class CameraController3D(CameraController):
         ratio = self._windowAspectRatio()
 
         aabb_size = self.aabb.max - self.aabb.min
+        bounding_sphere_diam = max( aabb_size.x(), aabb_size.y(), aabb_size.z() ) * math.sqrt(3)
+        bounding_sphere_rad = bounding_sphere_diam / 2
+        cam_distance = 2 * bounding_sphere_rad
 
-        cam_distance = 2 * max(aabb_size.x(), aabb_size.y(), aabb_size.z())
-        frustum_max = cam_distance * 2
-        frustum_min = frustum_max / 1e5
+        frustum_min = bounding_sphere_rad
+        frustum_max = 3 * bounding_sphere_rad
 
-        self.camera.lens().setPerspectiveProjection(45, ratio, frustum_min, frustum_max)
+        self.camera.lens().setPerspectiveProjection(50, ratio, frustum_min, frustum_max)
         cam_loc = self.aabb.center + vec3d( cam_distance, 0, 0 )
         self.camera.setPosition( cam_loc )
         self.camera.setViewCenter( self.aabb.center )
