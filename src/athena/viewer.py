@@ -108,8 +108,13 @@ class CameraController3D(CameraController):
         # geometry boundary
         bounding_sphere_diam *= 1.4
         bounding_sphere_rad = bounding_sphere_diam / 2
+
+        # Set the camera one radius away from the surface of bounding sphere
         cam_distance = 2 * bounding_sphere_rad
 
+        # Set the viewing frustum to contain the bounding sphere.  We want to be
+        # set the frustum as tightly around the geometry as possible because our
+        # z buffer has limited depth 
         frustum_min = bounding_sphere_rad
         frustum_max = 3 * bounding_sphere_rad
 
@@ -249,10 +254,13 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
         * setFoo(), the setter method
         * fooChanged(), a qt signal
         * initFoo(), an initializer for self._fooParam
+        * resetFoo(), a method to reset the param to initial value
 
     It also defines initParameters(), which calls all the initFoos.  These
     initializer methods assume that the object will have already defined
     a self.rootEntity to parent the newly-created QParameters onto.
+
+    It also defines resetParameters() which calls all the resetFoos.
 
     These automatic method definitions do not override custom definitions given
     in the class, so it's possible to customize any of these methods as necessary.
@@ -368,54 +376,45 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         return result
 
 
-    def _athenaMaterial( self, flavor ):
-        material = self._qmlLoad( 'main.qml' )
+    def _athenaMaterial( self, qmlfile, vert_shader, frag_shader, geom_shader=None ):
+        material = self._qmlLoad( qmlfile )
         shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
-        vert_shader = shader_path / 'wireframe.vert'
-        geom_shader = shader_path / 'wireframe.geom'
-        frag_shader = shader_path / (flavor+'_wireframe.frag')
+        vert_shader = shader_path / vert_shader
+        frag_shader = shader_path / frag_shader
+        if( geom_shader ): geom_shader = shader_path / geom_shader
         def loadShader( s ):
             return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
         shader = Qt3DRender.QShaderProgram(material)
         shader.setVertexShaderCode( loadShader( vert_shader ) )
-        shader.setGeometryShaderCode( loadShader( geom_shader ) )
+        if( geom_shader): shader.setGeometryShaderCode( loadShader( geom_shader ) )
         shader.setFragmentShaderCode( loadShader( frag_shader ) )
         for rpass in material.effect().techniques()[0].renderPasses():
             rpass.setShaderProgram( shader )
+        return material
 
+
+
+    def _plyMeshMaterial( self, flavor ):
+        material =  self._athenaMaterial( 'main.qml', 'wireframe.vert', 
+                                                      flavor+'_wireframe.frag',
+                                                      'wireframe.geom' )
+        material.addParameter( self._alphaParam )
+        material.addParameter( self._faceEnableParam )
+        material.addParameter( self._lineWidthParam )
+        material.addParameter( self._lineColorParam )
         return material
 
     def _imposterMaterial(self, flavor):
         flavor_str = flavor + '_imposter'
-        material = self._qmlLoad( 'imposter.qml' )
-        shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
-        vert_shader = shader_path / (flavor_str + '.vert')
-        geom_shader = shader_path / (flavor_str + '.geom')
-        frag_shader = shader_path / (flavor_str + '.frag')
-        def loadShader( s ):
-            return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
-        shader = Qt3DRender.QShaderProgram(material)
-        shader.setVertexShaderCode( loadShader( vert_shader ) )
-        shader.setGeometryShaderCode( loadShader( geom_shader ) )
-        shader.setFragmentShaderCode( loadShader( frag_shader ) )
-        for rpass in material.effect().techniques()[0].renderPasses():
-            rpass.setShaderProgram( shader )
+        material =  self._athenaMaterial( 'imposter.qml', flavor_str + '.vert', 
+                                                          flavor_str + '.frag',
+                                                          flavor_str + '.geom' )
 
         material.addParameter( self._projOrthographicParam )
         return material
 
     def _overlayMaterial( self ):
-        material = self._qmlLoad( 'overlay.qml' )
-        shader_path = Path(ATHENA_SRC_DIR) / 'shaders'
-        vert_shader = shader_path / 'overlay.vert'
-        frag_shader = shader_path / 'overlay.frag'
-        def loadShader( s ):
-            return Qt3DRender.QShaderProgram.loadSource( s.as_uri() )
-        shader = Qt3DRender.QShaderProgram(material)
-        shader.setVertexShaderCode( loadShader( vert_shader ) )
-        shader.setFragmentShaderCode( loadShader( frag_shader ) )
-        for rpass in material.effect().techniques()[0].renderPasses():
-            rpass.setShaderProgram( shader )
+        material = self._athenaMaterial( 'overlay.qml', 'overlay.vert', 'overlay.frag' )
         return material
 
 
@@ -444,18 +443,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.cylinder_material = self._imposterMaterial('cylinder')
         self.cone_material = self._imposterMaterial('cone')
 
-        self.flat_material = self._athenaMaterial( 'flat' )
-        self.flat_material.addParameter( self._alphaParam )
-        self.flat_material.addParameter( self._faceEnableParam )
+        self.flat_material = self._plyMeshMaterial( 'flat' )
         self.flat_material.addParameter( self._flatColorParam )
-        self.flat_material.addParameter( self._lineWidthParam )
-        self.flat_material.addParameter( self._lineColorParam )
 
-        self.gooch_material = self._athenaMaterial( 'gooch' )
-        self.gooch_material.addParameter( self._alphaParam )
-        self.gooch_material.addParameter( self._faceEnableParam )
-        self.gooch_material.addParameter( self._lineWidthParam )
-        self.gooch_material.addParameter( self._lineColorParam )
+        self.gooch_material = self._plyMeshMaterial( 'gooch' )
         self.gooch_material.addParameter( self._coolColorParam )
         self.gooch_material.addParameter( self._warmColorParam )
         self.gooch_material.addParameter( self._lightPositionParam )
