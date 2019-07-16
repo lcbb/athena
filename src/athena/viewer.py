@@ -103,6 +103,10 @@ class CameraController3D(CameraController):
 
         aabb_size = self.aabb.max - self.aabb.min
         bounding_sphere_diam = max( aabb_size.x(), aabb_size.y(), aabb_size.z() ) * math.sqrt(3)
+        # Add a slight offset to ensure the boundary will cover
+        # output decorations (cylinders etc) that are outside the original
+        # geometry boundary
+        bounding_sphere_diam *= 1.4
         bounding_sphere_rad = bounding_sphere_diam / 2
         cam_distance = 2 * bounding_sphere_rad
 
