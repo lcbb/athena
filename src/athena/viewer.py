@@ -2,8 +2,8 @@ from pathlib import Path
 import math
 import numpy as np
 
-from PySide2.QtGui import QColor, QVector3D as vec3d, QImageWriter
-from PySide2.QtCore import QUrl, QByteArray, Qt, Signal, QRectF
+from PySide2.QtGui import QColor, QVector3D as vec3d, QImageWriter, QOffscreenSurface, QSurfaceFormat, QImage
+from PySide2.QtCore import QUrl, QByteArray, Qt, Signal, QRectF, QSize
 
 from PySide2.Qt3DExtras import Qt3DExtras
 from PySide2.Qt3DRender import Qt3DRender
@@ -169,12 +169,51 @@ class ScreenshotMonger:
     def handleCompleted( self ):
         print("Completed", self.pendingScreenshot.captureId())
         iw = QImageWriter()
+        iw.setFormat(str.encode('png'))
         if self.window_gamma: iw.setGamma( self.window_gamma )
         iw.setFileName( "img{}.png".format(self.pendingScreenshot.captureId()) )
-        iw.write( self.pendingScreenshot.image() )
+        img = self.pendingScreenshot.image()
+        print(img.format())
+        img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
+        img3 = img2.convertToFormat( QImage.Format_RGB32 )
+        #iw.write( self.pendingScreenshot.image().convertToFormat(QImage.Format_ARGB32_Premultiplied))
+        iw.write(img3)
 
         self.pendingScreenshot.completed.disconnect( self.handleCompleted )
         self.pendingScreenshot = None
+
+class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
+    def __init__(self, parent, size):
+        super().__init__(parent)
+        self.size = size
+
+        self.output = Qt3DRender.QRenderTargetOutput( self )
+        self.output.setAttachmentPoint( Qt3DRender.QRenderTargetOutput.Color0 )
+
+        self.texture = Qt3DRender.QTexture2D(self.output)
+        self.texture.setSize(size.width(), size.height())
+        self.texture.setFormat(Qt3DRender.QAbstractTexture.RGB8_UNorm)
+        self.texture.setMinificationFilter(Qt3DRender.QAbstractTexture.Linear)
+        self.texture.setMagnificationFilter(Qt3DRender.QAbstractTexture.Linear)
+
+        self.output.setTexture(self.texture)
+        self.addOutput(self.output)
+
+        self.depthTexOutput = Qt3DRender.QRenderTargetOutput( self )
+        self.depthTexOutput.setAttachmentPoint( Qt3DRender.QRenderTargetOutput.Depth )
+        self.depthTex = Qt3DRender.QTexture2D(self.depthTexOutput )
+        self.depthTex.setSize( size.width(), size.height() )
+        self.depthTex.setFormat( Qt3DRender.QAbstractTexture.D24 )
+        self.depthTex.setMinificationFilter(Qt3DRender.QAbstractTexture.Linear)
+        self.depthTex.setMagnificationFilter(Qt3DRender.QAbstractTexture.Linear)
+        self.depthTex.setComparisonFunction(Qt3DRender.QAbstractTexture.CompareLessEqual)
+        self.depthTex.setComparisonMode(Qt3DRender.QAbstractTexture.CompareRefToTexture)
+
+        self.depthTexOutput.setTexture( self.depthTex)
+        self.addOutput( self.depthTexOutput )
+
+
+
 
 class AthenaFrameGraph:
 
@@ -182,51 +221,72 @@ class AthenaFrameGraph:
         # Three-pass rendering: first opaque solids, then transparent solids, then
         # a 2d overlay pass to draw annotations on top of all.
 
+        self.offscreenSurface = QOffscreenSurface()
+        self.offscreenSurface.setFormat( QSurfaceFormat.defaultFormat() )
+        self.offscreenSurface.create()
+        size = QSize(1000,1000)
+
         self.overlayCamera = Qt3DRender.QCamera()
 
-        self.renderCapture = Qt3DRender.QRenderCapture()
-        self.root = self.renderCapture
-        self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector(self.renderCapture)
-        self.surfaceSelector.setSurface(window)
-        self.cameraSelector = Qt3DRender.QCameraSelector(self.surfaceSelector)
-        self.cameraSelector.setCamera(window.camera())
-        self.clearBuffers = Qt3DRender.QClearBuffers(self.cameraSelector)
+
+        self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector()
+        self.surfaceSelector.setSurface(self.offscreenSurface)
+        self.surfaceSelector.setExternalRenderTargetSize(size)
+        #self.surfaceSelector.setSurface(window)
+        self.root = self.surfaceSelector
+
+        self.renderTargetSelector = Qt3DRender.QRenderTargetSelector(self.surfaceSelector)
+        self.targetTexture = OffscreenRenderTarget(self.renderTargetSelector,size)
+        self.renderTargetSelector.setTarget(self.targetTexture)
+        self.noDraw2 = Qt3DRender.QNoDraw(self.renderTargetSelector)
+
+        
+        self.clearBuffers = Qt3DRender.QClearBuffers(self.renderTargetSelector)
         self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
         self.clearBuffers.setClearColor(Qt.white)
+        self.noDraw = Qt3DRender.QNoDraw(self.clearBuffers)
+
+        self.cameraSelector = Qt3DRender.QCameraSelector(self.renderTargetSelector)
+        self.cameraSelector.setCamera(window.camera())
 
         # Framegraph branch for solid 3d objects
-        self.qfilt = Qt3DRender.QTechniqueFilter(self.cameraSelector)
+        self.viewport = Qt3DRender.QViewport(self.cameraSelector)
+        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+        self.qfilt = Qt3DRender.QTechniqueFilter(self.viewport)
         self.solidPassFilter = Qt3DRender.QFilterKey(self.qfilt)
         self.solidPassFilter.setName('pass')
         self.solidPassFilter.setValue('solid')
         self.qfilt.addMatch(self.solidPassFilter)
-        self.viewport = Qt3DRender.QViewport(self.qfilt)
-        self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
 
         # Branch for transparent 3d objects
-        self.qfilt2 = Qt3DRender.QTechniqueFilter(self.cameraSelector)
+        self.viewport2 = Qt3DRender.QViewport(self.cameraSelector)
+        self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+        self.qfilt2 = Qt3DRender.QTechniqueFilter(self.viewport2)
         self.transPassFilter = Qt3DRender.QFilterKey(self.qfilt2)
         self.transPassFilter.setName('pass')
         self.transPassFilter.setValue('transp')
         self.qfilt2.addMatch(self.transPassFilter)
-        self.viewport2 = Qt3DRender.QViewport(self.qfilt2)
-        self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
 
         # Branch for 2d on-screen overlays
-        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.surfaceSelector)
+        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.renderTargetSelector)
         self.cameraSelector2.setCamera(self.overlayCamera)
-        self.qfilt3 = Qt3DRender.QTechniqueFilter(self.cameraSelector2)
-        self.overlayPassFilter = Qt3DRender.QFilterKey(self.cameraSelector2)
+        self.viewport3 = Qt3DRender.QViewport(self.cameraSelector2)
+        self.viewport3.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+        self.qfilt3 = Qt3DRender.QTechniqueFilter(self.viewport3)
+        self.overlayPassFilter = Qt3DRender.QFilterKey(self.viewport3)
         self.overlayPassFilter.setName('pass')
         self.overlayPassFilter.setValue('overlay')
         self.qfilt3.addMatch(self.overlayPassFilter)
-        self.viewport3 = Qt3DRender.QViewport(self.qfilt3)
-        self.viewport3.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
+
+        self.renderCapture = Qt3DRender.QRenderCapture(self.renderTargetSelector)
+        self.noDraw3 = Qt3DRender.QNoDraw(self.renderCapture)
 
         self.overlayCamera.setViewCenter( vec3d() )
         self.overlayCamera.setPosition( vec3d( 0, 0, -1 ) )
         self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
         self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
+
+        self.dump()
 
 
     def dump(self):
@@ -527,13 +587,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def setSplitViewEnabled( self, enabled ):
 
         if( enabled ):
-            self.viewport.setNormalizedRect( QRectF( 0.5, 0, 0.5, 1.0) )
-            self.viewport2.setNormalizedRect( QRectF( 0, 0, 0.5, 1.0 ) )
+            self.framegraph.viewport.setNormalizedRect( QRectF( 0.5, 0, 0.5, 1.0) )
+            self.framegraph.viewport2.setNormalizedRect( QRectF( 0, 0, 0.5, 1.0 ) )
             self.splitLineEntity.setEnabled( True )
         else:
             whole_screen = QRectF( 0, 0, 1, 1 )
-            self.viewport.setNormalizedRect( whole_screen )
-            self.viewport2.setNormalizedRect( whole_screen )
+            self.framegraph.viewport.setNormalizedRect( whole_screen )
+            self.framegraph.viewport2.setNormalizedRect( whole_screen )
             self.splitLineEntity.setEnabled( False )
         self.camControl.split = enabled
         self.camControl.resize()
