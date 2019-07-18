@@ -12,7 +12,7 @@ from PySide2.QtQml import QQmlEngine, QQmlComponent
 
 from plyfile import PlyData, PlyElement
 
-from athena import ATHENA_SRC_DIR, plymesh, geom, decorations
+from athena import ATHENA_SRC_DIR, plymesh, geom, decorations, screenshot
 
 ATHENA_GEOM_UP = geom.ATHENA_GEOM_UP
 
@@ -153,37 +153,6 @@ class CameraController3D(CameraController):
 
     def resize(self):
         self.camera.setAspectRatio(self._windowAspectRatio())
-
-class ScreenshotMonger:
-    def __init__(self, viewer):
-        self.pendingScreenshot = None
-        self.viewer = viewer
-
-    def register( self, screenshot ):
-        print("Registering", screenshot)
-        assert( self.pendingScreenshot == None )
-        self.pendingScreenshot = screenshot
-        screenshot.completed.connect( self.handleCompleted )
-        assert( screenshot.isComplete() == False )
-
-    def handleCompleted( self ):
-        print("Completed", self.pendingScreenshot.captureId())
-        iw = QImageWriter()
-        iw.setFormat(str.encode('png'))
-        gamma = self.viewer.framegraph.viewport.gamma()
-        iw.setGamma( gamma )
-        iw.setFileName( "img{}.png".format(self.pendingScreenshot.captureId()) )
-        img = self.pendingScreenshot.image()
-        print(img.format())
-        img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
-        img3 = img2.convertToFormat( QImage.Format_RGB32 )
-        #iw.write( self.pendingScreenshot.image().convertToFormat(QImage.Format_ARGB32_Premultiplied))
-        iw.write(img3)
-
-        self.pendingScreenshot.completed.disconnect( self.handleCompleted )
-        self.pendingScreenshot = None
-        self.viewer.renderSettings().setRenderPolicy(self.viewer.renderSettings().OnDemand)
-        self.viewer.framegraph.setOnscreenRendering()
 
 
 class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
@@ -512,7 +481,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         self.framegraph = AthenaFrameGraph(self)
         self.setActiveFrameGraph(self.framegraph.root)
-        self.screenshots = ScreenshotMonger( self )
+        self.screenshots = screenshot.ScreenshotMonger( self )
 
 
         self.setBackgroundColor( QColor(63,63,63) )

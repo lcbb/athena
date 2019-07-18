@@ -774,7 +774,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>94</width>
-                    <height>91</height>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1178,6 +1178,8 @@
     <addaction name="actionOpen"/>
     <addaction name="actionAddScaffold"/>
     <addaction name="separator"/>
+    <addaction name="actionScreenshot"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -1286,6 +1288,14 @@
   <action name="actionAbout">
    <property name="text">
     <string>About Athena</string>
+   </property>
+  </action>
+  <action name="actionScreenshot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Screenshot...</string>
    </property>
   </action>
  </widget>

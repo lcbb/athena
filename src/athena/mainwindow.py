@@ -15,7 +15,7 @@ from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
-from athena import bildparser, viewer, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, ATHENA_SRC_DIR, logwindow, __version__
+from athena import bildparser, viewer, screenshot, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, ATHENA_SRC_DIR, logwindow, __version__
 from pdbgen import pdbgen
 
 class AutoResizingStackedWidget( QStackedWidget ):
@@ -260,6 +260,9 @@ class AthenaWindow(QMainWindow):
         sizePolicy = QSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
+
+        self.screenshotDialog = screenshot.ScreenshotDialog(self, self.geomView)
+        self.actionScreenshot.toggled.connect( self.screenshotDialog.setVisible )
 
         self.setupToolDefaults()
         self.enable2DControls()
