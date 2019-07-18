@@ -155,9 +155,9 @@ class CameraController3D(CameraController):
         self.camera.setAspectRatio(self._windowAspectRatio())
 
 class ScreenshotMonger:
-    def __init__(self, gamma = None):
+    def __init__(self, viewer):
         self.pendingScreenshot = None
-        self.window_gamma = gamma
+        self.viewer = viewer
 
     def register( self, screenshot ):
         print("Registering", screenshot)
@@ -170,7 +170,8 @@ class ScreenshotMonger:
         print("Completed", self.pendingScreenshot.captureId())
         iw = QImageWriter()
         iw.setFormat(str.encode('png'))
-        if self.window_gamma: iw.setGamma( self.window_gamma )
+        gamma = self.viewer.framegraph.viewport.gamma()
+        iw.setGamma( gamma )
         iw.setFileName( "img{}.png".format(self.pendingScreenshot.captureId()) )
         img = self.pendingScreenshot.image()
         print(img.format())
@@ -181,9 +182,12 @@ class ScreenshotMonger:
 
         self.pendingScreenshot.completed.disconnect( self.handleCompleted )
         self.pendingScreenshot = None
+        self.viewer.renderSettings().setRenderPolicy(self.viewer.renderSettings().OnDemand)
+        self.viewer.framegraph.setOnscreenRendering()
+
 
 class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
-    def __init__(self, parent, size):
+    def __init__(self, parent, size = QSize(500,500) ):
         super().__init__(parent)
         self.size = size
 
@@ -212,44 +216,54 @@ class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
         self.depthTexOutput.setTexture( self.depthTex)
         self.addOutput( self.depthTexOutput )
 
+    def setSize( self, size ):
+        self.texture.setSize( size.width(), size.height() )
+        self.depthTex.setSize( size.width(), size.height() )
 
 
 
 class AthenaFrameGraph:
+    '''
+    Class to manage the Qt3D framegraph on behalf of the Athena viewer
+    '''
 
     def __init__(self, window):
-        # Three-pass rendering: first opaque solids, then transparent solids, then
-        # a 2d overlay pass to draw annotations on top of all.
+
+        self.window = window
 
         self.offscreenSurface = QOffscreenSurface()
         self.offscreenSurface.setFormat( QSurfaceFormat.defaultFormat() )
         self.offscreenSurface.create()
-        size = QSize(1000,1000)
 
         self.overlayCamera = Qt3DRender.QCamera()
+        self.overlayCamera.setViewCenter( vec3d() )
+        self.overlayCamera.setPosition( vec3d( 0, 0, -1 ) )
+        self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
+        self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
 
-
+        # Framegraph root
         self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector()
-        self.surfaceSelector.setSurface(self.offscreenSurface)
-        self.surfaceSelector.setExternalRenderTargetSize(size)
-        #self.surfaceSelector.setSurface(window)
+        self.surfaceSelector.setSurface(window)
         self.root = self.surfaceSelector
 
-        self.renderTargetSelector = Qt3DRender.QRenderTargetSelector(self.surfaceSelector)
-        self.targetTexture = OffscreenRenderTarget(self.renderTargetSelector,size)
+
+        # Used for offscreen renders, but not in the graph by default
+        self.renderTargetSelector = Qt3DRender.QRenderTargetSelector()
+        self.targetTexture = OffscreenRenderTarget(self.renderTargetSelector)
         self.renderTargetSelector.setTarget(self.targetTexture)
         self.noDraw2 = Qt3DRender.QNoDraw(self.renderTargetSelector)
 
-        
-        self.clearBuffers = Qt3DRender.QClearBuffers(self.renderTargetSelector)
+        # Branch 1: clear buffers
+        self.clearBuffers = Qt3DRender.QClearBuffers(self.surfaceSelector)
         self.clearBuffers.setBuffers(Qt3DRender.QClearBuffers.ColorDepthBuffer)
         self.clearBuffers.setClearColor(Qt.white)
         self.noDraw = Qt3DRender.QNoDraw(self.clearBuffers)
 
-        self.cameraSelector = Qt3DRender.QCameraSelector(self.renderTargetSelector)
+        # Branch 2: main drawing branches using the Athena camera
+        self.cameraSelector = Qt3DRender.QCameraSelector(self.surfaceSelector)
         self.cameraSelector.setCamera(window.camera())
 
-        # Framegraph branch for solid 3d objects
+        # Branch 2A: solid objects
         self.viewport = Qt3DRender.QViewport(self.cameraSelector)
         self.viewport.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
         self.qfilt = Qt3DRender.QTechniqueFilter(self.viewport)
@@ -258,7 +272,7 @@ class AthenaFrameGraph:
         self.solidPassFilter.setValue('solid')
         self.qfilt.addMatch(self.solidPassFilter)
 
-        # Branch for transparent 3d objects
+        # Branch 2B: transparent objects
         self.viewport2 = Qt3DRender.QViewport(self.cameraSelector)
         self.viewport2.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
         self.qfilt2 = Qt3DRender.QTechniqueFilter(self.viewport2)
@@ -267,8 +281,8 @@ class AthenaFrameGraph:
         self.transPassFilter.setValue('transp')
         self.qfilt2.addMatch(self.transPassFilter)
 
-        # Branch for 2d on-screen overlays
-        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.renderTargetSelector)
+        # Branch 3: 2D screen overlays
+        self.cameraSelector2 = Qt3DRender.QCameraSelector(self.surfaceSelector)
         self.cameraSelector2.setCamera(self.overlayCamera)
         self.viewport3 = Qt3DRender.QViewport(self.cameraSelector2)
         self.viewport3.setNormalizedRect(QRectF(0, 0, 1.0, 1.0))
@@ -278,15 +292,29 @@ class AthenaFrameGraph:
         self.overlayPassFilter.setValue('overlay')
         self.qfilt3.addMatch(self.overlayPassFilter)
 
-        self.renderCapture = Qt3DRender.QRenderCapture(self.renderTargetSelector)
+        # Branch 4: render capture branch for taking screenshots
+        self.renderCapture = Qt3DRender.QRenderCapture(self.surfaceSelector)
         self.noDraw3 = Qt3DRender.QNoDraw(self.renderCapture)
 
-        self.overlayCamera.setViewCenter( vec3d() )
-        self.overlayCamera.setPosition( vec3d( 0, 0, -1 ) )
-        self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
-        self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
+        # Branch roots are the bits that need reparenting when switchign between
+        # offscreen and onscreen rendering
+        self.branchRoots = [ self.clearBuffers, self.cameraSelector, self.cameraSelector2, self.renderCapture ]
 
         self.dump()
+
+    def setOffscreenRendering ( self, size = QSize(1200,1200) ):
+        self.targetTexture.setSize(size)
+        self.surfaceSelector.setSurface(self.offscreenSurface)
+        self.surfaceSelector.setExternalRenderTargetSize(size)
+        self.renderTargetSelector.setParent(self.surfaceSelector)
+        for node in self.branchRoots:
+            node.setParent( self.renderTargetSelector )
+
+    def setOnscreenRendering (self):
+        self.surfaceSelector.setSurface(self.window)
+        for node in self.branchRoots:
+            node.setParent( self.surfaceSelector )
+        self.renderTargetSelector.setParent( None )
 
 
     def dump(self):
@@ -484,7 +512,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         self.framegraph = AthenaFrameGraph(self)
         self.setActiveFrameGraph(self.framegraph.root)
-        self.screenshots = ScreenshotMonger( self.framegraph.viewport.gamma() )
+        self.screenshots = ScreenshotMonger( self )
 
 
         self.setBackgroundColor( QColor(63,63,63) )
@@ -641,8 +669,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         print("Click")
+        self.framegraph.setOffscreenRendering()
         capture = self.framegraph.renderCapture.requestCapture()
         self.screenshots.register( capture )
+        self.renderSettings().setRenderPolicy(self.renderSettings().Always)
 
 
     def mouseMoveEvent(self, event):
