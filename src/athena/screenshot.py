@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PySide2.QtGui import QImage, QImageWriter
 from PySide2.QtWidgets import QDialog, QFileDialog
-from PySide2.QtCore import QObject, QSize
+from PySide2.QtCore import QObject, QSize, Signal
 
 from athena import mainwindow, ATHENA_DIR, viewer
 
@@ -139,7 +139,7 @@ class ScreenshotDialog(QDialog):
         candidate_path = dpath / file_pattern.format( capture_id )
         idx = 1
         while candidate_path.exists() or candidate_path.is_symlink():
-            candidate_path = dpath / file_pattern.format( str(capture_id) + '_' + idx )
+            candidate_path = dpath / file_pattern.format( str(capture_id) + '_' + str(idx) )
             idx += 1
         return candidate_path
 
@@ -157,4 +157,7 @@ class ScreenshotDialog(QDialog):
             img.setDotsPerMeterX( dpm )
             img.setDotsPerMeterY( dpm )
             iw.write(img)
+            self.screenshotSaved.emit(path)
         return doSaveScreenshot
+
+    screenshotSaved = Signal(Path)

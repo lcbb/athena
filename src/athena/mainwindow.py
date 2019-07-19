@@ -248,7 +248,6 @@ class AthenaWindow(QMainWindow):
         self.actionOverlayResults.setShortcut( QKeySequence (Qt.CTRL + Qt.Key_1 ) )
         self.actionSeparateResults.setShortcut( QKeySequence(Qt.CTRL + Qt.Key_2 ) )
 
-
         self.scaffoldBox.setItemData(0,"m13")
         self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
 
@@ -263,6 +262,7 @@ class AthenaWindow(QMainWindow):
 
         self.screenshotDialog = screenshot.ScreenshotDialog(self, self.geomView)
         self.actionScreenshot.toggled.connect( self.screenshotDialog.setVisible )
+        self.screenshotDialog.screenshotSaved.connect( self.notifyScreenshotDone )
 
         self.setupToolDefaults()
         self.enable2DControls()
@@ -531,3 +531,6 @@ class AthenaWindow(QMainWindow):
         about_text = open(Path(ATHENA_SRC_DIR)/'txt'/'About.txt','r', encoding='utf8').read()
         about_text = about_text.format( version=__version__ )
         QMessageBox.about(self, "About Athena", about_text )
+
+    def notifyScreenshotDone( self, path ):
+        self.updateStatus('Saved screenshot to {}'.format(path))

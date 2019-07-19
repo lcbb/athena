@@ -272,7 +272,7 @@ class AthenaFrameGraph:
         # offscreen and onscreen rendering
         self.branchRoots = [ self.clearBuffers, self.cameraSelector, self.cameraSelector2, self.renderCapture ]
 
-        self.dump()
+        #self.dump()
 
     def setOffscreenRendering ( self, size = QSize(1200,1200) ):
         self.targetTexture.setSize(size)
