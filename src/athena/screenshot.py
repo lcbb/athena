@@ -133,22 +133,28 @@ class ScreenshotDialog(QDialog):
         request = self.view.requestScreenshot( QSize(w, h) )
         request.completed.connect( self.saveScreenshotCallback(request, d, self.output_dir) )
 
+    def screenshotFilepath(self, output_path, capture_id ):
+        dpath = Path(output_path)
+        file_pattern = 'athena_img_{}.png'
+        candidate_path = dpath / file_pattern.format( capture_id )
+        idx = 1
+        while candidate_path.exists() or candidate_path.is_symlink():
+            candidate_path = dpath / file_pattern.format( str(capture_id) + '_' + idx )
+            idx += 1
+        return candidate_path
+
     def saveScreenshotCallback(self, request, dpi, output_path):
         def doSaveScreenshot():
             iw = QImageWriter()
             iw.setFormat(str.encode('png'))
             gamma = self.view.framegraph.viewport.gamma()
             iw.setGamma( gamma )
-            path = Path(output_path) / 'img{}.png'.format(request.captureId())
+            path = self.screenshotFilepath( output_path, request.captureId() )
             iw.setFileName( str(path) )
             img = request.image()
-            print(img.format())
-            img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
-            img3 = img2.convertToFormat( QImage.Format_RGB32 )
-            # You're adorable, Qt
             in_per_meter = 39.37007874
-            dpm = dpi * in_per_meter
-            img3.setDotsPerMeterX( dpm )
-            img3.setDotsPerMeterY( dpm )
-            iw.write(img3)
+            dpm = dpi * in_per_meter        # You're adorable, Qt
+            img.setDotsPerMeterX( dpm )
+            img.setDotsPerMeterY( dpm )
+            iw.write(img)
         return doSaveScreenshot
