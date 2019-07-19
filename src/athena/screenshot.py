@@ -21,32 +21,10 @@ def SignalBlocker( *args ):
         a.blockSignals(s)
 
 class ScreenshotManager:
+
     def __init__(self, view):
         self.view = view
-        
 
-    def doScreenshot( self, width, height, dpi, output_path ):
-        request = self.view.requestScreenshot( QSize(width, height) )
-        request.completed.connect( self.saveScreenshotCallback(request, dpi, output_path) )
-
-    def saveScreenshotCallback(self, request, dpi, output_path):
-        in_per_meter = 39.37007874
-        dpm = dpi * in_per_meter
-        def doSaveScreenshot():
-            iw = QImageWriter()
-            iw.setFormat(str.encode('png'))
-            gamma = self.view.framegraph.viewport.gamma()
-            iw.setGamma( gamma )
-            path = Path(output_path) / 'img{}.png'.format(request.captureId())
-            iw.setFileName( str(path) )
-            img = request.image()
-            print(img.format())
-            img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
-            img3 = img2.convertToFormat( QImage.Format_RGB32 )
-            img3.setDotsPerMeterX( dpm )
-            img3.setDotsPerMeterY( dpm )
-            iw.write(img3)
-        return doSaveScreenshot
 
 
 class ScreenshotDialog(QDialog):
@@ -152,37 +130,25 @@ class ScreenshotDialog(QDialog):
         w = self.widthBoxPixels.value()
         h = self.heightBoxPixels.value()
         d = self.dpiBox.value()
-        print("Saving {0}x{1} @ {2} to {3}".format(w,h,d,self.output_dir))
-        self.screenshotMgr.doScreenshot(w, h, d, self.output_dir)
+        request = self.view.requestScreenshot( QSize(w, h) )
+        request.completed.connect( self.saveScreenshotCallback(request, d, self.output_path) )
 
-class ScreenshotMonger:
-    def __init__(self, viewer):
-        self.pendingScreenshot = None
-        self.viewer = viewer
-
-    def register( self, screenshot ):
-        print("Registering", screenshot)
-        assert( self.pendingScreenshot == None )
-        self.pendingScreenshot = screenshot
-        screenshot.completed.connect( self.handleCompleted )
-        assert( screenshot.isComplete() == False )
-
-    def handleCompleted( self ):
-        print("Completed", self.pendingScreenshot.captureId())
-        iw = QImageWriter()
-        iw.setFormat(str.encode('png'))
-        gamma = self.viewer.framegraph.viewport.gamma()
-        iw.setGamma( gamma )
-        iw.setFileName( "img{}.png".format(self.pendingScreenshot.captureId()) )
-        img = self.pendingScreenshot.image()
-        print(img.format())
-        img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
-        img3 = img2.convertToFormat( QImage.Format_RGB32 )
-        #iw.write( self.pendingScreenshot.image().convertToFormat(QImage.Format_ARGB32_Premultiplied))
-        iw.write(img3)
-
-        self.pendingScreenshot.completed.disconnect( self.handleCompleted )
-        self.pendingScreenshot = None
-        self.viewer.renderSettings().setRenderPolicy(self.viewer.renderSettings().OnDemand)
-        self.viewer.framegraph.setOnscreenRendering()
-
+    def saveScreenshotCallback(self, request, dpi, output_path):
+        def doSaveScreenshot():
+            iw = QImageWriter()
+            iw.setFormat(str.encode('png'))
+            gamma = self.view.framegraph.viewport.gamma()
+            iw.setGamma( gamma )
+            path = Path(output_path) / 'img{}.png'.format(request.captureId())
+            iw.setFileName( str(path) )
+            img = request.image()
+            print(img.format())
+            img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
+            img3 = img2.convertToFormat( QImage.Format_RGB32 )
+            # You're adorable, Qt
+            in_per_meter = 39.37007874
+            dpm = dpi * in_per_meter
+            img3.setDotsPerMeterX( dpm )
+            img3.setDotsPerMeterY( dpm )
+            iw.write(img3)
+        return doSaveScreenshot

@@ -215,8 +215,9 @@ class AthenaFrameGraph:
         self.surfaceSelector.setSurface(window)
         self.root = self.surfaceSelector
 
-
-        # Used for offscreen renders, but not in the graph by default
+        # Used for offscreen renders, not in the graph by default
+        # During screenshots, this will become a child of surfaceSelector
+        # and the branch roots will become a child of renderTargetSelector
         self.renderTargetSelector = Qt3DRender.QRenderTargetSelector()
         self.targetTexture = OffscreenRenderTarget(self.renderTargetSelector)
         self.renderTargetSelector.setTarget(self.targetTexture)
@@ -265,7 +266,7 @@ class AthenaFrameGraph:
         self.renderCapture = Qt3DRender.QRenderCapture(self.surfaceSelector)
         self.noDraw3 = Qt3DRender.QNoDraw(self.renderCapture)
 
-        # Branch roots are the bits that need reparenting when switchign between
+        # Branch roots are the bits that need reparenting when switching between
         # offscreen and onscreen rendering
         self.branchRoots = [ self.clearBuffers, self.cameraSelector, self.cameraSelector2, self.renderCapture ]
 
@@ -482,8 +483,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         self.framegraph = AthenaFrameGraph(self)
         self.setActiveFrameGraph(self.framegraph.root)
-        self.screenshots = screenshot.ScreenshotMonger( self )
-
 
         self.setBackgroundColor( QColor(63,63,63) )
         self.lightOrientation = int(0) # Internal integer controlling light.position attribute
@@ -638,7 +637,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     def requestScreenshot(self, size):
         def cleanup():
-            print("Cleaning up")
             self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
             self.framegraph.setOnscreenRendering()
         self.framegraph.setOffscreenRendering(size)
