@@ -1,9 +1,10 @@
 import os
 from contextlib import contextmanager
+from pathlib import Path
 
 from PySide2.QtGui import QImage, QImageWriter
 from PySide2.QtWidgets import QDialog, QFileDialog
-from PySide2.QtCore import QObject
+from PySide2.QtCore import QObject, QSize
 
 from athena import mainwindow, ATHENA_DIR, viewer
 
@@ -19,6 +20,34 @@ def SignalBlocker( *args ):
         # restore original settings
         a.blockSignals(s)
 
+class ScreenshotManager:
+    def __init__(self, view):
+        self.view = view
+        
+
+    def doScreenshot( self, width, height, dpi, output_path ):
+        request = self.view.requestScreenshot( QSize(width, height) )
+        request.completed.connect( self.saveScreenshotCallback(request, dpi, output_path) )
+
+    def saveScreenshotCallback(self, request, dpi, output_path):
+        in_per_meter = 39.37007874
+        dpm = dpi * in_per_meter
+        def doSaveScreenshot():
+            iw = QImageWriter()
+            iw.setFormat(str.encode('png'))
+            gamma = self.view.framegraph.viewport.gamma()
+            iw.setGamma( gamma )
+            path = Path(output_path) / 'img{}.png'.format(request.captureId())
+            iw.setFileName( str(path) )
+            img = request.image()
+            print(img.format())
+            img2 = QImage(img.bits(), img.width(), img.height(), QImage.Format_ARGB32)
+            img3 = img2.convertToFormat( QImage.Format_RGB32 )
+            img3.setDotsPerMeterX( dpm )
+            img3.setDotsPerMeterY( dpm )
+            iw.write(img3)
+        return doSaveScreenshot
+
 
 class ScreenshotDialog(QDialog):
 
@@ -28,6 +57,7 @@ class ScreenshotDialog(QDialog):
         super().__init__(parent)
         mainwindow.UiLoader.populateUI( self, ui_filepath )
         self.view = view
+        self.screenshotMgr = ScreenshotManager(view)
         self.dpiBox.setValue( self.view.screen().physicalDotsPerInch() )
 
         # User may choose between inches and pixels
@@ -47,9 +77,11 @@ class ScreenshotDialog(QDialog):
         self.heightBoxInches.valueChanged.connect( self.changeHeightInches )
         self.dpiBox.valueChanged.connect( self.changeDpi )
 
-        self.output_dir = "HOME"
+        self.output_dir = str(Path.home())
         self.savetoLabel.setText( self.output_dir )
         self.dirChooserButton.clicked.connect( self.chooseOutputDir )
+
+        self.buttonBox.accepted.connect( self.doSave )
 
         self.ratio = 1
 
@@ -115,6 +147,13 @@ class ScreenshotDialog(QDialog):
         self.output_dir = QFileDialog.getExistingDirectory( self, "Choose Screenshot Directory", self.output_dir,
                                                     QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks )
         self.savetoLabel.setText( self.output_dir )
+
+    def doSave( self ):
+        w = self.widthBoxPixels.value()
+        h = self.heightBoxPixels.value()
+        d = self.dpiBox.value()
+        print("Saving {0}x{1} @ {2} to {3}".format(w,h,d,self.output_dir))
+        self.screenshotMgr.doScreenshot(w, h, d, self.output_dir)
 
 class ScreenshotMonger:
     def __init__(self, viewer):

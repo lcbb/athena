@@ -281,6 +281,7 @@ class AthenaFrameGraph:
 
     def setOnscreenRendering (self):
         self.surfaceSelector.setSurface(self.window)
+        self.surfaceSelector.setExternalRenderTargetSize(self.window.size())
         for node in self.branchRoots:
             node.setParent( self.surfaceSelector )
         self.renderTargetSelector.setParent( None )
@@ -635,14 +636,16 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.camControl.reset()
         return mesh_3d
 
-    def mousePressEvent(self, event):
-        super().mousePressEvent(event)
-        print("Click")
-        self.framegraph.setOffscreenRendering()
-        capture = self.framegraph.renderCapture.requestCapture()
-        self.screenshots.register( capture )
+    def requestScreenshot(self, size):
+        def cleanup():
+            print("Cleaning up")
+            self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
+            self.framegraph.setOnscreenRendering()
+        self.framegraph.setOffscreenRendering(size)
+        request = self.framegraph.renderCapture.requestCapture()
         self.renderSettings().setRenderPolicy(self.renderSettings().Always)
-
+        request.completed.connect( cleanup )
+        return request
 
     def mouseMoveEvent(self, event):
         if( self.lastpos ):
