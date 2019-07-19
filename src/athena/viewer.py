@@ -176,7 +176,7 @@ class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
         self.depthTexOutput.setAttachmentPoint( Qt3DRender.QRenderTargetOutput.Depth )
         self.depthTex = Qt3DRender.QTexture2D(self.depthTexOutput )
         self.depthTex.setSize( size.width(), size.height() )
-        self.depthTex.setFormat( Qt3DRender.QAbstractTexture.D24 )
+        self.depthTex.setFormat( Qt3DRender.QAbstractTexture.D32F )
         self.depthTex.setMinificationFilter(Qt3DRender.QAbstractTexture.Linear)
         self.depthTex.setMagnificationFilter(Qt3DRender.QAbstractTexture.Linear)
         self.depthTex.setComparisonFunction(Qt3DRender.QAbstractTexture.CompareLessEqual)
@@ -201,7 +201,9 @@ class AthenaFrameGraph:
         self.window = window
 
         self.offscreenSurface = QOffscreenSurface()
-        self.offscreenSurface.setFormat( QSurfaceFormat.defaultFormat() )
+        sformat = QSurfaceFormat.defaultFormat()
+        sformat.setDepthBufferSize(32)
+        self.offscreenSurface.setFormat( sformat )
         self.offscreenSurface.create()
 
         self.overlayCamera = Qt3DRender.QCamera()
