@@ -563,7 +563,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     faceRenderingEnabledChanged = Signal( bool )
 
     def faceRenderingEnabled( self ):
-        return self._faceEnableParam.value > 0.0
+        return self._faceEnableParam.value() > 0.0
 
     def toggleFaceRendering( self, boolvalue ):
         self.setFaceEnable( 1.0 if boolvalue else 0.0 )
@@ -639,12 +639,15 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     def requestScreenshot(self, size):
         def cleanup():
-            self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
             self.framegraph.setOnscreenRendering()
         self.framegraph.setOffscreenRendering(size)
         request = self.framegraph.renderCapture.requestCapture()
-        self.renderSettings().setRenderPolicy(self.renderSettings().Always)
         request.completed.connect( cleanup )
+        # Now ensure a frame redraw occurs so that the capture can go forward.
+        # A nicer way would be to call renderSettings().sendCommand('InvalidateFrame'),
+        # but PySide2 does not expose QNode.sendCommand().
+        # c.f. the implementation of Qt3DWindow::event()
+        self.requestUpdate()
         return request
 
     def mouseMoveEvent(self, event):
