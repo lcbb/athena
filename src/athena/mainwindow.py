@@ -236,7 +236,7 @@ class AthenaWindow(QMainWindow):
         self.statusBar().addWidget(self.statusMsg)
 
         self.logWindow = logwindow.LogWindow(self)
-        self.actionShowLogWindow.toggled.connect( self.logWindow.setVisible )
+        self.actionShowLogWindow.triggered.connect( self.logWindow.show )
         self.actionShowInputSidebar.toggled.connect( self.inputSidebar.setVisible )
         self.actionShowOutputSidebar.toggled.connect( self.outputSidebar.setVisible )
 
@@ -261,7 +261,7 @@ class AthenaWindow(QMainWindow):
         self.geomViewWidget.setSizePolicy(sizePolicy) 
 
         self.screenshotDialog = screenshot.ScreenshotDialog(self, self.geomView)
-        self.actionScreenshot.toggled.connect( self.screenshotDialog.setVisible )
+        self.actionScreenshot.triggered.connect( self.screenshotDialog.show )
         self.screenshotDialog.screenshotSaved.connect( self.notifyScreenshotDone )
 
         self.setupToolDefaults()

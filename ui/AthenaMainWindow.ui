@@ -960,7 +960,7 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>94</width>
+                    <width>98</width>
                     <height>181</height>
                    </rect>
                   </property>
@@ -1233,7 +1233,7 @@
   </action>
   <action name="actionShowLogWindow">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Show Log Window</string>
@@ -1292,7 +1292,7 @@
   </action>
   <action name="actionScreenshot">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Screenshot...</string>
