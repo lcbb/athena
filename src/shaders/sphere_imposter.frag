@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from PyMOL
+
 in SphereVertex {
     vec3 sphere_center;
     vec3 point;

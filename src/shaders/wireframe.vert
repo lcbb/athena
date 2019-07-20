@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from Qt outline shader example
+
 in vec3 vertexPosition;
 in vec3 vertexNormal;
 in float vertexInterior;

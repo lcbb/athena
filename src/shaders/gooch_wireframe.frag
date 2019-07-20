@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from Qt outline shader example
+
 uniform struct LightInfo {
     vec4 position;
     vec3 intensity;

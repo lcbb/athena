@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from Qt outline shader example
+
 layout( triangles ) in;
 layout( triangle_strip, max_vertices = 3 ) out;
 

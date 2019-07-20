@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from cylinder shader, which was adapted from PyMOL
+
 in vec3 vertexPosition;
 in float radius;
 in vec4 vertexColor;

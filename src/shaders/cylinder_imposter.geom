@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from PyMOL
+
 // Imposter shader converts line segment + radius information, specifying a cylinder,
 // into the vertices of an oriented bounding box around the cylinder.  The fragment
 // shader goes on to draw a ray-traced cylinder onto that box.

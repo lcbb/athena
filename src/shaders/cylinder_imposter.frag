@@ -1,5 +1,7 @@
 #version 330 core
 
+// Adapted from PyMOL
+
 uniform mat4 projectionMatrix;
 uniform float proj_orthographic;
 

@@ -1,5 +1,6 @@
 #version 330 core
 
+// Adapted from cylinder shader, which was adapted from PyMOL
 
 in CylinderPoint {
     vec3 surface_point;
