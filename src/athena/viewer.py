@@ -38,7 +38,7 @@ class CameraController:
     def drag(self, dx, dy):
         pass
 
-    def resize(self):
+    def resize(self, ratio=None):
         pass
 
 class CameraController2D(CameraController):
@@ -57,16 +57,16 @@ class CameraController2D(CameraController):
         self.camera.setUpVector( ATHENA_GEOM_UP )
         self._orient()
 
-    def _extents(self):
+    def _extents(self, ratio=None):
         # Return the visible x,y dimensions
-        ratio = self._windowAspectRatio()
+        if ratio is None: ratio = self._windowAspectRatio()
         mesh_extents = self.aabb.max - self.aabb.min
         view_extents = mesh_extents * self.margin
         view_extents.setX( view_extents.y() * ratio )
         return view_extents.x(), view_extents.y()
 
-    def _orient(self):
-        x_view, y_view = self._extents()
+    def _orient(self, ratio = None):
+        x_view, y_view = self._extents(ratio)
 
         xmin = self.aabb.center.x() - x_view / 2
         xmax = self.aabb.center.x() + x_view / 2
@@ -89,8 +89,8 @@ class CameraController2D(CameraController):
         self.margin *= delta
         self._orient()
 
-    def resize(self):
-        self._orient()
+    def resize(self, ratio=None):
+        self._orient(ratio)
 
 class CameraController3D(CameraController):
     def __init__(self, window, camera, geometry, split):
@@ -151,8 +151,9 @@ class CameraController3D(CameraController):
         new_fov = clamp (5, 150, fov - delta)
         self.camera.setFieldOfView( new_fov )
 
-    def resize(self):
-        self.camera.setAspectRatio(self._windowAspectRatio())
+    def resize(self, ratio = None):
+        if ratio is None: ratio = self._windowAspectRatio()
+        self.camera.setAspectRatio(ratio)
 
 
 class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
@@ -284,6 +285,7 @@ class AthenaFrameGraph:
 
     def setOnscreenRendering (self):
         self.surfaceSelector.setSurface(self.window)
+        # Turns out you want to call this even for non-external rendering targets
         self.surfaceSelector.setExternalRenderTargetSize(self.window.size())
         for node in self.branchRoots:
             node.setParent( self.surfaceSelector )
@@ -638,9 +640,12 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         return mesh_3d
 
     def requestScreenshot(self, size):
+        ratio = size.width() / size.height()
         def cleanup():
             self.framegraph.setOnscreenRendering()
+            self.camControl.resize()
         self.framegraph.setOffscreenRendering(size)
+        self.camControl.resize(ratio)
         request = self.framegraph.renderCapture.requestCapture()
         request.completed.connect( cleanup )
         # Now ensure a frame redraw occurs so that the capture can go forward.
