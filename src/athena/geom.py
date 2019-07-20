@@ -152,6 +152,9 @@ def dumpGeometry( geom, dumpf=print ):
             for tri in grouper(iterAttr(att), 3):
                 dumpf(tri)
 class AABB:
+    '''
+    An axis-aligned bounding box around the given geometry
+    '''
     def __init__(self, geom):
         if hasattr(geom, 'allVertices'):
             # Something lke bildparser.OutputDecorations
@@ -173,31 +176,39 @@ class AABB:
         self.center = (self.min+self.max) / 2.0
 
     def iterCorners(self, cons = vec3d ):
+        '''
+        Iterator over the eight corners of the AABB
+        '''
         for x in [self.min.x(), self.max.x()]:
             for y in [self.min.y(), self.max.y()]:
                 for z in [self.min.z(), self.max.z()]:
                     yield cons(x, y, z)
 
 def transformBetween( aabb1, aabb2 ):
+    '''
+    Return a function mapping coords of one AABB to another
+    '''
 
-        def np_coords_from_aabb(aabb):
-            return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x])) ) )
+    def np_coords_from_aabb(aabb):
+        return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x])) ) )
 
-        coord_from = np_coords_from_aabb( aabb1 )
-        coord_to = np_coords_from_aabb( aabb2 )
+    # https://stackoverflow.com/questions/20546182/how-to-perform-coordinates-affine-transformation-using-python-part-2
 
-        n = coord_from.shape[0]
-        pad = lambda x: np.hstack([x, np.ones((x.shape[0],1))])
-        unpad = lambda x: x[:,:-1]
+    coord_from = np_coords_from_aabb( aabb1 )
+    coord_to = np_coords_from_aabb( aabb2 )
 
-        X = pad(coord_from)
-        Y = pad(coord_to)
+    n = coord_from.shape[0]
+    pad = lambda x: np.hstack([x, np.ones((x.shape[0],1))])
+    unpad = lambda x: x[:,:-1]
 
-        A, res, rank, s = np.linalg.lstsq(X, Y, rcond=None)
+    X = pad(coord_from)
+    Y = pad(coord_to)
 
-        transform = lambda x: unpad(np.dot(pad(x), A))
+    A, res, rank, s = np.linalg.lstsq(X, Y, rcond=None)
 
-        return transform
+    transform = lambda x: unpad(np.dot(pad(x), A))
+
+    return transform
 
 
 

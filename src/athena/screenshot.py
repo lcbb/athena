@@ -20,13 +20,6 @@ def SignalBlocker( *args ):
         # restore original settings
         a.blockSignals(s)
 
-class ScreenshotManager:
-
-    def __init__(self, view):
-        self.view = view
-
-
-
 class ScreenshotDialog(QDialog):
 
     default_ui_path = os.path.join( ATHENA_DIR, 'ui', 'ScreenshotDialog.ui' )

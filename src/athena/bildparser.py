@@ -14,7 +14,7 @@ Cone = namedtuple('Cone', 'color, x1, y1, z1, x2, y2, z2, r' )
 # We'll give defaults for r1, r2, and rho, which are optional in a file.
 # This isn't perfect because the default for r2 should be r1*4.  Parser
 # code should watch for the case where r1 is given and r2 is not, and update
-# the r2 value appropriately.
+# the r2 value appropriately. FIXME
 Arrow = namedtuple ( 'Arrow', 'color, x1, y1, z1, x2, y2, z2, r1, r2, rho', defaults=[0.1,0.4,0.75] )
 
 class OutputDecorations:
