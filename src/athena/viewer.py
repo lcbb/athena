@@ -60,6 +60,7 @@ class CameraController2D(CameraController):
     def _extents(self, ratio=None):
         # Return the visible x,y dimensions
         if ratio is None: ratio = self._windowAspectRatio()
+        elif self.split: ratio /= 2
         mesh_extents = self.aabb.max - self.aabb.min
         view_extents = mesh_extents * self.margin
         view_extents.setX( view_extents.y() * ratio )
@@ -153,6 +154,7 @@ class CameraController3D(CameraController):
 
     def resize(self, ratio = None):
         if ratio is None: ratio = self._windowAspectRatio()
+        elif self.split: ratio /= 2
         self.camera.setAspectRatio(ratio)
 
 
