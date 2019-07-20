@@ -28,7 +28,6 @@ class ScreenshotDialog(QDialog):
         super().__init__(parent)
         mainwindow.UiLoader.populateUI( self, ui_filepath )
         self.view = view
-        self.screenshotMgr = ScreenshotManager(view)
         self.dpiBox.setValue( self.view.screen().physicalDotsPerInch() )
 
         # User may choose between inches and pixels
