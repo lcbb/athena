@@ -10,7 +10,7 @@ del /s /f /q ".\Athena"
 mkdir Athena
 xcopy "dist\Athena.exe" "Athena\"
 xcopy "README.txt" "Athena\"
-xcopy "LICENSE" "Athena\"
+xcopy "LICENSE" "Athena\LICENSE.txt"
 
 set ZIPFILE=dist/athena_win_%VERSION%.zip
 echo Creating %ZIPFILE%

@@ -14,7 +14,7 @@ rm -rf Athena
 mkdir Athena
 cp -a dist/Athena.app Athena
 cp README.txt Athena
-cp LICENSE Athena
+cp LICENSE Athena/LICENSE.txt
 
 ZIPFILE=dist/athena_mac_${VERSION}.zip
 echo "Creating ${ZIPFILE}"
