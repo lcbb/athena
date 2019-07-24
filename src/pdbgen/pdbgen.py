@@ -990,9 +990,7 @@ def pdbgen(filename,abtype,natype,inputdir,outputdir,log):
         # Check if the base is 5'-end
         if baseup == -1:
             # Multi-model PDB starts new model here
-            f = open(outputdir + filename + '-multimodel.pdb', 'a')
-            f.write('MODEL' + '{0:>9s}'.format(str(chainnum + 1)) + '\n')
-            f.close()    
+            fmm.write('MODEL' + '{0:>9s}'.format(str(chainnum + 1)) + '\n')   
 
         #print sslength, sslast, baseid
 
@@ -1446,9 +1444,16 @@ def pdbgen(filename,abtype,natype,inputdir,outputdir,log):
         # Iterate residue indexing
         resnum += 1
         if basedown == -1:
+          
+            # Standard PDB end chain
+            if chainnum < 62:
+                fpdb.write('TER\n')
+            
+            # Chain segment PDB end chain
+            fseg.write('TER\n')
             
             # Multi-model PDB ends model here
-            fmm.write('ENDMDL\n')
+            fmm.write('TER\nENDMDL\n')
             
             # Iterate chainnum and return mmatomnum to 1
             chainnum += 1
