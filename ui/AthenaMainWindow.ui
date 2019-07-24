@@ -1121,7 +1121,7 @@
               <item row="2" column="0">
                <widget class="QCheckBox" name="displayPAtomBox">
                 <property name="text">
-                 <string>Psuedoatomic</string>
+                 <string>Pseudoatomic</string>
                 </property>
                </widget>
               </item>

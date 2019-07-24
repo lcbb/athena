@@ -21,6 +21,7 @@ from pdbgen import pdbgen
 class SequenceToolBox( QToolBox ):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
+        # Work around a GUI bug on OSX
         self.currentChanged.connect( self.repaint )
 
 class AutoResizingStackedWidget( QStackedWidget ):
