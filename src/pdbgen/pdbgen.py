@@ -1446,7 +1446,7 @@ def pdbgen(filename,abtype,natype,inputdir,outputdir,log):
         if basedown == -1:
           
             # Standard PDB end chain
-            if chainnum < 62:
+            if numchains <= 63:
                 fpdb.write('TER\n')
             
             # Chain segment PDB end chain
