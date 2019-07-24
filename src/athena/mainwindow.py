@@ -10,13 +10,18 @@ from datetime import datetime
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup, QMessageBox
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup, QMessageBox, QToolBox
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
 
 from athena import bildparser, viewer, screenshot, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, ATHENA_SRC_DIR, logwindow, __version__
 from pdbgen import pdbgen
+
+class SequenceToolBox( QToolBox ):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.currentChanged.connect( self.repaint )
 
 class AutoResizingStackedWidget( QStackedWidget ):
     '''
@@ -159,6 +164,7 @@ class UiLoader(QUiLoader):
         ui_file.open( QFile.ReadOnly )
         try:
             ui_loader = UiLoader( parent )
+            ui_loader.registerCustomWidget( SequenceToolBox )
             ui_loader.registerCustomWidget( AutoResizingStackedWidget )
             ui_loader.registerCustomWidget( FileSelectionTreeWidget )
             ui_loader.registerCustomWidget( ColorButton )
