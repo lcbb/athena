@@ -274,10 +274,7 @@ class AthenaWindow(QMainWindow):
         self.setupToolDefaults()
         self.enable2DControls()
 
-        self.perdixRunButton.clicked.connect(self.runPERDIX)
-        self.talosRunButton.clicked.connect(self.runTALOS)
-        self.daedalusRunButton.clicked.connect(self.runDAEDALUS2)
-        self.metisRunButton.clicked.connect(self.runMETIS)
+        self.toolRunButton.clicked.connect(self.runTool)
         self.saveButton.clicked.connect(self.saveOutput)
 
         self.actionQuit.triggered.connect(self.close)
@@ -477,6 +474,17 @@ class AthenaWindow(QMainWindow):
         outfile_dir_path = ATHENA_OUTPUT_DIR / output_subdir
         return infile_path, outfile_dir_path
 
+    def runTool( self ):
+        tool_chooser = self.toolControls.currentWidget()
+        if tool_chooser == self.tools_2D:
+            toolkey = (0, self.toolBox_2D.currentIndex() )
+        elif tool_chooser == self.tools_3D:
+            toolkey = (1, self.toolBox_3D.currentIndex() )
+        else:
+            print( "ERROR: No available tool" ) 
+
+        self.toolMap[ toolkey ](self)
+
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
         infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX' )
@@ -533,6 +541,12 @@ class AthenaWindow(QMainWindow):
         self.log( process.stdout )
         self.updateStatus('METIS returned {}.'.format(human_retval))
         self.newOutputs(process)
+
+    toolMap = { (0, 0): runPERDIX,
+                (0, 1): runMETIS,
+                (1, 0): runDAEDALUS2,
+                (1, 1): runTALOS }
+
 
     def showAbout(self):
         about_text = open(Path(ATHENA_SRC_DIR)/'txt'/'About.txt','r', encoding='utf8').read()

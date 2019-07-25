@@ -800,7 +800,7 @@
               <enum>QFrame::Sunken</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="tools_2D">
               <property name="sizePolicy">
@@ -823,7 +823,7 @@
                 <number>2</number>
                </property>
                <item>
-                <widget class="SequenceToolBox" name="toolBox">
+                <widget class="SequenceToolBox" name="toolBox_2D">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                    <horstretch>0</horstretch>
@@ -840,9 +840,9 @@
                   <property name="geometry">
                    <rect>
                     <x>0</x>
-                    <y>0</y>
+                    <y>-7</y>
                     <width>88</width>
-                    <height>91</height>
+                    <height>62</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -900,19 +900,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item>
-                    <widget class="QPushButton" name="perdixRunButton">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Run</string>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </widget>
                  <widget class="QWidget" name="page_2">
@@ -921,7 +908,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>94</width>
-                    <height>81</height>
+                    <height>72</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -982,13 +969,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item>
-                    <widget class="QPushButton" name="metisRunButton">
-                     <property name="text">
-                      <string>Run</string>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </widget>
                 </widget>
@@ -1016,7 +996,7 @@
                 <number>2</number>
                </property>
                <item>
-                <widget class="SequenceToolBox" name="toolBox_2">
+                <widget class="SequenceToolBox" name="toolBox_3D">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                    <horstretch>0</horstretch>
@@ -1031,8 +1011,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>88</width>
-                    <height>91</height>
+                    <width>176</width>
+                    <height>72</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1084,31 +1064,15 @@
                      </property>
                     </widget>
                    </item>
-                   <item>
-                    <widget class="QPushButton" name="daedalusRunButton">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Run</string>
-                     </property>
-                     <property name="flat">
-                      <bool>false</bool>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </widget>
                  <widget class="QWidget" name="page_3">
                   <property name="geometry">
                    <rect>
                     <x>0</x>
-                    <y>0</y>
-                    <width>94</width>
-                    <height>181</height>
+                    <y>-80</y>
+                    <width>159</width>
+                    <height>152</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1211,13 +1175,6 @@
                      </item>
                     </widget>
                    </item>
-                   <item>
-                    <widget class="QPushButton" name="talosRunButton">
-                     <property name="text">
-                      <string>Run</string>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </widget>
                 </widget>
@@ -1238,6 +1195,13 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="toolRunButton">
+             <property name="text">
+              <string>Run Tool</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QGroupBox" name="saveResultsBox">
