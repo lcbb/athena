@@ -800,11 +800,11 @@
               <enum>QFrame::Sunken</enum>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="tools_2D">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -825,7 +825,7 @@
                <item>
                 <widget class="SequenceToolBox" name="toolBox_2D">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -840,7 +840,7 @@
                   <property name="geometry">
                    <rect>
                     <x>0</x>
-                    <y>-7</y>
+                    <y>0</y>
                     <width>88</width>
                     <height>62</height>
                    </rect>
@@ -977,7 +977,7 @@
              </widget>
              <widget class="QWidget" name="tools_3D">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
