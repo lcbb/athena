@@ -36,7 +36,7 @@
        <layout class="QHBoxLayout" name="upperLayout">
         <item>
          <widget class="QWidget" name="inputSidebar" native="true">
-          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,1">
+          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0">
            <property name="spacing">
             <number>10</number>
            </property>
@@ -53,81 +53,6 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="FileSelectionTreeWidget" name="geometryList">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>180</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="horizontalScrollBarPolicy">
-              <enum>Qt::ScrollBarAsNeeded</enum>
-             </property>
-             <property name="editTriggers">
-              <set>QAbstractItemView::NoEditTriggers</set>
-             </property>
-             <property name="showDropIndicator" stdset="0">
-              <bool>false</bool>
-             </property>
-             <property name="textElideMode">
-              <enum>Qt::ElideNone</enum>
-             </property>
-             <property name="indentation">
-              <number>10</number>
-             </property>
-             <property name="allColumnsShowFocus">
-              <bool>true</bool>
-             </property>
-             <attribute name="headerShowSortIndicator" stdset="0">
-              <bool>false</bool>
-             </attribute>
-             <attribute name="headerStretchLastSection">
-              <bool>false</bool>
-             </attribute>
-             <column>
-              <property name="text">
-               <string>Geometry</string>
-              </property>
-             </column>
-             <item>
-              <property name="text">
-               <string>2D Examples</string>
-              </property>
-              <property name="flags">
-               <set>ItemIsEnabled</set>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>3D Examples</string>
-              </property>
-              <property name="flags">
-               <set>ItemIsEnabled</set>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Loaded Files</string>
-              </property>
-              <property name="statusTip">
-               <string/>
-              </property>
-              <property name="whatsThis">
-               <string>Load custom files by choosing Load from the File menu</string>
-              </property>
-              <property name="flags">
-               <set>ItemIsEnabled</set>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <property name="topMargin">
               <number>0</number>
@@ -135,6 +60,19 @@
              <property name="bottomMargin">
               <number>0</number>
              </property>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
              <item>
               <widget class="QLabel" name="label_3">
                <property name="text">
@@ -147,6 +85,9 @@
                <property name="text">
                 <string/>
                </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
             </layout>
@@ -154,38 +95,47 @@
            <item>
             <widget class="QGroupBox" name="groupBox">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="minimumSize">
               <size>
-               <width>170</width>
+               <width>0</width>
                <height>0</height>
               </size>
              </property>
              <property name="title">
               <string>Wireframe</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
              <property name="flat">
               <bool>true</bool>
              </property>
-             <layout class="QGridLayout" name="gridLayout_3">
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,0,0,0,0,0">
               <property name="leftMargin">
-               <number>2</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
-               <number>2</number>
+               <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>2</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
-               <number>2</number>
+               <number>0</number>
               </property>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_15">
+              <property name="spacing">
+               <number>4</number>
+              </property>
+              <item row="2" column="1">
+               <widget class="QLabel" name="label_2">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -193,14 +143,17 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Line Color</string>
+                 <string>Width</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
+              <item row="2" column="2" colspan="4">
                <widget class="QSlider" name="lineWidthSlider">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -222,21 +175,24 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="ColorButton" name="lineColorButton">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+              <item row="1" column="1" colspan="2">
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
                 </property>
-                <property name="text">
-                 <string/>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
                 </property>
-               </widget>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>2</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_2">
+              <item row="1" column="3">
+               <widget class="QLabel" name="label_15">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -244,9 +200,44 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Line Width</string>
+                 <string>Color</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
+              </item>
+              <item row="1" column="4">
+               <widget class="ColorButton" name="lineColorButton">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
@@ -254,7 +245,7 @@
            <item>
             <widget class="AutoResizingStackedWidget" name="renderControls">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
+              <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -263,11 +254,11 @@
               <enum>QFrame::NoFrame</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="controls_2D_container">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+               <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -297,14 +288,14 @@
                <item>
                 <widget class="QGroupBox" name="controls_2D">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                    <horstretch>1</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
                  <property name="minimumSize">
                   <size>
-                   <width>170</width>
+                   <width>0</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -339,13 +330,16 @@
                   <item row="0" column="2">
                    <widget class="ColorButton" name="flatColorButton">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
                     <property name="text">
                      <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
@@ -376,7 +370,7 @@
              </widget>
              <widget class="QWidget" name="controls_3D_container">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -400,14 +394,14 @@
                <item>
                 <widget class="QGroupBox" name="controls_3D">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
+                  <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                   <horstretch>1</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
                  <property name="minimumSize">
                   <size>
-                   <width>170</width>
+                   <width>0</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -426,71 +420,26 @@
                  <property name="checked">
                   <bool>true</bool>
                  </property>
-                 <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0" columnstretch="0,0" columnminimumwidth="0,0">
+                 <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0">
                   <property name="sizeConstraint">
                    <enum>QLayout::SetDefaultConstraint</enum>
                   </property>
                   <property name="leftMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
-                  <item row="0" column="1">
-                   <widget class="QSlider" name="alphaSlider">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>60</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="value">
-                     <number>255</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="invertedAppearance">
-                     <bool>true</bool>
-                    </property>
-                    <property name="invertedControls">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0" rowspan="2">
-                   <widget class="QLabel" name="label_14">
-                    <property name="text">
-                     <string>Light Direction</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="ColorButton" name="coolColorButton">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1" rowspan="2">
+                  <item row="9" column="4">
                    <widget class="QDial" name="lightDial">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -503,8 +452,8 @@
                     </property>
                     <property name="maximumSize">
                      <size>
-                      <width>60</width>
-                      <height>60</height>
+                      <width>50</width>
+                      <height>50</height>
                      </size>
                     </property>
                     <property name="minimum">
@@ -533,31 +482,112 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_4">
-                    <property name="text">
-                     <string>Transparency</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="1">
+                  <item row="6" column="4">
                    <widget class="ColorButton" name="warmColorButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="text">
                      <string/>
                     </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
-                  <item row="3" column="0">
+                  <item row="7" column="4" colspan="2">
+                   <widget class="QSlider" name="alphaSlider">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="value">
+                     <number>255</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="invertedAppearance">
+                     <bool>true</bool>
+                    </property>
+                    <property name="invertedControls">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="4">
+                   <widget class="ColorButton" name="coolColorButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1" colspan="3">
+                   <widget class="QLabel" name="label_14">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Direction</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0" colspan="2">
                    <widget class="QLabel" name="label_8">
                     <property name="text">
                      <string>Cool Color</string>
                     </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
                    </widget>
                   </item>
-                  <item row="4" column="0">
+                  <item row="7" column="0" colspan="2">
+                   <widget class="QLabel" name="label_4">
+                    <property name="text">
+                     <string>Transparency</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0" colspan="2">
                    <widget class="QLabel" name="label_12">
                     <property name="text">
                      <string>Warm Color</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
@@ -580,6 +610,48 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="showResultsBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Display Models</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_5">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="displayCylinderBox">
+                <property name="text">
+                 <string>Cylindrical</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QCheckBox" name="displayRoutingBox">
+                <property name="text">
+                 <string>Routing</string>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QCheckBox" name="displayPAtomBox">
+                <property name="text">
+                 <string>Pseudoatomic</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -612,6 +684,81 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_5">
              <item>
+              <widget class="FileSelectionTreeWidget" name="geometryList">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>180</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAsNeeded</enum>
+               </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="showDropIndicator" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="textElideMode">
+                <enum>Qt::ElideNone</enum>
+               </property>
+               <property name="indentation">
+                <number>15</number>
+               </property>
+               <property name="allColumnsShowFocus">
+                <bool>true</bool>
+               </property>
+               <attribute name="headerShowSortIndicator" stdset="0">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="headerStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Geometry</string>
+                </property>
+               </column>
+               <item>
+                <property name="text">
+                 <string>2D Examples</string>
+                </property>
+                <property name="flags">
+                 <set>ItemIsEnabled</set>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>3D Examples</string>
+                </property>
+                <property name="flags">
+                 <set>ItemIsEnabled</set>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Loaded Files</string>
+                </property>
+                <property name="statusTip">
+                 <string/>
+                </property>
+                <property name="whatsThis">
+                 <string>Load custom files by choosing Load from the File menu</string>
+                </property>
+                <property name="flags">
+                 <set>ItemIsEnabled</set>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
               <widget class="QLabel" name="label_9">
                <property name="text">
                 <string>Scaffold</string>
@@ -641,7 +788,7 @@
            <item>
             <widget class="AutoResizingStackedWidget" name="toolControls">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -774,7 +921,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>94</width>
-                    <height>91</height>
+                    <height>81</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1091,42 +1238,6 @@
               </size>
              </property>
             </spacer>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="showResultsBox">
-             <property name="title">
-              <string>Display Models</string>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_5">
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="displayCylinderBox">
-                <property name="text">
-                 <string>Cylindrical</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QCheckBox" name="displayRoutingBox">
-                <property name="text">
-                 <string>Routing</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QCheckBox" name="displayPAtomBox">
-                <property name="text">
-                 <string>Pseudoatomic</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
            </item>
            <item>
             <widget class="QGroupBox" name="saveResultsBox">
