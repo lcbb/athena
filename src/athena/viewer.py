@@ -22,6 +22,9 @@ class CameraController:
         self.camera = camera
         self.geometry = geometry
         self.split = split
+        if( geometry ) : 
+            self.aabb = geom.AABB(self.geometry)
+            self._setupCamera()
 
     def _windowAspectRatio(self):
         w = self.window.width()
@@ -29,120 +32,82 @@ class CameraController:
         if self.split: h = 2 * h
         return w / h
 
+    def _setupCamera(self):
+        aabb_dims = self.aabb.dimensions()
+        # Diameter of a bounding sphere over the input geometry
+        bounding_sphere_diam = max( aabb_dims ) * math.sqrt(3)
+
+        # Add a slight offset to ensure the boundary will cover
+        # output decorations (cylinders etc) that are outside the original
+        # geometry boundary.  This was determined experimentally
+        # by running TALOS with mitered edges on the cube geometry.
+        bounding_sphere_diam *= 1.4
+
+        # Save the bounding sphere radius
+        self.bounding_radius = bounding_sphere_diam / 2
+
     def reset(self):
+        self.camLoc = vec3d( 0, 0, 2 * self.bounding_radius )
+        self.rightVector = vec3d(1, 0, 0)
+        self.upVector = vec3d(0, 1, 0)
+        self._apply()
+        self._setProjection()
+
+    def _apply(self):
+        self.camera.setViewCenter( self.aabb.center )
+        self.camera.setPosition( self.camLoc )
+        self.camera.setUpVector( self.upVector )
+
+    def _setProjection(self):
         pass
 
     def zoom(self, delta):
         pass
 
-    def drag(self, dx, dy):
+    def pan(self, dx, dy):
         pass
+
+    def rotate( self, dx, dy ):
+        ctr = self.aabb.center
+        up = self.upVector
+        v = self.camLoc - ctr
+        right = self.rightVector
+        v = geom.rotateAround( v, right, -dy )
+        v = geom.rotateAround( v, up, -dx )
+        self.camLoc = ctr + v
+        self.rightVector = geom.rotateAround( right, up, -dx )
+        self._apply()
 
     def resize(self, ratio=None):
-        pass
+        self._setProjection()
 
-class CameraController2D(CameraController):
+class OrthoCamController(CameraController):
     def __init__(self, window, camera, geometry, split):
-        super(CameraController2D,self).__init__(window, camera, geometry, split)
-        self.aabb = geom.AABB(self.geometry)
-        self.aabb.min.setZ( self.aabb.min.z() - 5 )
-        self.aabb.max.setZ( self.aabb.max.z() + 5 )
+        super().__init__(window, camera, geometry, split)
+        self.margin = 1.4
         self.reset()
 
-    def reset(self):
-        self.margin = 1.4
-        self.zpos = self.aabb.max.z()
-        self.camera.setViewCenter( self.aabb.center )
-        self.camera.setPosition( vec3d( self.aabb.center.x(), self.aabb.center.y(), self.zpos ) )
-        self.camera.setUpVector( ATHENA_GEOM_UP )
-        self._orient()
-
-    def _extents(self, ratio=None):
-        # Return the visible x,y dimensions
-        if ratio is None: ratio = self._windowAspectRatio()
-        elif self.split: ratio /= 2
-        mesh_extents = self.aabb.max - self.aabb.min
-        view_extents = mesh_extents * self.margin
-        view_extents.setX( view_extents.y() * ratio )
-        return view_extents.x(), view_extents.y()
-
-    def _orient(self, ratio = None):
-        x_view, y_view = self._extents(ratio)
-
-        xmin = self.aabb.center.x() - x_view / 2
-        xmax = self.aabb.center.x() + x_view / 2
-        ymin = self.aabb.center.y() - y_view / 2
-        ymax = self.aabb.center.y() + y_view / 2
-        zmin = self.aabb.min.z() - 10 
-        zmax = self.aabb.max.z() + 10
-
-        self.camera.lens().setOrthographicProjection( xmin, xmax, ymin, ymax, zmin, zmax )
-
-    def drag( self, delta_x, delta_y ):
-        xview, yview = self._extents()
-        xchange = delta_x / self.window.width()
-        ychange = delta_y / self.window.height()
-        self.camera.translateWorld( vec3d( -xchange * xview, ychange * yview, 0 ), self.camera.TranslateViewCenter )
-        self._orient()
+    def _setProjection(self):
+        r = self.bounding_radius
+        x = self.aabb.dimensions()[0] / 2 * self.margin
+        y = x / self._windowAspectRatio()
+        self.camera.lens().setOrthographicProjection( -x, x, -y, y, r, 3*r )
 
     def zoom( self, delta ):
         delta = pow ( 1.1, -delta/100 )
         self.margin *= delta
-        self._orient()
+        self._setProjection()
 
-    def resize(self, ratio=None):
-        self._orient(ratio)
-
-class CameraController3D(CameraController):
+class PerspectiveCamController(CameraController):
     def __init__(self, window, camera, geometry, split):
-        super(CameraController3D,self).__init__(window, camera, geometry, split)
-        self.aabb = geom.AABB(self.geometry)
+        super().__init__(window, camera, geometry, split)
         self.reset()
 
-    def reset(self):
+    def _setProjection(self):
+        frustum_min = self.bounding_radius
+        frustum_max = 3 * frustum_min
         ratio = self._windowAspectRatio()
-
-        aabb_size = self.aabb.max - self.aabb.min
-        bounding_sphere_diam = max( aabb_size.x(), aabb_size.y(), aabb_size.z() ) * math.sqrt(3)
-        # Add a slight offset to ensure the boundary will cover
-        # output decorations (cylinders etc) that are outside the original
-        # geometry boundary
-        bounding_sphere_diam *= 1.4
-        bounding_sphere_rad = bounding_sphere_diam / 2
-
-        # Set the camera one radius away from the surface of bounding sphere
-        cam_distance = 2 * bounding_sphere_rad
-
-        # Set the viewing frustum to contain the bounding sphere.  We want to be
-        # set the frustum as tightly around the geometry as possible because our
-        # z buffer has limited depth 
-        frustum_min = bounding_sphere_rad
-        frustum_max = 3 * bounding_sphere_rad
-
         self.camera.lens().setPerspectiveProjection(50, ratio, frustum_min, frustum_max)
-        cam_loc = self.aabb.center + vec3d( cam_distance, 0, 0 )
-        self.camera.setPosition( cam_loc )
-        self.camera.setViewCenter( self.aabb.center )
-        self.rightVector = vec3d( 0, 1, 0 )
-        self._orientCamera()
-
-    def _orientCamera( self ):
-        # Set the camera up vector based on our tracking of the right vector
-        view_vec = self.camera.viewCenter() - self.camera.position()
-        up = vec3d.crossProduct( self.rightVector, view_vec )
-        self.camera.setUpVector( up.normalized() )
-
-    def drag( self, delta_x, delta_y ):
-        # Rotate camera based on mouse-drag inputs
-        ctr = self.camera.viewCenter()
-        up = ATHENA_GEOM_UP
-        v = self.camera.position() - ctr
-        right = self.rightVector
-        v = geom.rotateAround( v, right, -delta_y )
-        v = geom.rotateAround( v, up, -delta_x )
-        self.camera.setPosition ( (ctr + v) )
-        self.rightVector = geom.rotateAround( right, up, -delta_x )
-        self._orientCamera()
 
     def zoom( self, delta ):
         delta = delta / 25
@@ -151,11 +116,6 @@ class CameraController3D(CameraController):
             return min( max( value, min_ ), max_ )
         new_fov = clamp (5, 150, fov - delta)
         self.camera.setFieldOfView( new_fov )
-
-    def resize(self, ratio = None):
-        if ratio is None: ratio = self._windowAspectRatio()
-        elif self.split: ratio /= 2
-        self.camera.setAspectRatio(ratio)
 
 
 class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
@@ -632,12 +592,12 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         split = self.camControl.split
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
-            self.camControl = CameraController3D(self, self.camera(), self.meshEntity.geometry, split)
+            self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity.geometry, split)
             self.setProjOrthographic(0.0)
         else:
             self.meshEntity.addComponent(self.flat_material)
-            self.camControl = CameraController2D(self, self.camera(), self.meshEntity.geometry, split)
-            self.setProjOrthographic(1.0)
+            self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity.geometry, split)
+            self.setProjOrthographic(0.0)
         self.camControl.reset()
         return mesh_3d
 
@@ -661,7 +621,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         if( self.lastpos ):
             delta = event.pos()-self.lastpos
             if( event.buttons() == Qt.LeftButton ):
-                self.camControl.drag( delta.x(), delta.y() )
+                self.camControl.rotate( delta.x(), delta.y() )
         self.lastpos = event.pos()
 
     def wheelEvent( self, event ):

@@ -184,6 +184,10 @@ class AABB:
                 for z in [self.min.z(), self.max.z()]:
                     yield cons(x, y, z)
 
+    def dimensions(self):
+        v = self.max - self.min
+        return v.x(), v.y(), v.z()
+
 def transformBetween( aabb1, aabb2 ):
     '''
     Return a function mapping coords of one AABB to another
