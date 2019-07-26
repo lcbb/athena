@@ -17,6 +17,17 @@ from athena import ATHENA_SRC_DIR, plymesh, geom, decorations, screenshot
 ATHENA_GEOM_UP = geom.ATHENA_GEOM_UP
 
 class CameraController:
+
+    @classmethod
+    def createFrom( cls, cc ):
+        '''Copy constructor'''
+        ret = cls( cc.window, cc.camera, cc.geometry, cc.split )
+        ret.camLoc = cc.camLoc
+        ret.upVector = cc.upVector
+        ret.rightVector = cc.rightVector
+        ret._apply()
+        return ret
+
     def __init__(self, window, camera, geometry, split):
         self.window = window
         self.camera = camera
@@ -61,7 +72,7 @@ class CameraController:
     def _setProjection(self):
         pass
 
-    def zoom(self, delta):
+    def zoom(self, dx, dy):
         pass
 
     def pan(self, dx, dy):
@@ -82,10 +93,12 @@ class CameraController:
         self._setProjection()
 
 class OrthoCamController(CameraController):
+
     def __init__(self, window, camera, geometry, split):
         super().__init__(window, camera, geometry, split)
         self.margin = 1.4
         self.reset()
+
 
     def _setProjection(self):
         r = self.bounding_radius
@@ -93,12 +106,13 @@ class OrthoCamController(CameraController):
         y = x / self._windowAspectRatio()
         self.camera.lens().setOrthographicProjection( -x, x, -y, y, r, 3*r )
 
-    def zoom( self, delta ):
-        delta = pow ( 1.1, -delta/100 )
+    def zoom( self, dx, dy ):
+        delta = pow ( 1.1, -dy/100 )
         self.margin *= delta
         self._setProjection()
 
 class PerspectiveCamController(CameraController):
+
     def __init__(self, window, camera, geometry, split):
         super().__init__(window, camera, geometry, split)
         self.reset()
@@ -109,8 +123,8 @@ class PerspectiveCamController(CameraController):
         ratio = self._windowAspectRatio()
         self.camera.lens().setPerspectiveProjection(50, ratio, frustum_min, frustum_max)
 
-    def zoom( self, delta ):
-        delta = delta / 25
+    def zoom( self, dx, dy ):
+        delta = dy / 25
         fov = self.camera.fieldOfView()
         def clamp(min_, max_, value):
             return min( max( value, min_ ), max_ )
@@ -592,14 +606,31 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         split = self.camControl.split
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
-            self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity.geometry, split)
-            self.setProjOrthographic(0.0)
+            self.camControl = OrthoCamController(self, self.camera(), self.meshEntity.geometry, split)
+            self.setProjOrthographic(1.0)
         else:
             self.meshEntity.addComponent(self.flat_material)
             self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity.geometry, split)
             self.setProjOrthographic(0.0)
         self.camControl.reset()
         return mesh_3d
+
+    def setPerspectiveCam(self):
+        self.setProjOrthographic(0.0)
+        self.camControl = PerspectiveCamController.createFrom( self.camControl)
+
+    def setOrthoCam(self):
+        self.setProjOrthographic(1.0)
+        self.camControl = OrthoCamController.createFrom( self.camControl)
+
+    def setRotateTool(self):
+        self.mouseTool = 'rotate'
+
+    def setPanTool(self):
+        self.mouseTool = 'pan'
+
+    def setZoomTool(self):
+        self.mouseTool = 'zoom'
 
     def requestScreenshot(self, size):
         ratio = size.width() / size.height()
@@ -621,7 +652,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         if( self.lastpos ):
             delta = event.pos()-self.lastpos
             if( event.buttons() == Qt.LeftButton ):
-                self.camControl.rotate( delta.x(), delta.y() )
+                tool = getattr(self.camControl, self.mouseTool)
+                tool( delta.x(), delta.y() )
         self.lastpos = event.pos()
 
     def wheelEvent( self, event ):

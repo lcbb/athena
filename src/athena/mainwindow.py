@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup, QMessageBox, QToolBox
+from PySide2.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QStatusBar, QFileDialog, QWidget, QSizePolicy, QColorDialog, QStackedWidget, QTreeWidget, QTreeWidgetItem, QHeaderView, QActionGroup, QButtonGroup, QMessageBox, QToolBox
 from PySide2.QtGui import QKeySequence, QPixmap, QIcon, QColor
 from PySide2.QtCore import QFile, Qt, Signal
 import PySide2.QtXml #Temporary pyinstaller workaround
@@ -290,6 +290,20 @@ class AthenaWindow(QMainWindow):
         self.resultsActionGroup.addAction( self.actionSeparateResults )
         self.resultsActionGroup.triggered.connect( self._setViewSplit )
 
+        # Likewise for button groups
+        self.projectionButtonGroup = QButtonGroup(self)
+        self.projectionButtonGroup.addButton( self.orthoCamButton )
+        self.projectionButtonGroup.addButton( self.perspectiveCamButton )
+        self.projectionButtonGroup.buttonClicked.connect( self.selectProjection )
+
+        self.camMotionButtonGroup = QButtonGroup(self)
+        self.camMotionButtonGroup.addButton( self.rotateButton )
+        self.camMotionButtonGroup.addButton( self.rotateButton )
+        self.camMotionButtonGroup.addButton( self.panButton )
+        self.camMotionButtonGroup.addButton( self.zoomButton )
+        self.camMotionButtonGroup.buttonClicked.connect( self.selectCameraTool )
+
+
         # On OSX, add a separator to the bottom of the view menu, which
         # will isolate the appkit default "full screen" option on its own.
         if platform.system() == 'Darwin':
@@ -334,6 +348,20 @@ class AthenaWindow(QMainWindow):
         self.show()
         self.log("Athena version {}".format(__version__))
 
+
+    def selectProjection(self, widget):
+        if widget == self.orthoCamButton:
+            self.geomView.setOrthoCam()
+        elif widget == self.perspectiveCamButton:
+            self.geomView.setPerspectiveCam()
+
+    def selectCameraTool(self, widget):
+        if widget == self.rotateButton:
+            self.geomView.setRotateTool()
+        elif widget == self.panButton:
+            self.geomView.setPanTool()
+        elif widget == self.zoomButton:
+            self.geomView.setZoomTool()
 
     def setViewerAlpha(self, value):
         alpha = float(value) / 255.0
@@ -460,7 +488,6 @@ class AthenaWindow(QMainWindow):
             self.updateStatus('Saved results to {}'.format(newdir))
         else:
             print("ERROR: No current results to save")
-
 
     def updateStatus( self, msg ):
         self.log( msg )
