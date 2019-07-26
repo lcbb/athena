@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>828</width>
-    <height>562</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,8 +32,14 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="upperLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QWidget" name="inputSidebar" native="true">
           <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0">
@@ -54,6 +60,9 @@
            </property>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="topMargin">
               <number>0</number>
              </property>
@@ -82,6 +91,12 @@
              </item>
              <item>
               <widget class="ColorButton" name="bgColorButton">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -132,7 +147,7 @@
                <number>0</number>
               </property>
               <property name="spacing">
-               <number>4</number>
+               <number>0</number>
               </property>
               <item row="2" column="1">
                <widget class="QLabel" name="label_2">
@@ -215,6 +230,12 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="layoutDirection">
                  <enum>Qt::LeftToRight</enum>
                 </property>
@@ -254,7 +275,7 @@
               <enum>QFrame::NoFrame</enum>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="controls_2D_container">
               <property name="sizePolicy">
@@ -271,7 +292,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout">
                <property name="spacing">
-                <number>2</number>
+                <number>0</number>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -316,16 +337,19 @@
                  </property>
                  <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0">
                   <property name="leftMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>2</number>
+                   <number>0</number>
+                  </property>
+                  <property name="spacing">
+                   <number>0</number>
                   </property>
                   <item row="0" column="2">
                    <widget class="ColorButton" name="flatColorButton">
@@ -334,6 +358,12 @@
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>50</width>
+                      <height>16777215</height>
+                     </size>
                     </property>
                     <property name="text">
                      <string/>
@@ -377,7 +407,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <property name="spacing">
-                <number>2</number>
+                <number>0</number>
                </property>
                <property name="leftMargin">
                 <number>0</number>
@@ -420,7 +450,7 @@
                  <property name="checked">
                   <bool>true</bool>
                  </property>
-                 <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0">
+                 <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0,0,0">
                   <property name="sizeConstraint">
                    <enum>QLayout::SetDefaultConstraint</enum>
                   </property>
@@ -434,6 +464,9 @@
                    <number>0</number>
                   </property>
                   <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="spacing">
                    <number>0</number>
                   </property>
                   <item row="9" column="4">
@@ -490,6 +523,12 @@
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>50</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string/>
                     </property>
@@ -536,6 +575,12 @@
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>50</width>
+                      <height>16777215</height>
+                     </size>
                     </property>
                     <property name="text">
                      <string/>
@@ -623,6 +668,9 @@
               <string>Display Models</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_5">
+              <property name="spacing">
+               <number>0</number>
+              </property>
               <item row="0" column="0">
                <widget class="QCheckBox" name="displayCylinderBox">
                 <property name="text">
@@ -841,8 +889,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>88</width>
-                    <height>62</height>
+                    <width>114</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -907,8 +955,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>94</width>
-                    <height>72</height>
+                    <width>122</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1011,8 +1059,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>176</width>
-                    <height>72</height>
+                    <width>114</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1070,9 +1118,9 @@
                   <property name="geometry">
                    <rect>
                     <x>0</x>
-                    <y>-80</y>
-                    <width>159</width>
-                    <height>152</height>
+                    <y>0</y>
+                    <width>125</width>
+                    <height>195</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1241,7 +1289,7 @@
      <x>0</x>
      <y>0</y>
      <width>828</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
