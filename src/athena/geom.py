@@ -175,13 +175,23 @@ class AABB:
             self.max.setZ( max( self.max.z(), v[2] ) )
         self.center = (self.min+self.max) / 2.0
 
-    def iterCorners(self, cons = vec3d ):
+    def iterCorners(self, cons = vec3d, flat_z_correct = False ):
         '''
-        Iterator over the eight corners of the AABB
+        Iterator over the eight corners of the AABB.
+
+        If flat_z_correct is true, fudge the return values
+        to ensure that the z dimension is not zero.  Code that
+        relies on non-degenerate 3D bounding boxes can specify
+        this option to get a well-formed result.
         '''
+        min_z = self.min.z()
+        max_z = self.max.z()
+        if( flat_z_correct and min_z == max_z ):
+            min_z -= 1
+            max_z += 1
         for x in [self.min.x(), self.max.x()]:
             for y in [self.min.y(), self.max.y()]:
-                for z in [self.min.z(), self.max.z()]:
+                for z in [min_z, max_z]:
                     yield cons(x, y, z)
 
     def dimensions(self):
@@ -194,7 +204,7 @@ def transformBetween( aabb1, aabb2 ):
     '''
 
     def np_coords_from_aabb(aabb):
-        return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x])) ) )
+        return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x]), flat_z_correct=True) ) )
 
     # https://stackoverflow.com/questions/20546182/how-to-perform-coordinates-affine-transformation-using-python-part-2
 
