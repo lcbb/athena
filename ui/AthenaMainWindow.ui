@@ -42,7 +42,7 @@
         </property>
         <item>
          <widget class="QWidget" name="inputSidebar" native="true">
-          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0">
+          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0,0">
            <property name="spacing">
             <number>10</number>
            </property>
@@ -58,6 +58,30 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="leftMargin">
+              <number>4</number>
+             </property>
+             <property name="topMargin">
+              <number>4</number>
+             </property>
+             <item>
+              <widget class="QToolButton" name="perspectiveCamButton">
+               <property name="text">
+                <string>Ortho</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="orthoCamButton">
+               <property name="text">
+                <string>Perspective</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <property name="spacing">
@@ -889,8 +913,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>114</width>
-                    <height>73</height>
+                    <width>88</width>
+                    <height>62</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -955,8 +979,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>122</width>
-                    <height>73</height>
+                    <width>94</width>
+                    <height>69</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1059,8 +1083,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>114</width>
-                    <height>73</height>
+                    <width>88</width>
+                    <height>62</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1119,8 +1143,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>125</width>
-                    <height>195</height>
+                    <width>94</width>
+                    <height>152</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1289,7 +1313,7 @@
      <x>0</x>
      <y>0</y>
      <width>828</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
