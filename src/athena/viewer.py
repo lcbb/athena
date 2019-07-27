@@ -58,6 +58,7 @@ class CameraController:
         self.bounding_radius = bounding_sphere_diam / 2
 
     def reset(self):
+        self.camCenter = self.aabb.center
         self.camLoc = vec3d( 0, 0, 2 * self.bounding_radius )
         self.rightVector = vec3d(1, 0, 0)
         self.upVector = vec3d(0, 1, 0)
@@ -65,9 +66,9 @@ class CameraController:
         self._setProjection()
 
     def _apply(self):
-        self.camera.setViewCenter( self.aabb.center )
+        self.camera.setViewCenter( self.camCenter )
         self.camera.setPosition( self.camLoc )
-        self.camera.setUpVector( self.upVector )
+        self.camera.setUpVector( vec3d.crossProduct( self.rightVector, self.camCenter - self.camLoc ).normalized() )
 
     def _setProjection(self):
         pass
@@ -76,16 +77,30 @@ class CameraController:
         pass
 
     def pan(self, dx, dy):
-        pass
+        delta_x = -dx * self.rightVector
+        delta_y = dy * self.upVector
+        delta = delta_x + delta_y
+        delta *= .01
+        self.camCenter += delta
+        self.camLoc += delta
+        self._apply()
+        self._setProjection()
 
     def rotate( self, dx, dy ):
-        ctr = self.aabb.center
         up = self.upVector
-        v = self.camLoc - ctr
         right = self.rightVector
+        ctr = self.aabb.center
+
+        v = self.camLoc - ctr
         v = geom.rotateAround( v, right, -dy )
         v = geom.rotateAround( v, up, -dx )
         self.camLoc = ctr + v
+
+        d = self.camCenter - ctr
+        d = geom.rotateAround( d, right, -dy )
+        d = geom.rotateAround( d, up, -dx )
+        self.camCenter = ctr + d
+
         self.rightVector = geom.rotateAround( right, up, -dx )
         self._apply()
 
@@ -525,6 +540,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.atomModelEntity = DecorationEntity( self.rootEntity )
 
         self.lastpos = None
+        self.mouseTool = 'rotate'
 
         #import IPython
         #IPython.embed()
@@ -657,7 +673,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.lastpos = event.pos()
 
     def wheelEvent( self, event ):
-        self.camControl.zoom( event.angleDelta().y() )
+        self.camControl.zoom( 0, event.angleDelta().y() )
 
     def resizeEvent( self, event ):
         self.camControl.resize()
