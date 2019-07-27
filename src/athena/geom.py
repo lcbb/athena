@@ -175,23 +175,13 @@ class AABB:
             self.max.setZ( max( self.max.z(), v[2] ) )
         self.center = (self.min+self.max) / 2.0
 
-    def iterCorners(self, cons = vec3d, flat_z_correct = False ):
+    def iterCorners(self, cons = vec3d):
         '''
         Iterator over the eight corners of the AABB.
-
-        If flat_z_correct is true, fudge the return values
-        to ensure that the z dimension is not zero.  Code that
-        relies on non-degenerate 3D bounding boxes can specify
-        this option to get a well-formed result.
         '''
-        min_z = self.min.z()
-        max_z = self.max.z()
-        if( flat_z_correct and min_z == max_z ):
-            min_z -= 1
-            max_z += 1
         for x in [self.min.x(), self.max.x()]:
             for y in [self.min.y(), self.max.y()]:
-                for z in [min_z, max_z]:
+                for z in [self.min.z(), self.max.z()]:
                     yield cons(x, y, z)
 
     def dimensions(self):
@@ -200,16 +190,35 @@ class AABB:
 
 def transformBetween( aabb1, aabb2 ):
     '''
-    Return a function mapping coords of one AABB to another
+    Return a function mapping corners of aabb1 onto those of aabb2
+
+    If the boxes are flat (all zero z-values), the transformation will be modified
+    so that Z coordinates scale uniformly with the X and Y coordinates.  This ensures
+    the returned transformation doesn't pancake all 3D inputs.
     '''
 
     def np_coords_from_aabb(aabb):
-        return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x]), flat_z_correct=True) ) )
-
-    # https://stackoverflow.com/questions/20546182/how-to-perform-coordinates-affine-transformation-using-python-part-2
+        return np.array( list ( aabb.iterCorners(cons=lambda *x:np.array([*x]) ) ) )
 
     coord_from = np_coords_from_aabb( aabb1 )
     coord_to = np_coords_from_aabb( aabb2 )
+
+    def all_zero(x): return all([x==0 for x in x])
+    if all_zero(coord_to[:,2]) and all_zero(coord_from[:,2]):
+        # Both boxes are flat in Z, so ensure Z direction scales uniformly with x and y in the returned transformation
+        span_from = aabb1.dimensions()[0:2]
+        span_to = aabb2.dimensions()[0:2]
+        ratio_x = span_to[0] / span_from[0]
+        ratio_y = span_to[1] / span_from[1]
+        ratio = (ratio_x + ratio_y) / 2
+        min_rows = (0,2,4,6)
+        max_rows = (1,3,5,7)
+        coord_from[min_rows,2] = -1
+        coord_from[max_rows,2] = 1
+        coord_to[min_rows,2] = -ratio
+        coord_to[max_rows,2] = ratio
+
+    # https://stackoverflow.com/questions/20546182/how-to-perform-coordinates-affine-transformation-using-python-part-2
 
     n = coord_from.shape[0]
     pad = lambda x: np.hstack([x, np.ones((x.shape[0],1))])
