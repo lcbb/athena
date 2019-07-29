@@ -18,11 +18,6 @@ uniform float face_enable;
 in WireframeVertex {
     vec3 position;
     flat vec3 normal;
-    noperspective vec4 edgeA;
-    flat vec3 interior;
-    flat vec2 p[3];
-    noperspective vec4 edgeB;
-    flat int configuration;
     flat vec2 segments[9];
 } fs_in;
 
@@ -50,7 +45,7 @@ float distance_to_line_segment( const in vec2 P, const in vec2 A, const in vec2 
 vec4 shadeLine( const in vec4 color )
 {
     // Find the smallest distance between the fragment and a triangle edge
-    float d = 100;
+    float d = 10000;
 
     vec2 point = gl_FragCoord.xy; //  transformToViewport( gl_FragCoord );
 
@@ -84,9 +79,6 @@ vec4 shadeLine( const in vec4 color )
 
 void main()
 {
-    //vec4 color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), alpha );
-    //vec4 color = vec4( flat_color.x, flat_color.y, flat_color.z, alpha );
-    
     vec4 color = vec4( flat_color, face_enable );
     fragColor = shadeLine( color );
 }
