@@ -72,6 +72,8 @@ class CameraController:
         self._apply()
         self._setProjection()
 
+    # Cross of right and forward vector -- the "true up" of the camera.
+    # self.upVector is immutable and used as the reference direction for rotations.
     def _currentUp(self):
         return vec3d.crossProduct( self.rightVector, self.camCenter - self.camLoc ).normalized()
 
@@ -81,9 +83,11 @@ class CameraController:
         self.camera.setUpVector( self._currentUp() )
 
     def _setProjection(self):
+        # Defined in concrete subclasses
         pass
 
     def zoom(self, dx, dy):
+        # Defined in concrete subclasses
         pass
 
     def pan(self, dx, dy):
@@ -688,7 +692,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         return request
 
     def mouseMoveEvent(self, event):
-        if( self.lastpos ):
+        if( self.meshEntity and self.lastpos ):
             delta = event.pos()-self.lastpos
             if( event.buttons() == Qt.LeftButton ):
                 tool = getattr(self.camControl, self.mouseTool)
