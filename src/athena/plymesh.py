@@ -10,6 +10,7 @@ from PySide2.Qt3DExtras import Qt3DExtras
 
 from plyfile import PlyData, PlyElement
 import numpy as np
+from numpy.lib.recfunctions import repack_fields
 
 from athena import geom
 from earcut import earcut
@@ -30,7 +31,13 @@ def edgeIter(poly):
         yield edge( i_last, i )
         i_last = i
     yield edge( i_last, i0 )
-   
+
+def sharedEdges(poly, vtx):
+    for a, b in edgeIter(poly):
+        if vtx == a:
+            yield b
+        elif vtx == b:
+            yield a
 
 class PlyMesh2(Qt3DCore.QEntity):
     def __init__(self, parent, plydata):
@@ -39,6 +46,14 @@ class PlyMesh2(Qt3DCore.QEntity):
         ply_vertices = plydata['vertex'].data
         ply_faces = plydata['face'].data['vertex_indices']
 
+        # The ply reader library returns the vertex data in numpy structured arrays,
+        # which wind up being annoying to access manually, so define a convenience
+        # lookup function here.
+        def vertex(indices):
+            vertices = np.take(ply_vertices, indices, axis=0)
+            fields = ['x', 'y', 'z'] # Ignore any othe per-vertex values
+            return np.r_[ [v[fields].item() for v in vertices] ]
+
         flat_xy = np.all( 0 == ply_vertices['z'] )
         self.dimensions = 2 if flat_xy else 3
 
@@ -46,24 +61,66 @@ class PlyMesh2(Qt3DCore.QEntity):
         triangles = list()
 
         def add_vtx(v, a, b):
-            print(v, a, b)
             vertices.append( np.hstack( [v , a , b] ) )
             return len(vertices) - 1
 
-        def add_simple_tri( a, b, c ):
-            i = add_vtx(a, b, c)
-            j = add_vtx(b, a, c)
-            k = add_vtx(c, a, b)
+        def add_simple_tri( *args ):
+            A, B, C = vertex( args )
+            i = add_vtx(A, B, C)
+            j = add_vtx(B, A, C)
+            k = add_vtx(C, A, B)
+            triangles.append( (i, j, k) )
+
+        def add_complex_tri( a, b, c, poly ):
+            def add_vertex_with_edges( x ):
+                e1, e2 = tuple( x for x in sharedEdges(poly, x) )
+                return add_vtx( *vertex( (x, e1, e2) ) )
+            i = add_vertex_with_edges( a )
+            j = add_vertex_with_edges( b )
+            k = add_vertex_with_edges( c )
             triangles.append( (i, j, k) )
 
         for poly in ply_faces:
             if len(poly) == 3:
-                poly_vertices = np.take(ply_vertices, poly, axis=0) # [ply_vertices[p] for p in poly]
-                verts = [ [v['x'], v['y'], v['z']] for v in poly_vertices]
-                add_simple_tri( *verts )
+                add_simple_tri( *poly )
+            else:
+                external_edges = set( edgeIter( poly ) )
+                assert( len(external_edges) == len(poly) )
+                poly_geom = vertex(poly)
+                # Compute the normal of this polygon from the first three verts;
+                # we'll need this later to determine winding direction for the
+                # triangulated faces
+                poly_normal = tri_norm( *(poly_geom[x,:] for x in range(3)) )
+                # Geometric centroid of the polygon
+                G = np.average( poly_geom, axis=0 )
+                offset_geom = poly_geom - G
+                # Singular value decomposition: we want to map the 3D coordinates
+                # to a 2D subspace that can be fed into a 2D triangulation algorithm.
+                # For this we only need the last return value.
+                _, _, vh = np.linalg.svd(offset_geom)
+                vt = vh[:2,:].T
+                xy_coords = np.dot(offset_geom, vt)
+                flattened = earcut.flatten([xy_coords,[]])
+                new_tris = earcut.earcut(flattened['vertices'],None,flattened['dimensions'])
 
-        print(vertices)
-        print(triangles)
+                # Now we have the new triangles from earcut.
+                # Check the first one's normal; if it doesn't match the polygon normal,
+                # then we'll assume the 2D projection reversed our triangle windings.
+                geom_tri0 = poly_geom.take(new_tris[0:3], axis=0)
+                tri0_norm = tri_norm(*(geom_tri0[x,:] for x in range(3)))
+                normcheck = np.dot(tri0_norm, poly_normal)
+                flip = False
+                if( not np.isclose(normcheck, 1.0, rtol=1e-1) ):
+                    flip = True
+
+                # Now add new triangles to the buffers
+                for a,b,c in geom.grouper(new_tris,3):
+                    idx_a = poly[a]
+                    idx_b = poly[b]
+                    idx_c = poly[c]
+                    if( flip ): 
+                        idx_b, idx_c = idx_c, idx_b
+                    add_complex_tri( idx_a, idx_b, idx_c, poly )
 
         vertex_basetype = geom.basetypes.Float
         if( len(triangles) < 30000 ):
@@ -72,10 +129,8 @@ class PlyMesh2(Qt3DCore.QEntity):
             index_basetype = geom.basetypes.UnsignedInt
 
         vertex_nparr = np.array(vertices, dtype = geom.basetype_numpy_codes[vertex_basetype])
-        print(vertex_nparr, vertex_nparr.dtype)
 
         index_nparr = np.array( triangles, dtype=geom.basetype_numpy_codes[index_basetype])
-        print(index_nparr, index_nparr.dtype)
 
         self.geometry = Qt3DRender.QGeometry(self)
 
