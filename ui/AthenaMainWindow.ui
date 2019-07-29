@@ -110,6 +110,9 @@
                   <property name="text">
                    <string>Rotate</string>
                   </property>
+                  <property name="shortcut">
+                   <string>R</string>
+                  </property>
                   <property name="checkable">
                    <bool>true</bool>
                   </property>
@@ -121,7 +124,10 @@
                 <item>
                  <widget class="QToolButton" name="panButton">
                   <property name="text">
-                   <string>Pan</string>
+                   <string>&amp;Pan</string>
+                  </property>
+                  <property name="shortcut">
+                   <string>P</string>
                   </property>
                   <property name="checkable">
                    <bool>true</bool>
@@ -132,6 +138,9 @@
                  <widget class="QToolButton" name="zoomButton">
                   <property name="text">
                    <string>Zoom</string>
+                  </property>
+                  <property name="shortcut">
+                   <string>Z</string>
                   </property>
                   <property name="checkable">
                    <bool>true</bool>
