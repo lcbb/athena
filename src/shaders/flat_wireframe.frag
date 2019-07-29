@@ -14,6 +14,7 @@ uniform struct LineInfo {
 
 uniform vec3 flat_color; 
 uniform float face_enable;
+uniform float wire_enable;
 
 in WireframeVertex {
     vec3 position;
@@ -79,6 +80,14 @@ vec4 shadeLine( const in vec4 color )
 
 void main()
 {
-    vec4 color = vec4( flat_color, face_enable );
-    fragColor = shadeLine( color );
+    vec4 color = vec4( line.color.xyz, 0.0 );
+    if( face_enable > 0.0 ){
+        color = vec4( flat_color, 1.0 );
+    }
+    if( wire_enable > 0.0 ){
+        fragColor = shadeLine( color );
+    }
+    else{
+        fragColor = color;
+    }
 }

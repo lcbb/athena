@@ -20,6 +20,7 @@ uniform vec3 cool_color;
 uniform vec3 warm_color;
 uniform float alpha; 
 uniform float face_enable;
+uniform float wire_enable;
 
 //const vec3 kblue = vec3 ( 0, .1, .8 );
 //const vec3 kyellow = vec3( .7, .7, 0 );
@@ -127,8 +128,16 @@ vec4 shadeLine( const in vec4 color )
 void main()
 {
     // Calculate the color from the phong model
-    if( face_enable == 0. ) discard;
-    float effective_alpha = min( alpha, face_enable );
-    vec4 color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), effective_alpha );
-    fragColor = shadeLine( color );
+
+    vec4 color = vec4( line.color.xyz, 0.0 );
+    if( face_enable > 0.0 ){
+        float effective_alpha = min( alpha, face_enable );
+        color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), effective_alpha );
+    }
+    if( wire_enable > 0.0 ){
+        fragColor = shadeLine( color );
+    }
+    else{
+        fragColor = color;
+    }
 }

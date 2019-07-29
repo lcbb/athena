@@ -21,20 +21,21 @@ class CameraController:
     @classmethod
     def createFrom( cls, cc ):
         '''Copy constructor'''
-        ret = cls( cc.window, cc.camera, cc.geometry, cc.split )
+        ret = cls( cc.window, cc.camera, cc.mesh, cc.split )
+        ret.camCenter = cc.camCenter
         ret.camLoc = cc.camLoc
         ret.upVector = cc.upVector
         ret.rightVector = cc.rightVector
         ret._apply()
         return ret
 
-    def __init__(self, window, camera, geometry, split):
+    def __init__(self, window, camera, mesh, split):
         self.window = window
         self.camera = camera
-        self.geometry = geometry
+        self.mesh = mesh
         self.split = split
-        if( geometry ) : 
-            self.aabb = geom.AABB(self.geometry)
+        if( self.mesh ) : 
+            self.aabb = geom.AABB(self.mesh.geometry)
             self._setupCamera()
 
     def _windowAspectRatio(self):
@@ -59,16 +60,25 @@ class CameraController:
 
     def reset(self):
         self.camCenter = self.aabb.center
-        self.camLoc = vec3d( 0, 0, 2 * self.bounding_radius )
-        self.rightVector = vec3d(1, 0, 0)
-        self.upVector = vec3d(0, 1, 0)
+        camDistance = 2 * self.bounding_radius
+        if( self.mesh.dimensions == 2 ):
+            self.rightVector = vec3d(1, 0, 0)
+            self.upVector = vec3d(0, 1, 0)
+            self.camLoc = self.camCenter + vec3d( 0, 0, camDistance )
+        else:
+            self.rightVector = vec3d( 0, 1, 0 )
+            self.upVector = vec3d( 0, 0, 1 )
+            self.camLoc = self.camCenter + vec3d( camDistance, 0, 0 )
         self._apply()
         self._setProjection()
+
+    def _currentUp(self):
+        return vec3d.crossProduct( self.rightVector, self.camCenter - self.camLoc ).normalized()
 
     def _apply(self):
         self.camera.setViewCenter( self.camCenter )
         self.camera.setPosition( self.camLoc )
-        self.camera.setUpVector( vec3d.crossProduct( self.rightVector, self.camCenter - self.camLoc ).normalized() )
+        self.camera.setUpVector( self._currentUp() )
 
     def _setProjection(self):
         pass
@@ -78,7 +88,7 @@ class CameraController:
 
     def pan(self, dx, dy):
         delta_x = -dx * self.rightVector
-        delta_y = dy * self.upVector
+        delta_y = dy * self._currentUp()
         delta = delta_x + delta_y
         delta *= .01
         self.camCenter += delta
@@ -407,6 +417,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     _qparameters = { 'alpha': 1.0,
                      'face_enable': 1.0,
+                     'wire_enable': 1.0,
                      'proj_orthographic': 1.0,
                      'flat_color': QColor( 97, 188, 188),
                      'cool_color': QColor( 0, 25, 170 ),
@@ -454,6 +465,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                                                       'wireframe.geom' )
         material.addParameter( self._alphaParam )
         material.addParameter( self._faceEnableParam )
+        material.addParameter( self._wireEnableParam )
         material.addParameter( self._lineWidthParam )
         material.addParameter( self._lineColorParam )
         return material
@@ -565,6 +577,17 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def handleFaceRenderChange( self, floatvalue ):
         self.faceRenderingEnabledChanged.emit( True if floatvalue > 0.0 else False )
 
+    wireframeRenderingEnabledChanged = Signal( bool )
+
+    def wireframeRenderingEnabled( self ):
+        return self._wireEnableParam.value() > 0.0
+
+    def toggleWireframeRendering( self, boolvalue ):
+        self.setWireEnable( 1.0 if boolvalue else 0.0 )
+
+    def handleWireframeRenderChange( self, floatvalue ):
+        self.wireframeRenderingEnabledChanged.emit( True if floatvalue > 0.0 else False )
+
     lightOrientationChanged = Signal( int )
 
     def setLightOrientation( self, value ):
@@ -622,11 +645,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         split = self.camControl.split
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
-            self.camControl = OrthoCamController(self, self.camera(), self.meshEntity.geometry, split)
+            self.camControl = OrthoCamController(self, self.camera(), self.meshEntity, split)
             self.setProjOrthographic(1.0)
         else:
             self.meshEntity.addComponent(self.flat_material)
-            self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity.geometry, split)
+            self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity, split)
             self.setProjOrthographic(0.0)
         self.camControl.reset()
         return mesh_3d

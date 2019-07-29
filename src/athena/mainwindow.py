@@ -341,8 +341,10 @@ class AthenaWindow(QMainWindow):
 
         self.controls_2D.toggled.connect( self.geomView.toggleFaceRendering )
         self.controls_3D.toggled.connect( self.geomView.toggleFaceRendering )
+        self.controls_wireframe.toggled.connect( self.geomView.toggleWireframeRendering )
         self.geomView.faceRenderingEnabledChanged.connect( self.controls_2D.setChecked )
         self.geomView.faceRenderingEnabledChanged.connect( self.controls_3D.setChecked )
+        self.geomView.wireframeRenderingEnabledChanged.connect( self.controls_wireframe.setChecked )
 
         self.newMesh(None)
         self.show()
