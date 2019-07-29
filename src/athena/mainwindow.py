@@ -467,15 +467,15 @@ class AthenaWindow(QMainWindow):
         scale_factor = toolresults.toolinfo['scale_factor']
         self.geomView.clearDecorations()
         for path in toolresults.bildfiles:
-            if path.match('*01_target_geometry.bild'):
+            if path.match('*target_geometry.bild'):
                 base_bild = bildparser.parseBildFile( path, scale_factor )
                 base_aabb = geom.AABB( base_bild )
         for path in toolresults.bildfiles:
-            if path.match('*06_cylinder_final.bild'):
+            if path.match('*_cylinder_model.bild'):
                 self.geomView.setCylDisplay( bildparser.parseBildFile( path ), base_aabb )
-            elif path.match('*09_atomic_model.bild'):
+            elif path.match('*_atomic_model_multi.bild'):
                 self.geomView.setAtomDisplay( bildparser.parseBildFile( path ), base_aabb )
-            elif path.match('*12_routing_all.bild'):
+            elif path.match('*_routing_multi.bild'):
                 self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb )
         self.toggleOutputControls(True)
         self.toolresults = toolresults
