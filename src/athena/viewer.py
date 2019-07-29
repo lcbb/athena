@@ -465,7 +465,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
 
     def _plyMeshMaterial( self, flavor ):
-        material =  self._athenaMaterial( 'main.qml', 'wireframe.vert', 
+        material =  self._athenaMaterial( 'meshmaterial.qml', 'wireframe.vert', 
                                                       flavor+'_wireframe.frag',
                                                       'wireframe.geom' )
         material.addParameter( self._alphaParam )
