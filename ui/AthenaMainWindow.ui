@@ -42,7 +42,7 @@
         </property>
         <item>
          <widget class="QWidget" name="inputSidebar" native="true">
-          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0,0">
+          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0,0,0">
            <property name="spacing">
             <number>10</number>
            </property>
@@ -216,7 +216,7 @@
               </size>
              </property>
              <property name="title">
-              <string>Wireframe</string>
+              <string>Wireframe Rendering</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -418,7 +418,7 @@
                   <string notr="true"/>
                  </property>
                  <property name="title">
-                  <string>2D Rendering</string>
+                  <string>Surface Rendering</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -530,7 +530,7 @@
                   </size>
                  </property>
                  <property name="title">
-                  <string>3D Rendering</string>
+                  <string>Surface Rendering</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -749,6 +749,13 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>Reset View</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QGroupBox" name="showResultsBox">
@@ -1392,6 +1399,7 @@
     </property>
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
+    <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionAddScaffold"/>
     <addaction name="separator"/>
@@ -1513,6 +1521,11 @@
    </property>
    <property name="text">
     <string>Screenshot...</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New Session</string>
    </property>
   </action>
  </widget>

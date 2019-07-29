@@ -278,11 +278,13 @@ class AthenaWindow(QMainWindow):
         self.saveButton.clicked.connect(self.saveOutput)
 
         self.actionQuit.triggered.connect(self.close)
+        self.actionNew.triggered.connect(self.newSession)
         self.actionAbout.triggered.connect(self.showAbout)
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
         self.actionAddScaffold.triggered.connect( self.selectAndAddScaffoldFile )
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
         self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
+        self.actionResetViewerOptions.triggered.connect( self.geomView.resetBackgroundColor )
 
         # action groups cannot be set up in Qt Designer, so do that here
         self.resultsActionGroup = QActionGroup(self)
@@ -350,6 +352,13 @@ class AthenaWindow(QMainWindow):
         self.show()
         self.log("Athena version {}".format(__version__))
 
+
+    def newSession( self ):
+        self.newMesh(None)
+        self.geomView.clearAllGeometry()
+        self.geomView.resetBackgroundColor()
+        self.geomView.resetParameters()
+        self.geomView.resetCamera()
 
     def selectProjection(self, widget):
         if widget == self.orthoCamButton:

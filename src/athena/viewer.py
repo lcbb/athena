@@ -59,6 +59,7 @@ class CameraController:
         self.bounding_radius = bounding_sphere_diam / 2
 
     def reset(self):
+        if( self.mesh is None ): return 
         self.camCenter = self.aabb.center
         camDistance = 2 * self.bounding_radius
         if( self.mesh.dimensions == 2 ):
@@ -424,11 +425,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                      'wire_enable': 1.0,
                      'proj_orthographic': 1.0,
                      'dpi' : 100.0,
-                     'flat_color': QColor( 97, 188, 188),
-                     'cool_color': QColor( 0, 25, 170 ),
-                     'warm_color': QColor( 210, 190, 0),
+                     'flat_color': QColor( 215, 72, 215),
+                     'cool_color': QColor( 0, 0, 127 ),
+                     'warm_color': QColor( 255, 0, 255),
                      'line.width': 1.0,
-                     'line.color': QColor( 200, 10, 10),
+                     'line.color': QColor( 85, 230, 255),
                      'light.position': vec3d( 0, 0, 100) }
 
     def _qmlLoad( self, qmlfile ):
@@ -497,7 +498,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.framegraph = AthenaFrameGraph(self)
         self.setActiveFrameGraph(self.framegraph.root)
 
-        self.setBackgroundColor( QColor(63,63,63) )
+        self.resetBackgroundColor()
         self.lightOrientation = int(0) # Internal integer controlling light.position attribute
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
@@ -507,6 +508,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.initParameters() # defined in metaclass
         self.faceEnableChanged.connect( self.handleFaceRenderChange )
         self.lightPositionChanged.connect( self.handleLightPositionChange )
+        self.wireEnableChanged.connect( self.handleWireframeRenderChange )
 
         self.sphere_material = self._imposterMaterial('sphere')
         #self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
@@ -566,6 +568,9 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         #IPython.embed()
 
     backgroundColorChanged = Signal( QColor )
+
+    def resetBackgroundColor( self ):
+        self.setBackgroundColor( QColor(0,0,0) )
 
     def backgroundColor( self ):
         return self.framegraph.clearBuffers.clearColor()
