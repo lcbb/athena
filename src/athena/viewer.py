@@ -423,6 +423,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                      'face_enable': 1.0,
                      'wire_enable': 1.0,
                      'proj_orthographic': 1.0,
+                     'dpi' : 100.0,
                      'flat_color': QColor( 97, 188, 188),
                      'cool_color': QColor( 0, 25, 170 ),
                      'warm_color': QColor( 210, 190, 0),
@@ -468,6 +469,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                                                       flavor+'_wireframe.frag',
                                                       'wireframe.geom' )
         material.addParameter( self._alphaParam )
+        material.addParameter( self._dpiParam )
         material.addParameter( self._faceEnableParam )
         material.addParameter( self._wireEnableParam )
         material.addParameter( self._lineWidthParam )
@@ -531,7 +533,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         # Old meshes are deleteLater()-ed.  A problem with this approach is that the deleted QEntities
         # also delete their components (and this seems true even if we try to remove the component first).
         # The workaround we use here is to also add the materials as components of the root entity,
-        # which keeps Qt3D from deleting it.  I don't know if this is the best approach, but it works.
+        # which keeps Qt3D from deleting them.  I don't know if this is the best approach, but it works.
         self.rootEntity.addComponent(self.flat_material)
         self.rootEntity.addComponent(self.gooch_material)
         self.rootEntity.addComponent(self.sphere_material)
@@ -557,6 +559,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
         self.lastpos = None
         self.mouseTool = 'rotate'
+
+        self.setDpi( self.screen().physicalDotsPerInch() )
 
         #import IPython
         #IPython.embed()
@@ -675,11 +679,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def setZoomTool(self):
         self.mouseTool = 'zoom'
 
-    def requestScreenshot(self, size):
+    def requestScreenshot(self, size, dpi=None):
         ratio = size.width() / size.height()
         def cleanup():
             self.framegraph.setOnscreenRendering()
+            self.setDpi( self.screen().physicalDotsPerInch() )
             self.camControl.resize()
+        if dpi: self.setDpi(dpi)
         self.framegraph.setOffscreenRendering(size)
         self.camControl.resize(ratio)
         request = self.framegraph.renderCapture.requestCapture()

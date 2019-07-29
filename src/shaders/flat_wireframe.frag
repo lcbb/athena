@@ -15,6 +15,7 @@ uniform struct LineInfo {
 uniform vec3 flat_color; 
 uniform float face_enable;
 uniform float wire_enable;
+uniform float dpi;
 
 in WireframeVertex {
     vec3 position;
@@ -43,7 +44,7 @@ float distance_to_line_segment( const in vec2 P, const in vec2 A, const in vec2 
     return min( d, length(dist) );
 }
 
-vec4 shadeLine( const in vec4 color )
+vec4 shadeLine( const in vec4 color, const in float linewidth )
 {
     // Find the smallest distance between the fragment and a triangle edge
     float d = 10000;
@@ -61,17 +62,17 @@ vec4 shadeLine( const in vec4 color )
 
     // Blend between line color and phong color
     float mixVal;
-    if ( d < line.width - 1.0 )
+    if ( d < linewidth - 1.0 )
     {
         mixVal = 1.0;
     }
-    else if ( d > line.width + 1.0 )
+    else if ( d > linewidth + 1.0 )
     {
         mixVal = 0.0;
     }
     else
     {
-        float x = d - ( line.width - 1.0 );
+        float x = d - ( linewidth - 1.0 );
         mixVal = exp2( -2.0 * ( x * x ) );
     }
 
@@ -81,11 +82,12 @@ vec4 shadeLine( const in vec4 color )
 void main()
 {
     vec4 color = vec4( line.color.xyz, 0.0 );
+    float effective_line_width = line.width * (dpi / 100);
     if( face_enable > 0.0 ){
         color = vec4( flat_color, 1.0 );
     }
     if( wire_enable > 0.0 ){
-        fragColor = shadeLine( color );
+        fragColor = shadeLine( color, effective_line_width );
     }
     else{
         fragColor = color;

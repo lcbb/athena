@@ -122,7 +122,7 @@ class ScreenshotDialog(QDialog):
         w = self.widthBoxPixels.value()
         h = self.heightBoxPixels.value()
         d = self.dpiBox.value()
-        request = self.view.requestScreenshot( QSize(w, h) )
+        request = self.view.requestScreenshot( QSize(w, h), d )
         request.completed.connect( self.saveScreenshotCallback(request, d, self.output_dir) )
 
     def screenshotFilepath(self, output_path, capture_id ):

@@ -19,6 +19,7 @@ uniform float shininess;    // Specular shininess factor
 uniform vec3 cool_color;
 uniform vec3 warm_color;
 uniform float alpha; 
+uniform float dpi;
 uniform float face_enable;
 uniform float wire_enable;
 
@@ -90,7 +91,7 @@ vec3 goochModel( const in vec3 pos, const in vec3 n )
 }
 
 
-vec4 shadeLine( const in vec4 color )
+vec4 shadeLine( const in vec4 color, const in float linewidth )
 {
     // Find the smallest distance between the fragment and a triangle edge
     float d = 10000;
@@ -108,17 +109,17 @@ vec4 shadeLine( const in vec4 color )
 
     // Blend between line color and phong color
     float mixVal;
-    if ( d < line.width - 1.0 )
+    if ( d < linewidth - 1.0 )
     {
         mixVal = 1.0;
     }
-    else if ( d > line.width + 1.0 )
+    else if ( d > linewidth + 1.0 )
     {
         mixVal = 0.0;
     }
     else
     {
-        float x = d - ( line.width - 1.0 );
+        float x = d - ( linewidth - 1.0 );
         mixVal = exp2( -2.0 * ( x * x ) );
     }
 
@@ -129,13 +130,14 @@ void main()
 {
     // Calculate the color from the phong model
 
+    float effective_line_width = line.width * (dpi / 100);
     vec4 color = vec4( line.color.xyz, 0.0 );
     if( face_enable > 0.0 ){
         float effective_alpha = min( alpha, face_enable );
         color = vec4( goochModel( fs_in.position, normalize( fs_in.normal ) ), effective_alpha );
     }
     if( wire_enable > 0.0 ){
-        fragColor = shadeLine( color );
+        fragColor = shadeLine( color, effective_line_width );
     }
     else{
         fragColor = color;
