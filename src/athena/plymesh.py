@@ -19,23 +19,6 @@ def tri_norm(a,b,c):
     tri_normal /= np.linalg.norm(tri_normal)
     return tri_normal
 
-class EdgeDict:
-    def __init__(self):
-        self.edges = dict()
-
-    @classmethod
-    def _key(a,b):
-        return (min(a,b), max(a,b))
-
-    def addEdge( self, a, b, idx ):
-        self.edges[ _key(a,b) ] = idx
-
-    def hasEdge( self, a, b ):
-        return _key(a,b) in self.edges
-
-    def getEdge( self, a, b ):
-        return self.edges[_key(a,b)]
-
 def edge( a, b ):
     return (min(a,b), max(a,b))
 
@@ -48,6 +31,76 @@ def edgeIter(poly):
         i_last = i
     yield edge( i_last, i0 )
    
+
+class PlyMesh2(Qt3DCore.QEntity):
+    def __init__(self, parent, plydata):
+        super().__init__(parent)
+
+        ply_vertices = plydata['vertex'].data
+        ply_faces = plydata['face'].data['vertex_indices']
+
+        flat_xy = np.all( 0 == ply_vertices['z'] )
+        self.dimensions = 2 if flat_xy else 3
+
+        vertices = list()
+        triangles = list()
+
+        def add_vtx(v, a, b):
+            print(v, a, b)
+            vertices.append( np.hstack( [v , a , b] ) )
+            return len(vertices) - 1
+
+        def add_simple_tri( a, b, c ):
+            i = add_vtx(a, b, c)
+            j = add_vtx(b, a, c)
+            k = add_vtx(c, a, b)
+            triangles.append( (i, j, k) )
+
+        for poly in ply_faces:
+            if len(poly) == 3:
+                poly_vertices = np.take(ply_vertices, poly, axis=0) # [ply_vertices[p] for p in poly]
+                verts = [ [v['x'], v['y'], v['z']] for v in poly_vertices]
+                add_simple_tri( *verts )
+
+        print(vertices)
+        print(triangles)
+
+        vertex_basetype = geom.basetypes.Float
+        if( len(triangles) < 30000 ):
+            index_basetype = geom.basetypes.UnsignedShort
+        else:
+            index_basetype = geom.basetypes.UnsignedInt
+
+        vertex_nparr = np.array(vertices, dtype = geom.basetype_numpy_codes[vertex_basetype])
+        print(vertex_nparr, vertex_nparr.dtype)
+
+        index_nparr = np.array( triangles, dtype=geom.basetype_numpy_codes[index_basetype])
+        print(index_nparr, index_nparr.dtype)
+
+        self.geometry = Qt3DRender.QGeometry(self)
+
+        # Setup vertex attributes for position and interior flags
+        position_attrname = Qt3DRender.QAttribute.defaultPositionAttributeName()
+        wing1_attrname = 'wing1Vtx'
+        wing2_attrname = 'wing2Vtx'
+
+        attrspecs = [ geom.AttrSpec(position_attrname, column=0, numcols=3 ),
+                      geom.AttrSpec(wing1_attrname, column=3, numcols=3),
+                      geom.AttrSpec(wing2_attrname, column=6, numcols=3) ]
+        self.posAttr, self.wing1Attr, self.wing2Attr = geom.buildVertexAttrs( parent, vertex_nparr, attrspecs )
+        self.geometry.addAttribute(self.posAttr)
+        self.geometry.addAttribute(self.wing1Attr)
+        self.geometry.addAttribute(self.wing2Attr)
+
+        self.indexAttr = geom.buildIndexAttr( parent, index_nparr )
+        self.geometry.addAttribute(self.indexAttr)
+
+        self.lineMesh = Qt3DRender.QGeometryRenderer(parent)
+        self.lineMesh.setGeometry(self.geometry)
+        self.lineMesh.setPrimitiveType( Qt3DRender.QGeometryRenderer.Triangles )
+
+        self.addComponent(self.lineMesh)
+
 
 class PlyMesh(Qt3DCore.QEntity):
     def __init__(self, parent, plydata):

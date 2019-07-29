@@ -617,7 +617,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.meshFilepath = filepath
         self.plydata = PlyData.read(filepath)
         self.clearAllGeometry()
-        self.meshEntity = plymesh.PlyMesh(self.meshEntityParent, self.plydata)
+        self.meshEntity = plymesh.PlyMesh2(self.meshEntityParent, self.plydata)
         mesh_3d = self.meshEntity.dimensions == 3
         split = self.camControl.split
         if( mesh_3d ):

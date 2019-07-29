@@ -19,45 +19,49 @@ in WireframeVertex {
     vec3 position;
     flat vec3 normal;
     noperspective vec4 edgeA;
+    flat vec3 interior;
+    flat vec2 p[3];
     noperspective vec4 edgeB;
     flat int configuration;
+    flat vec2 segments[9];
 } fs_in;
 
 out vec4 fragColor;
 
+uniform mat4 viewportMatrix;
+
+vec2 transformToViewport( const in vec4 p )
+{
+    return vec2( viewportMatrix * ( p / p.w ) );
+}
+
+float cross2( const in vec2 a, const in vec2 b )
+{
+    return a.x * b.y - b.x * a.y;
+}
+
+float distance_to_line_segment( const in vec2 P, const in vec2 A, const in vec2 B, float d ){
+    vec2 AP = P - A;
+    vec2 AB = B - A;
+    vec2 dist = AP - AB * clamp (dot(AP,AB)/dot(AB,AB), 0.0, 1.0);
+    return min( d, length(dist) );
+}
+
 vec4 shadeLine( const in vec4 color )
 {
     // Find the smallest distance between the fragment and a triangle edge
-    float d;
-    if ( fs_in.configuration == 0 )
-    {
-        // Common configuration
-        d = min( fs_in.edgeA.x, fs_in.edgeA.y );
-        d = min( d, fs_in.edgeA.z );
-    }
-    else
-    {
-        // Handle configuration where screen space projection breaks down
-        // Compute and compare the squared distances
-        vec2 AF = gl_FragCoord.xy - fs_in.edgeA.xy;
-        float sqAF = dot( AF, AF );
-        float AFcosA = dot( AF, fs_in.edgeA.zw );
-        d = abs( sqAF - AFcosA * AFcosA );
+    float d = 100;
 
-        vec2 BF = gl_FragCoord.xy - fs_in.edgeB.xy;
-        float sqBF = dot( BF, BF );
-        float BFcosB = dot( BF, fs_in.edgeB.zw );
-        d = min( d, abs( sqBF - BFcosB * BFcosB ) );
+    vec2 point = gl_FragCoord.xy; //  transformToViewport( gl_FragCoord );
 
-        // Only need to care about the 3rd edge for some configurations.
-        if ( fs_in.configuration == 1 || fs_in.configuration == 2 || fs_in.configuration == 4 )
-        {
-            float AFcosA0 = dot( AF, normalize( fs_in.edgeB.xy - fs_in.edgeA.xy ) );
-            d = min( d, abs( sqAF - AFcosA0 * AFcosA0 ) );
-        }
+    d = distance_to_line_segment( point, fs_in.segments[0], fs_in.segments[1], d);
+    d = distance_to_line_segment( point, fs_in.segments[1], fs_in.segments[2], d);
 
-        d = sqrt( d );
-    }
+    d = distance_to_line_segment( point, fs_in.segments[3], fs_in.segments[4], d);
+    d = distance_to_line_segment( point, fs_in.segments[4], fs_in.segments[5], d);
+
+    d = distance_to_line_segment( point, fs_in.segments[6], fs_in.segments[7], d);
+    d = distance_to_line_segment( point, fs_in.segments[7], fs_in.segments[8], d);
 
     // Blend between line color and phong color
     float mixVal;
