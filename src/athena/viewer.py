@@ -22,11 +22,13 @@ class CameraController:
     def createFrom( cls, cc ):
         '''Copy constructor'''
         ret = cls( cc.window, cc.camera, cc.mesh, cc.split )
-        ret.camCenter = cc.camCenter
-        ret.camLoc = cc.camLoc
-        ret.upVector = cc.upVector
-        ret.rightVector = cc.rightVector
-        ret._apply()
+        if( cc.mesh ):
+            ret.camCenter = cc.camCenter
+            ret.camLoc = cc.camLoc
+            ret.upVector = cc.upVector
+            ret.rightVector = cc.rightVector
+            ret._apply()
+            ret._setProjection()
         return ret
 
     def __init__(self, window, camera, mesh, split):
@@ -37,6 +39,12 @@ class CameraController:
         if( self.mesh ) : 
             self.aabb = geom.AABB(self.mesh.geometry)
             self._setupCamera()
+
+    def newMesh( self, mesh ):
+        self.mesh = mesh
+        self.aabb = geom.AABB( self.mesh.geometry )
+        self._setupCamera()
+        self.reset()
 
     def _windowAspectRatio(self):
         w = self.window.width()
@@ -95,11 +103,11 @@ class CameraController:
         delta_x = -dx * self.rightVector
         delta_y = dy * self._currentUp()
         delta = delta_x + delta_y
-        delta *= .01
+        delta *= self._panfactor()
         self.camCenter += delta
         self.camLoc += delta
-        self._apply()
         self._setProjection()
+        self._apply()
 
     def rotate( self, dx, dy ):
         up = self.upVector
@@ -120,15 +128,20 @@ class CameraController:
         self._apply()
 
     def resize(self, ratio=None):
-        self._setProjection()
+        if( self.mesh ):
+            self._setProjection()
 
 class OrthoCamController(CameraController):
 
     def __init__(self, window, camera, geometry, split):
         super().__init__(window, camera, geometry, split)
         self.margin = 1.4
-        self.reset()
+        if( self.mesh ):
+            self._setupCamera()
 
+    def _panfactor(self):
+        f = self.bounding_radius * self.margin / self.window.width()
+        return f
 
     def _setProjection(self):
         r = self.bounding_radius
@@ -140,26 +153,35 @@ class OrthoCamController(CameraController):
         delta = pow ( 1.1, -dy/100 )
         self.margin *= delta
         self._setProjection()
+        self._apply()
 
 class PerspectiveCamController(CameraController):
 
     def __init__(self, window, camera, geometry, split):
         super().__init__(window, camera, geometry, split)
-        self.reset()
+        self.fov = 50
+        if( self.mesh ):
+            self._setupCamera()
+
+    def _panfactor(self):
+        f = self.bounding_radius * ( self.fov / 15 ) / self.window.width() 
+        return f
 
     def _setProjection(self):
         frustum_min = self.bounding_radius
         frustum_max = 3 * frustum_min
         ratio = self._windowAspectRatio()
-        self.camera.lens().setPerspectiveProjection(50, ratio, frustum_min, frustum_max)
+        self.camera.lens().setPerspectiveProjection(self.fov, ratio, frustum_min, frustum_max)
 
     def zoom( self, dx, dy ):
         delta = dy / 25
-        fov = self.camera.fieldOfView()
+        fov = self.fov
         def clamp(min_, max_, value):
             return min( max( value, min_ ), max_ )
         new_fov = clamp (5, 150, fov - delta)
-        self.camera.setFieldOfView( new_fov )
+        self.fov = new_fov
+        self._setProjection()
+        self._apply()
 
 
 class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
@@ -503,7 +525,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.renderSettings().setRenderPolicy(self.renderSettings().OnDemand)
 
         self.rootEntity = Qt3DCore.QEntity()
-        self.camControl = CameraController(None, None, None, False)
 
         self.initParameters() # defined in metaclass
         self.faceEnableChanged.connect( self.handleFaceRenderChange )
@@ -563,6 +584,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.mouseTool = 'rotate'
 
         self.setDpi( self.screen().physicalDotsPerInch() )
+        self.camControl = OrthoCamController(self,self.camera(),None,False)
 
         #import IPython
         #IPython.embed()
@@ -655,15 +677,11 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearAllGeometry()
         self.meshEntity = plymesh.PlyMesh2(self.meshEntityParent, self.plydata)
         mesh_3d = self.meshEntity.dimensions == 3
-        split = self.camControl.split
+        self.camControl.newMesh(self.meshEntity)
         if( mesh_3d ):
             self.meshEntity.addComponent(self.gooch_material)
-            self.camControl = OrthoCamController(self, self.camera(), self.meshEntity, split)
-            self.setProjOrthographic(1.0)
         else:
             self.meshEntity.addComponent(self.flat_material)
-            self.camControl = PerspectiveCamController(self, self.camera(), self.meshEntity, split)
-            self.setProjOrthographic(0.0)
         self.camControl.reset()
         return mesh_3d
 
