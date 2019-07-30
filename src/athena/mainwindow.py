@@ -314,10 +314,18 @@ class AthenaWindow(QMainWindow):
 
         self.displayCylinderBox.toggled.connect( self.geomView.toggleCylDisplay )
         self.geomView.toggleCylDisplay(self.displayCylinderBox.isChecked())
-        self.displayRoutingBox.toggled.connect( self.geomView.toggleRoutDisplay )
-        self.geomView.toggleRoutDisplay(self.displayRoutingBox.isChecked())
-        self.displayPAtomBox.toggled.connect( self.geomView.toggleAtomDisplay )
-        self.geomView.toggleAtomDisplay(self.displayPAtomBox.isChecked())
+
+        self.displayRoutingBox.toggled.connect( self.toggleRoutingDisplay )
+        self.routingColorButtonGroup.setId( self.routingMulticolorButton, 0 )
+        self.routingColorButtonGroup.setId( self.routingBicolorButton, 1 )
+        self.routingColorButtonGroup.buttonClicked[int].connect( self.toggleRoutingDisplayVariant )
+        self.toggleRoutingDisplay( self.displayRoutingBox.isChecked() )
+
+        self.displayPAtomBox.toggled.connect( self.toggleAtomicDisplay )
+        self.atomicColorButtonGroup.setId( self.atomicMulticolorButton, 0 )
+        self.atomicColorButtonGroup.setId( self.atomicBicolorButton, 1 )
+        self.atomicColorButtonGroup.buttonClicked[int].connect( self.toggleAtomicDisplayVariant )
+        self.toggleAtomicDisplay(self.displayPAtomBox.isChecked())
 
         self.geometryList.newFileSelected.connect( self.newMesh )
 
@@ -389,6 +397,24 @@ class AthenaWindow(QMainWindow):
     def handleViewerLinewidthChanged( self, newvalue ):
         intvalue = newvalue * 10
         self.lineWidthSlider.setValue(intvalue)
+
+    def toggleRoutingDisplay( self, boolvalue ):
+        self.geomView.toggleRoutDisplay( boolvalue, self.routingColorButtonGroup.checkedId() )
+        self.geomView.toggleRoutDisplay( False, abs( self.routingColorButtonGroup.checkedId() - 1 ) )
+
+    def toggleRoutingDisplayVariant( self, buttonid ):
+        other = abs(buttonid - 1)
+        self.geomView.toggleRoutDisplay( False, other )
+        self.geomView.toggleRoutDisplay( self.displayRoutingBox.isChecked(), buttonid )
+
+    def toggleAtomicDisplay( self, boolvalue ):
+        self.geomView.toggleAtomDisplay( boolvalue, self.atomicColorButtonGroup.checkedId() )
+        self.geomView.toggleAtomDisplay( False, abs( self.atomicColorButtonGroup.checkedId() - 1 ) )
+
+    def toggleAtomicDisplayVariant( self, buttonid ):
+        other = abs(buttonid - 1)
+        self.geomView.toggleAtomDisplay( False, other )
+        self.geomView.toggleAtomDisplay( self.displayPAtomBox.isChecked(), buttonid )
 
     def _setViewSplit( self, action ):
         if action is self.actionOverlayResults:
@@ -474,9 +500,13 @@ class AthenaWindow(QMainWindow):
             if path.match('*_cylinder_model.bild'):
                 self.geomView.setCylDisplay( bildparser.parseBildFile( path ), base_aabb )
             elif path.match('*_atomic_model_multi.bild'):
-                self.geomView.setAtomDisplay( bildparser.parseBildFile( path ), base_aabb )
+                self.geomView.setAtomDisplay( bildparser.parseBildFile( path ), base_aabb, 0 )
+            elif path.match('*_atomic_model_two.bild'):
+                self.geomView.setAtomDisplay( bildparser.parseBildFile( path ), base_aabb, 1 )
             elif path.match('*_routing_multi.bild'):
-                self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb )
+                self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb, 0 )
+            elif path.match('*_routing_two.bild'):
+                self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb, 1 )
         self.toggleOutputControls(True)
         self.toolresults = toolresults
 

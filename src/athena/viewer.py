@@ -556,8 +556,8 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                 self.cones = None
 
         self.cylModelEntity = DecorationEntity( self.rootEntity )
-        self.routModelEntity = DecorationEntity( self.rootEntity )
-        self.atomModelEntity = DecorationEntity( self.rootEntity )
+        self.routModelEntities = [ DecorationEntity( self.rootEntity ) for x in range(2) ]
+        self.atomModelEntities = [ DecorationEntity( self.rootEntity ) for x in range(2) ]
 
         self.lastpos = None
         self.mouseTool = 'rotate'
@@ -637,7 +637,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.clearDecorations()
 
     def clearDecorations( self ):
-        for ent in [self.cylModelEntity, self.routModelEntity, self.atomModelEntity]:
+        for ent in [self.cylModelEntity] + self.routModelEntities + self.atomModelEntities:
             if( ent.spheres ):
                 ent.spheres.deleteLater()
                 ent.spheres = None
@@ -739,17 +739,17 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def setCylDisplay(self, bild_results, map_aabb):
         self.newDecoration( self.cylModelEntity, bild_results, map_aabb )
 
-    def setRoutDisplay(self, bild_results, map_aabb):
-        self.newDecoration( self.routModelEntity, bild_results, map_aabb )
+    def setRoutDisplay(self, bild_results, map_aabb, variant):
+        self.newDecoration( self.routModelEntities[variant], bild_results, map_aabb )
 
-    def setAtomDisplay(self, bild_results, map_aabb):
-        self.newDecoration( self.atomModelEntity, bild_results, map_aabb )
+    def setAtomDisplay(self, bild_results, map_aabb, variant):
+        self.newDecoration( self.atomModelEntities[variant], bild_results, map_aabb )
 
     def toggleCylDisplay(self, value):
         self.cylModelEntity.setEnabled( value )
 
-    def toggleRoutDisplay(self, value):
-        self.routModelEntity.setEnabled( value )
+    def toggleRoutDisplay(self, value, variant):
+        self.routModelEntities[variant].setEnabled( value )
 
-    def toggleAtomDisplay(self, value):
-        self.atomModelEntity.setEnabled( value )
+    def toggleAtomDisplay(self, value, variant):
+        self.atomModelEntities[variant].setEnabled( value )
