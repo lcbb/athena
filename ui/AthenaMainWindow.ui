@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>828</width>
-    <height>670</height>
+    <height>671</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -153,13 +153,26 @@
                <number>9</number>
               </property>
               <property name="topMargin">
-               <number>5</number>
+               <number>9</number>
+              </property>
+              <property name="rightMargin">
+               <number>9</number>
               </property>
               <property name="bottomMargin">
                <number>5</number>
               </property>
               <item>
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <property name="topMargin">
                  <number>4</number>
                 </property>
@@ -222,7 +235,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <property name="spacing">
-                 <number>3</number>
+                 <number>0</number>
                 </property>
                 <property name="topMargin">
                  <number>2</number>
@@ -285,7 +298,7 @@
               <enum>QFrame::NoFrame</enum>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="controls_2D_container">
               <property name="sizePolicy">
@@ -345,7 +358,7 @@
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_12">
+                 <layout class="QVBoxLayout" name="verticalLayout_7">
                   <property name="spacing">
                    <number>0</number>
                   </property>
@@ -353,7 +366,7 @@
                    <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>0</number>
+                   <number>9</number>
                   </property>
                   <property name="rightMargin">
                    <number>9</number>
@@ -362,46 +375,60 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <spacer name="horizontalSpacer">
+                   <widget class="Line" name="line_7">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_16">
-                    <property name="text">
-                     <string>Color</string>
-                    </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="ColorButton" name="flatColorButton">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
+                   <layout class="QHBoxLayout" name="horizontalLayout_12">
+                    <property name="topMargin">
+                     <number>0</number>
                     </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>50</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
+                    <item>
+                     <spacer name="horizontalSpacer">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_16">
+                      <property name="text">
+                       <string>Color</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="ColorButton" name="flatColorButton">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>50</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                  </layout>
                 </widget>
@@ -471,7 +498,7 @@
                    <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>0</number>
+                   <number>9</number>
                   </property>
                   <property name="rightMargin">
                    <number>9</number>
@@ -480,7 +507,17 @@
                    <number>0</number>
                   </property>
                   <item>
+                   <widget class="Line" name="line_5">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_13">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <property name="topMargin">
                      <number>0</number>
                     </property>
@@ -533,6 +570,9 @@
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_14">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <property name="topMargin">
                      <number>0</number>
                     </property>
@@ -585,6 +625,9 @@
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_15">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <property name="topMargin">
                      <number>0</number>
                     </property>
@@ -633,6 +676,9 @@
                   </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_16">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
                     <property name="topMargin">
                      <number>0</number>
                     </property>
@@ -1113,7 +1159,7 @@ Direction</string>
               <enum>QFrame::Sunken</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="tools_2D">
               <property name="sizePolicy">
@@ -1154,12 +1200,12 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>88</width>
-                    <height>62</height>
+                    <width>180</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -1168,11 +1214,14 @@ Direction</string>
                    <string>PERDIX</string>
                   </attribute>
                   <layout class="QVBoxLayout" name="verticalLayout_3">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
                    <property name="leftMargin">
                     <number>2</number>
                    </property>
                    <property name="topMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="rightMargin">
                     <number>2</number>
@@ -1184,6 +1233,13 @@ Direction</string>
                     <widget class="QLabel" name="label_10">
                      <property name="text">
                       <string>2D with DX edges</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_4">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1220,12 +1276,12 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>94</width>
-                    <height>69</height>
+                    <width>180</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Ignored">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -1234,11 +1290,14 @@ Direction</string>
                    <string>METIS</string>
                   </attribute>
                   <layout class="QVBoxLayout" name="verticalLayout_8">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
                    <property name="leftMargin">
                     <number>2</number>
                    </property>
                    <property name="topMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="rightMargin">
                     <number>2</number>
@@ -1250,6 +1309,13 @@ Direction</string>
                     <widget class="QLabel" name="label_28">
                      <property name="text">
                       <string>2D with 6HB edges</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_3">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1317,26 +1383,35 @@ Direction</string>
                   </sizepolicy>
                  </property>
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <widget class="QWidget" name="page_4">
                   <property name="geometry">
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>88</width>
-                    <height>62</height>
+                    <width>180</width>
+                    <height>73</height>
                    </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
                   </property>
                   <attribute name="label">
                    <string>DAEDALUS</string>
                   </attribute>
                   <layout class="QVBoxLayout" name="verticalLayout_10">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
                    <property name="leftMargin">
                     <number>2</number>
                    </property>
                    <property name="topMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="rightMargin">
                     <number>2</number>
@@ -1348,6 +1423,13 @@ Direction</string>
                     <widget class="QLabel" name="label_23">
                      <property name="text">
                       <string>3D with DX edges</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_2">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1384,19 +1466,28 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>94</width>
-                    <height>152</height>
+                    <width>180</width>
+                    <height>154</height>
                    </rect>
+                  </property>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Ignored">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
                   </property>
                   <attribute name="label">
                    <string>TALOS</string>
                   </attribute>
                   <layout class="QVBoxLayout" name="verticalLayout_9">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
                    <property name="leftMargin">
                     <number>2</number>
                    </property>
                    <property name="topMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="rightMargin">
                     <number>2</number>
@@ -1408,6 +1499,13 @@ Direction</string>
                     <widget class="QLabel" name="label_11">
                      <property name="text">
                       <string>3D with 6HB edges</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                     </widget>
                    </item>
@@ -1554,7 +1652,7 @@ Direction</string>
      <x>0</x>
      <y>0</y>
      <width>828</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">

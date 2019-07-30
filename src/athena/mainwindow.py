@@ -43,7 +43,7 @@ class AutoResizingStackedWidget( QStackedWidget ):
         max_width = max( self.widget(x).sizeHint().width() for x in range(self.count()))
         self.k_max_width = max( self.k_max_width, max_width )
         for page_idx in range(self.count()):
-            h_policy = self.widget(page_idx).sizePolicy().horizontalPolicy()
+            h_policy = QSizePolicy.Minimum # self.widget(page_idx).sizePolicy().horizontalPolicy()
             v_policy = QSizePolicy.Maximum if page_idx == current_idx else QSizePolicy.Ignored
             self.widget(page_idx).setMinimumSize( self.k_max_width,0 )
             self.widget(page_idx).setSizePolicy(h_policy, v_policy)
@@ -52,7 +52,7 @@ class AutoResizingStackedWidget( QStackedWidget ):
         # Only if this is actually an index change do we fool with our size policy
         if self.k_max_width < 0 or idx != self.currentIndex():
             self._updateSizePolicy(idx)
-        self.adjustSize()
+            self.adjustSize()
         super().setCurrentIndex( idx )
 
 class FileSelectionTreeWidget( QTreeWidget ):
