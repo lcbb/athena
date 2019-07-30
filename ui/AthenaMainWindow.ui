@@ -53,7 +53,7 @@
       <item>
        <layout class="QHBoxLayout" name="upperLayout">
         <property name="spacing">
-         <number>0</number>
+         <number>6</number>
         </property>
         <item>
          <widget class="QWidget" name="inputSidebar" native="true">
@@ -1185,7 +1185,7 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>114</width>
+                    <width>98</width>
                     <height>28</height>
                    </rect>
                   </property>
@@ -1261,7 +1261,7 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>122</width>
+                    <width>98</width>
                     <height>28</height>
                    </rect>
                   </property>
@@ -1375,8 +1375,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>72</height>
+                    <width>98</width>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1451,8 +1451,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>147</height>
+                    <width>176</width>
+                    <height>117</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1637,7 +1637,7 @@ Direction</string>
      <x>0</x>
      <y>0</y>
      <width>828</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">

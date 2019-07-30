@@ -305,6 +305,12 @@ class AthenaWindow(QMainWindow):
         self.camMotionButtonGroup.addButton( self.zoomButton )
         self.camMotionButtonGroup.buttonClicked.connect( self.selectCameraTool )
 
+        # On Windows, flat some QGroupBox's ... it looks better there,
+        # but worse on OSX.
+        if platform.system() == 'Windows':
+            self.controls_wireframe.setFlat(True)
+            self.controls_2D.setFlat(True)
+            self.controls_3D.setFlat(True)
 
         # On OSX, add a separator to the bottom of the view menu, which
         # will isolate the appkit default "full screen" option on its own.
