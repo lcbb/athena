@@ -91,7 +91,7 @@ class CameraController:
         self.camera.setPosition( self.camLoc )
         self.camera.setUpVector( self._currentUp() )
 
-    def _setProjection(self):
+    def _setProjection(self, ratio = None):
         # Defined in concrete subclasses
         pass
 
@@ -127,9 +127,11 @@ class CameraController:
         self.rightVector = geom.rotateAround( right, up, -dx )
         self._apply()
 
-    def resize(self, ratio=None):
+    def resize(self, newsize = None):
         if( self.mesh ):
-            self._setProjection()
+            ratio = newsize.width() / newsize.height() if newsize else None
+            self._setProjection( ratio )
+            self._apply()
 
 class OrthoCamController(CameraController):
 
@@ -143,10 +145,11 @@ class OrthoCamController(CameraController):
         f = self.bounding_radius * self.margin / self.window.width()
         return f
 
-    def _setProjection(self):
+    def _setProjection(self, ratio = None):
         r = self.bounding_radius
+        ratio = ratio if ratio else self._windowAspectRatio()
         x = self.aabb.dimensions()[0] / 2 * self.margin
-        y = x / self._windowAspectRatio()
+        y = x / ratio
         self.camera.lens().setOrthographicProjection( -x, x, -y, y, r, 3*r )
 
     def zoom( self, dx, dy ):
@@ -167,10 +170,10 @@ class PerspectiveCamController(CameraController):
         f = self.bounding_radius * ( self.fov / 15 ) / self.window.width() 
         return f
 
-    def _setProjection(self):
+    def _setProjection(self, ratio=None):
         frustum_min = self.bounding_radius
         frustum_max = 3 * frustum_min
-        ratio = self._windowAspectRatio()
+        ratio = ratio if ratio else self._windowAspectRatio()
         self.camera.lens().setPerspectiveProjection(self.fov, ratio, frustum_min, frustum_max)
 
     def zoom( self, dx, dy ):
@@ -241,15 +244,18 @@ class AthenaFrameGraph:
         self.overlayCamera.setUpVector( vec3d( 0, 1, 0 ) )
         self.overlayCamera.lens().setOrthographicProjection( -1, 1, -1, 1, -1, 1 )
 
-        # Framegraph root
+        # Framegraph root #1 -- onscreen rendering
         self.surfaceSelector = Qt3DRender.QRenderSurfaceSelector()
         self.surfaceSelector.setSurface(window)
         self.root = self.surfaceSelector
 
-        # Used for offscreen renders, not in the graph by default
-        # During screenshots, this will become a child of surfaceSelector
+
+        # Framgraph root #2 -- Used for offscreen renders, not in the graph by default
+        # During screenshots, offscreenSurfaceSelector becomes the root
         # and the branch roots will become a child of renderTargetSelector
-        self.renderTargetSelector = Qt3DRender.QRenderTargetSelector()
+        self.offscreenSurfaceSelector = Qt3DRender.QRenderSurfaceSelector()
+        self.offscreenSurfaceSelector.setSurface(self.offscreenSurface)
+        self.renderTargetSelector = Qt3DRender.QRenderTargetSelector(self.offscreenSurfaceSelector)
         self.targetTexture = OffscreenRenderTarget(self.renderTargetSelector)
         self.renderTargetSelector.setTarget(self.targetTexture)
         self.noDraw2 = Qt3DRender.QNoDraw(self.renderTargetSelector)
@@ -305,19 +311,15 @@ class AthenaFrameGraph:
 
     def setOffscreenRendering ( self, size = QSize(1200,1200) ):
         self.targetTexture.setSize(size)
-        self.surfaceSelector.setSurface(self.offscreenSurface)
-        self.surfaceSelector.setExternalRenderTargetSize(size)
-        self.renderTargetSelector.setParent(self.surfaceSelector)
+        self.offscreenSurfaceSelector.setExternalRenderTargetSize(size)
         for node in self.branchRoots:
             node.setParent( self.renderTargetSelector )
+        self.root = self.offscreenSurfaceSelector
 
     def setOnscreenRendering (self):
-        self.surfaceSelector.setSurface(self.window)
-        # Turns out you want to call this even for non-external rendering targets
-        self.surfaceSelector.setExternalRenderTargetSize(self.window.size())
         for node in self.branchRoots:
             node.setParent( self.surfaceSelector )
-        self.renderTargetSelector.setParent( None )
+        self.root = self.surfaceSelector
 
 
     def dump(self):
@@ -706,11 +708,14 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         ratio = size.width() / size.height()
         def cleanup():
             self.framegraph.setOnscreenRendering()
+            self.setActiveFrameGraph(self.framegraph.root)
             self.setDpi( self.screen().physicalDotsPerInch() )
             self.camControl.resize()
+            self.requestUpdate()
         if dpi: self.setDpi(dpi)
         self.framegraph.setOffscreenRendering(size)
-        self.camControl.resize(ratio)
+        self.setActiveFrameGraph(self.framegraph.root)
+        self.camControl.resize(size)
         request = self.framegraph.renderCapture.requestCapture()
         request.completed.connect( cleanup )
         # Now ensure a frame redraw occurs so that the capture can go forward.
@@ -732,7 +737,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.camControl.zoom( 0, event.angleDelta().y() )
 
     def resizeEvent( self, event ):
-        self.camControl.resize()
+        self.camControl.resize( event.size() )
 
     def newDecoration(self, parent, bild_results, decoration_aabb = None):
 
