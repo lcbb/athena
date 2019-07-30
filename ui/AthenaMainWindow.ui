@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>828</width>
-    <height>671</height>
+    <height>744</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,6 +36,12 @@
     </sizepolicy>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>8</number>
+    </property>
+    <property name="rightMargin">
+     <number>8</number>
+    </property>
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
@@ -76,7 +82,7 @@
               <number>0</number>
              </property>
              <property name="rightMargin">
-              <number>9</number>
+              <number>3</number>
              </property>
              <property name="bottomMargin">
               <number>0</number>
@@ -140,7 +146,7 @@
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
              <property name="flat">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -150,31 +156,24 @@
                <number>0</number>
               </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>3</number>
               </property>
               <property name="topMargin">
-               <number>9</number>
-              </property>
-              <property name="rightMargin">
-               <number>9</number>
-              </property>
-              <property name="bottomMargin">
                <number>5</number>
               </property>
-              <item>
-               <widget class="Line" name="line_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_10">
                 <property name="spacing">
                  <number>0</number>
                 </property>
                 <property name="topMargin">
-                 <number>4</number>
+                 <number>0</number>
                 </property>
                 <item>
                  <spacer name="horizontalSpacer_2">
@@ -252,7 +251,7 @@
                    <string>Width</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   <set>Qt::AlignHCenter|Qt::AlignTop</set>
                   </property>
                  </widget>
                 </item>
@@ -298,7 +297,7 @@
               <enum>QFrame::NoFrame</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="controls_2D_container">
               <property name="sizePolicy">
@@ -353,7 +352,7 @@
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                  </property>
                  <property name="flat">
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -363,24 +362,17 @@
                    <number>0</number>
                   </property>
                   <property name="leftMargin">
-                   <number>0</number>
+                   <number>3</number>
                   </property>
                   <property name="topMargin">
-                   <number>9</number>
+                   <number>5</number>
                   </property>
                   <property name="rightMargin">
-                   <number>9</number>
+                   <number>3</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>0</number>
+                   <number>2</number>
                   </property>
-                  <item>
-                   <widget class="Line" name="line_7">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_12">
                     <property name="topMargin">
@@ -479,7 +471,7 @@
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                  </property>
                  <property name="flat">
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -495,24 +487,17 @@
                    <enum>QLayout::SetDefaultConstraint</enum>
                   </property>
                   <property name="leftMargin">
-                   <number>0</number>
+                   <number>3</number>
                   </property>
                   <property name="topMargin">
-                   <number>9</number>
+                   <number>5</number>
                   </property>
                   <property name="rightMargin">
-                   <number>9</number>
+                   <number>3</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>0</number>
+                   <number>2</number>
                   </property>
-                  <item>
-                   <widget class="Line" name="line_5">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_13">
                     <property name="spacing">
@@ -1200,8 +1185,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>73</height>
+                    <width>114</width>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1276,8 +1261,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>73</height>
+                    <width>122</width>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1391,7 +1376,7 @@ Direction</string>
                     <x>0</x>
                     <y>0</y>
                     <width>180</width>
-                    <height>73</height>
+                    <height>72</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1467,7 +1452,7 @@ Direction</string>
                     <x>0</x>
                     <y>0</y>
                     <width>180</width>
-                    <height>154</height>
+                    <height>147</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
