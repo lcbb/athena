@@ -1023,7 +1023,7 @@
            <item>
             <widget class="AutoResizingStackedWidget" name="toolControls">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1039,7 +1039,7 @@
              </property>
              <widget class="QWidget" name="tools_2D">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -1060,7 +1060,7 @@
                <item>
                 <widget class="SequenceToolBox" name="toolBox_2D">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -1069,15 +1069,15 @@
                   <enum>QFrame::Plain</enum>
                  </property>
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <widget class="QWidget" name="page">
                   <property name="geometry">
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>88</width>
-                    <height>62</height>
+                    <width>114</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1142,8 +1142,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>94</width>
-                    <height>28</height>
+                    <width>122</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1246,8 +1246,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>62</height>
+                    <width>180</width>
+                    <height>73</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1306,8 +1306,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>152</height>
+                    <width>125</width>
+                    <height>195</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1476,7 +1476,7 @@
      <x>0</x>
      <y>0</y>
      <width>828</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
