@@ -462,7 +462,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                      'cool_color': QColor( 0, 0, 127 ),
                      'warm_color': QColor( 255, 0, 255),
                      'line.width': 1.0,
-                     'line.color': QColor( 55, 110, 255),
+                     'line.color': QColor( 0, 0, 255),
                      'light.position': vec3d( 0, 0, 100),
                      'athena_viewport': QMatrix4x4() # see function resizeViewport() for explanation
                     }
@@ -565,7 +565,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.splitLineEntity.addComponent( self.overlay_material )
         self.splitLineEntity.setEnabled(False)
 
-
         # Each time a mesh is loaded, we create a new Plymesh and add a material as a component.
         # Old meshes are deleteLater()-ed.  A problem with this approach is that the deleted QEntities
         # also delete their components (and this seems true even if we try to remove the component first).
@@ -604,6 +603,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         #IPython.embed()
 
     backgroundColorChanged = Signal( QColor )
+
+    # Override the automatically generated function to reset the viewport parameter,
+    # because it should never be reset
+    def resetAthenaViewport(self): pass
 
     def resetBackgroundColor( self ):
         self.setBackgroundColor( QColor(0,0,0) )
