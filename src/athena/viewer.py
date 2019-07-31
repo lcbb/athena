@@ -129,7 +129,10 @@ class CameraController:
 
     def resize(self, newsize = None):
         if( self.mesh ):
-            ratio = newsize.width() / newsize.height() if newsize else None
+            if( newsize ):
+                ratio = newsize.width() / newsize.height()
+                if self.split: ratio /= 2
+            else: ratio = None
             self._setProjection( ratio )
             self._apply()
 
