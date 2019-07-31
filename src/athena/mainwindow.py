@@ -374,6 +374,9 @@ class AthenaWindow(QMainWindow):
 
     def newSession( self ):
         self.newMesh(None)
+        self.geometryList.clearSelection()
+        for idx in range(3):
+            self.geometryList.collapseItem ( self.geometryList.topLevelItem(idx) )
         self.geomView.clearAllGeometry()
         self.geomView.resetBackgroundColor()
         self.geomView.resetParameters()

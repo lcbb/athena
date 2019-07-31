@@ -1664,7 +1664,7 @@ Direction</string>
            <item>
             <widget class="QPushButton" name="toolRunButton">
              <property name="text">
-              <string>Run Tool</string>
+              <string>Run Sequence Design</string>
              </property>
             </widget>
            </item>
