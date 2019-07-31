@@ -479,10 +479,12 @@ class AthenaWindow(QMainWindow):
     def enable2DControls( self ):
         self.renderControls.setCurrentIndex( 0 )
         self.toolControls.setCurrentIndex( 0 )
+        self.panButton.click()
 
     def enable3DControls( self ):
         self.renderControls.setCurrentIndex( 1 )
         self.toolControls.setCurrentIndex( 1 )
+        self.rotateButton.click()
 
     def toggleOutputControls( self, value ):
         self.saveResultsBox.setEnabled( value )
