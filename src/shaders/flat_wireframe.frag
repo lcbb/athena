@@ -26,10 +26,11 @@ in WireframeVertex {
 out vec4 fragColor;
 
 uniform mat4 viewportMatrix;
+uniform mat4 athena_viewport;
 
 vec2 transformToViewport( const in vec4 p )
 {
-    return vec2( viewportMatrix * ( p / p.w ) );
+    return vec2( athena_viewport * ( p / p.w ) );
 }
 
 float cross2( const in vec2 a, const in vec2 b )

@@ -28,6 +28,7 @@ uniform float wire_enable;
 const float gooch_beta = .35;
 const float gooch_alpha = .2;
 uniform mat4 viewportMatrix;
+uniform mat4 athena_viewport;
 
 in WireframeVertex {
     vec3 position;

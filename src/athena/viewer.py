@@ -2,7 +2,7 @@ from pathlib import Path
 import math
 import numpy as np
 
-from PySide2.QtGui import QColor, QVector3D as vec3d, QImageWriter, QOffscreenSurface, QSurfaceFormat, QImage
+from PySide2.QtGui import QColor, QVector3D as vec3d, QImageWriter, QOffscreenSurface, QSurfaceFormat, QImage, QMatrix4x4
 from PySide2.QtCore import QUrl, QByteArray, Qt, Signal, QRectF, QSize
 
 from PySide2.Qt3DExtras import Qt3DExtras
@@ -317,10 +317,10 @@ class AthenaFrameGraph:
 
     def setOffscreenRendering ( self, size = QSize(1200,1200) ):
         self.targetTexture.setSize(size)
-        self.offscreenSurfaceSelector.setExternalRenderTargetSize(size)
         for node in self.branchRoots:
             node.setParent( self.renderTargetSelector )
         self.root = self.offscreenSurfaceSelector
+        self.offscreenSurfaceSelector.setExternalRenderTargetSize(size)
 
     def setOnscreenRendering (self):
         for node in self.branchRoots:
@@ -459,8 +459,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                      'cool_color': QColor( 0, 0, 127 ),
                      'warm_color': QColor( 255, 0, 255),
                      'line.width': 1.0,
-                     'line.color': QColor( 85, 230, 255),
-                     'light.position': vec3d( 0, 0, 100) }
+                     'line.color': QColor( 55, 110, 255),
+                     'light.position': vec3d( 0, 0, 100),
+                     'athena_viewport': QMatrix4x4() # see function resizeViewport() for explanation
+                    }
 
     def _qmlLoad( self, qmlfile ):
         engine = QQmlEngine()
@@ -505,6 +507,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         material.addParameter( self._wireEnableParam )
         material.addParameter( self._lineWidthParam )
         material.addParameter( self._lineColorParam )
+        material.addParameter( self._athenaViewportParam )
         return material
 
     def _imposterMaterial(self, flavor):
@@ -656,6 +659,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
             self.splitLineEntity.setEnabled( False )
         self.camControl.split = enabled
         self.camControl.resize()
+        self.resizeViewport()
 
     def resetCamera(self):
         # FIXME camControl.reset() *should* work here, but something is amiss
@@ -720,11 +724,13 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
             self.setActiveFrameGraph(self.framegraph.root)
             self.setDpi( self.screen().physicalDotsPerInch() )
             self.camControl.resize()
+            self.resizeViewport()
             self.requestUpdate()
         if dpi: self.setDpi(dpi)
+        self.camControl.resize(size)
+        self.resizeViewport( size )
         self.framegraph.setOffscreenRendering(size)
         self.setActiveFrameGraph(self.framegraph.root)
-        self.camControl.resize(size)
         request = self.framegraph.renderCapture.requestCapture()
         request.completed.connect( cleanup )
         # Now ensure a frame redraw occurs so that the capture can go forward.
@@ -745,8 +751,41 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
     def wheelEvent( self, event ):
         self.camControl.zoom( 0, event.angleDelta().y() )
 
+    def _physicalPixelSize( self, size = None ):
+        if size is None: size = self.size()
+        factor = self.screen().devicePixelRatio()
+        return QSize( size.width() * factor, size.height() * factor )
+
+    def resizeViewport( self, size = None ):
+        # the athena_viewport QParameter exists because the Qt3D ViewportMatrix shader
+        # uniform is unreliable: it doesn't seem to be consistently updated before a draw
+        # operation occurs under a new viewport matrix.  This messes up shader calculations,
+        # especially in screenshots (where only a single frame is captured under new
+        # rendering dimensions), which in turn wrecks the wireframe renderer.
+        #
+        # This function manually recreates the viewport matrix that Qt3D uses and keeps
+        # it updated in the athena_viewport parameter.
+        # Note that it's important to use physical pixel sizes in this calculation, so
+        # always multiply on-screen sizes by self.screen().devicePixelRatio()
+        viewport_matrix = QMatrix4x4()
+
+        # The only renderer to use the athena_viewport parameter is the wireframe renderer,
+        # which is always under framegraph.viewport2
+        viewport = self.framegraph.viewport2.normalizedRect()
+        if ( size == None ):
+            size = self._physicalPixelSize()
+
+        # c.f. Qt3DRender::SubmissionContext::setViewport()
+        viewport_matrix.viewport( viewport.x() * size.width(),
+                                  (1.0 - viewport.y() - viewport.height()) * size.height(),
+                                  viewport.width() * size.width(),
+                                  viewport.height() * size.height() );
+        self.setAthenaViewport( viewport_matrix )
+
     def resizeEvent( self, event ):
-        self.camControl.resize( event.size() )
+        size = event.size()
+        self.resizeViewport( self._physicalPixelSize(size) )
+        self.camControl.resize( size )
 
     def newDecoration(self, parent, bild_results, decoration_aabb = None):
 

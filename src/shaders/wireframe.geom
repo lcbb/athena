@@ -24,11 +24,12 @@ out WireframeVertex {
 } gs_out;
 
 uniform mat4 viewportMatrix;
+uniform mat4 athena_viewport;
 uniform mat3 modelViewNormal;
 
 vec2 transformToViewport( const in vec4 p )
 {
-    return vec2( viewportMatrix * ( p / p.w ) );
+    return vec2( athena_viewport * ( p / p.w ) );
 }
 
 float cross2( const in vec2 a, const in vec2 b )
@@ -40,6 +41,7 @@ void main()
 {
     gs_out.normal = normalize( modelViewNormal * normalize( cross( gs_in[1].origPosition - gs_in[0].origPosition,
                                                         gs_in[2].origPosition - gs_in[0].origPosition ) ));
+
 
     // Transform each vertex into viewport space
     vec2 p[3];
