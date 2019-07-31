@@ -1782,7 +1782,7 @@ Direction</string>
   </action>
   <action name="actionResetViewerOptions">
    <property name="text">
-    <string>Reset Viewer Options</string>
+    <string>Reset Display Options</string>
    </property>
   </action>
   <action name="actionShowInputSidebar">

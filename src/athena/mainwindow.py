@@ -247,6 +247,9 @@ class AthenaWindow(QMainWindow):
         self.actionShowInputSidebar.toggled.connect( self.inputSidebar.setVisible )
         self.actionShowOutputSidebar.toggled.connect( self.outputSidebar.setVisible )
 
+        self.actionShowInputSidebar.setShortcut( QKeySequence(Qt.CTRL + Qt.Key_BracketLeft) )
+        self.actionShowOutputSidebar.setShortcut( QKeySequence(Qt.CTRL + Qt.Key_BracketRight) )
+
         # Menu shortcuts cannot be set up in a cross-platform way within Qt Designer,
         # so do that here.
         self.actionOpen.setShortcut( QKeySequence.StandardKey.Open )
@@ -282,9 +285,9 @@ class AthenaWindow(QMainWindow):
         self.actionAbout.triggered.connect(self.showAbout)
         self.actionOpen.triggered.connect( self.selectAndAddFileToGeomList )
         self.actionAddScaffold.triggered.connect( self.selectAndAddScaffoldFile )
-        self.actionResetViewerOptions.triggered.connect( self.geomView.resetParameters )
-        self.actionResetViewerOptions.triggered.connect( self.geomView.resetCamera )
-        self.actionResetViewerOptions.triggered.connect( self.geomView.resetBackgroundColor )
+        self.actionResetViewerOptions.triggered.connect( self.resetDisplayOptions )
+        self.resetDisplayButton.clicked.connect( self.resetDisplayOptions )
+
 
         # action groups cannot be set up in Qt Designer, so do that here
         self.resultsActionGroup = QActionGroup(self)
@@ -375,6 +378,10 @@ class AthenaWindow(QMainWindow):
         self.geomView.resetBackgroundColor()
         self.geomView.resetParameters()
         self.geomView.resetCamera()
+
+    def resetDisplayOptions( self ):
+        self.geomView.resetBackgroundColor()
+        self.geomView.resetParameters()
 
     def selectProjection(self, widget):
         if widget == self.orthoCamButton:
