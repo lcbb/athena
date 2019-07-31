@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>828</width>
-    <height>744</height>
+    <width>800</width>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -766,11 +766,27 @@ Direction</string>
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
-             <property name="text">
-              <string>Reset View</string>
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
+             <property name="spacing">
+              <number>0</number>
              </property>
-            </widget>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="resetDisplayButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Reset Display</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <widget class="QGroupBox" name="showResultsBox">
@@ -784,8 +800,23 @@ Direction</string>
               <string>Display Models</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_5">
-              <property name="spacing">
-               <number>0</number>
+              <property name="leftMargin">
+               <number>3</number>
+              </property>
+              <property name="topMargin">
+               <number>5</number>
+              </property>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <property name="horizontalSpacing">
+               <number>2</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>1</number>
               </property>
               <item row="4" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -909,6 +940,21 @@ Direction</string>
               <string>Camera</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_2">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <property name="leftMargin">
+               <number>3</number>
+              </property>
+              <property name="topMargin">
+               <number>5</number>
+              </property>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <property name="leftMargin">
@@ -989,6 +1035,29 @@ Direction</string>
                   </property>
                   <property name="checkable">
                    <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_18">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="resetCameraButton">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Reset Camera</string>
                   </property>
                  </widget>
                 </item>
@@ -1178,15 +1247,15 @@ Direction</string>
                   <enum>QFrame::Plain</enum>
                  </property>
                  <property name="currentIndex">
-                  <number>1</number>
+                  <number>0</number>
                  </property>
                  <widget class="QWidget" name="page">
                   <property name="geometry">
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>28</height>
+                    <width>180</width>
+                    <height>147</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1261,8 +1330,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>28</height>
+                    <width>180</width>
+                    <height>147</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1375,8 +1444,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>98</width>
-                    <height>28</height>
+                    <width>180</width>
+                    <height>72</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1451,8 +1520,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>176</width>
-                    <height>117</height>
+                    <width>180</width>
+                    <height>147</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1587,7 +1656,7 @@ Direction</string>
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>40</height>
+               <height>5</height>
               </size>
              </property>
             </spacer>
@@ -1636,8 +1705,8 @@ Direction</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>828</width>
-     <height>21</height>
+     <width>800</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">

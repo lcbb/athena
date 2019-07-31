@@ -87,9 +87,9 @@ class CameraController:
         return vec3d.crossProduct( self.rightVector, self.camCenter - self.camLoc ).normalized()
 
     def _apply(self):
-        self.camera.setViewCenter( self.camCenter )
-        self.camera.setPosition( self.camLoc )
         self.camera.setUpVector( self._currentUp() )
+        self.camera.setPosition( self.camLoc )
+        self.camera.setViewCenter( self.camCenter )
 
     def _setProjection(self, ratio = None):
         # Defined in concrete subclasses
@@ -138,8 +138,7 @@ class OrthoCamController(CameraController):
     def __init__(self, window, camera, geometry, split):
         super().__init__(window, camera, geometry, split)
         self.margin = 1.4
-        if( self.mesh ):
-            self._setupCamera()
+        self.reset()
 
     def _panfactor(self):
         f = self.bounding_radius * self.margin / self.window.width()
@@ -152,6 +151,10 @@ class OrthoCamController(CameraController):
         y = x / ratio
         self.camera.lens().setOrthographicProjection( -x, x, -y, y, r, 3*r )
 
+    def reset ( self ):
+        self.margin = 1.4
+        super().reset()
+
     def zoom( self, dx, dy ):
         delta = pow ( 1.1, -dy/100 )
         self.margin *= delta
@@ -163,8 +166,7 @@ class PerspectiveCamController(CameraController):
     def __init__(self, window, camera, geometry, split):
         super().__init__(window, camera, geometry, split)
         self.fov = 50
-        if( self.mesh ):
-            self._setupCamera()
+        self.reset()
 
     def _panfactor(self):
         f = self.bounding_radius * ( self.fov / 15 ) / self.window.width() 
@@ -175,6 +177,10 @@ class PerspectiveCamController(CameraController):
         frustum_max = 3 * frustum_min
         ratio = ratio if ratio else self._windowAspectRatio()
         self.camera.lens().setPerspectiveProjection(self.fov, ratio, frustum_min, frustum_max)
+
+    def reset ( self ):
+        self.fov = 50
+        super().reset()
 
     def zoom( self, dx, dy ):
         delta = dy / 25
@@ -652,7 +658,10 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.camControl.resize()
 
     def resetCamera(self):
-        self.camControl.reset()
+        # FIXME camControl.reset() *should* work here, but something is amiss
+        # and this is the more reliable method right now.  Ugh.
+        camclass = self.camControl.__class__
+        self.camControl = camclass( self, self.camera(), self.meshEntity, self.camControl.split )
 
     def clearAllGeometry( self ):
         if( self.meshEntity ):

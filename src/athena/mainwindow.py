@@ -305,6 +305,8 @@ class AthenaWindow(QMainWindow):
         self.camMotionButtonGroup.addButton( self.zoomButton )
         self.camMotionButtonGroup.buttonClicked.connect( self.selectCameraTool )
 
+        self.resetCameraButton.clicked.connect( self.geomView.resetCamera )
+
         # On Windows, flat some QGroupBox's ... it looks better there,
         # but worse on OSX.
         if platform.system() == 'Windows':
