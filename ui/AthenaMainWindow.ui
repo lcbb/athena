@@ -115,6 +115,9 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -138,6 +141,12 @@
                <width>0</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="mouseTracking">
+              <bool>false</bool>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
              </property>
              <property name="title">
               <string>Wireframe Rendering</string>
@@ -218,6 +227,9 @@
                     <height>16777215</height>
                    </size>
                   </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="layoutDirection">
                    <enum>Qt::LeftToRight</enum>
                   </property>
@@ -263,6 +275,9 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="minimum">
                    <number>-10</number>
                   </property>
@@ -297,7 +312,7 @@
               <enum>QFrame::NoFrame</enum>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="controls_2D_container">
               <property name="sizePolicy">
@@ -341,6 +356,9 @@
                    <width>0</width>
                    <height>0</height>
                   </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="styleSheet">
                   <string notr="true"/>
@@ -412,6 +430,9 @@
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
                       <property name="text">
                        <string/>
                       </property>
@@ -463,6 +484,9 @@
                    <width>0</width>
                    <height>0</height>
                   </size>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="title">
                   <string>Surface Rendering</string>
@@ -543,6 +567,9 @@
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
                       <property name="text">
                        <string/>
                       </property>
@@ -598,6 +625,9 @@
                         <height>16777215</height>
                        </size>
                       </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
                       <property name="text">
                        <string/>
                       </property>
@@ -639,6 +669,9 @@
                         <width>60</width>
                         <height>16777215</height>
                        </size>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
                       </property>
                       <property name="maximum">
                        <number>255</number>
@@ -781,6 +814,9 @@ Direction</string>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
                <property name="text">
                 <string>Reset Display</string>
                </property>
@@ -838,6 +874,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="atomicMulticolorButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Multicolor</string>
                   </property>
@@ -851,6 +890,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="atomicBicolorButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Bicolor</string>
                   </property>
@@ -863,6 +905,9 @@ Direction</string>
               </item>
               <item row="1" column="0">
                <widget class="QCheckBox" name="displayRoutingBox">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Routing</string>
                 </property>
@@ -873,6 +918,9 @@ Direction</string>
               </item>
               <item row="0" column="0">
                <widget class="QCheckBox" name="displayCylinderBox">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Cylindrical</string>
                 </property>
@@ -883,6 +931,9 @@ Direction</string>
               </item>
               <item row="3" column="0">
                <widget class="QCheckBox" name="displayPAtomBox">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Pseudoatomic</string>
                 </property>
@@ -908,6 +959,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="routingMulticolorButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Multicolor</string>
                   </property>
@@ -921,6 +975,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="routingBicolorButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Bicolor</string>
                   </property>
@@ -965,6 +1022,9 @@ Direction</string>
                 </property>
                 <item>
                  <widget class="QToolButton" name="orthoCamButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Ortho</string>
                   </property>
@@ -981,6 +1041,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QToolButton" name="perspectiveCamButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Perspective</string>
                   </property>
@@ -998,6 +1061,9 @@ Direction</string>
                 </property>
                 <item>
                  <widget class="QToolButton" name="rotateButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Rotate</string>
                   </property>
@@ -1014,6 +1080,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QToolButton" name="panButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>&amp;Pan</string>
                   </property>
@@ -1027,6 +1096,9 @@ Direction</string>
                 </item>
                 <item>
                  <widget class="QToolButton" name="zoomButton">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="text">
                    <string>Zoom</string>
                   </property>
@@ -1055,6 +1127,9 @@ Direction</string>
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
                   </property>
                   <property name="text">
                    <string>Reset Camera</string>
@@ -1186,6 +1261,9 @@ Direction</string>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
                <property name="sizeAdjustPolicy">
                 <enum>QComboBox::AdjustToContents</enum>
                </property>
@@ -1254,8 +1332,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>147</height>
+                    <width>114</width>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1330,8 +1408,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>147</height>
+                    <width>122</width>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1437,7 +1515,7 @@ Direction</string>
                   </sizepolicy>
                  </property>
                  <property name="currentIndex">
-                  <number>1</number>
+                  <number>0</number>
                  </property>
                  <widget class="QWidget" name="page_4">
                   <property name="geometry">
@@ -1501,6 +1579,9 @@ Direction</string>
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
+                     </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
                      </property>
                      <property name="minimum">
                       <number>38</number>
@@ -1578,6 +1659,9 @@ Direction</string>
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
+                     </property>
                      <item>
                       <property name="text">
                        <string>6HB - Inner</string>
@@ -1605,6 +1689,9 @@ Direction</string>
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
+                     </property>
                      <property name="correctionMode">
                       <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
                      </property>
@@ -1628,6 +1715,9 @@ Direction</string>
                    </item>
                    <item>
                     <widget class="QComboBox" name="talosVertexDesignBox">
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
+                     </property>
                      <item>
                       <property name="text">
                        <string>Flat</string>
@@ -1663,6 +1753,9 @@ Direction</string>
            </item>
            <item>
             <widget class="QPushButton" name="toolRunButton">
+             <property name="focusPolicy">
+              <enum>Qt::NoFocus</enum>
+             </property>
              <property name="text">
               <string>Run Sequence Design</string>
              </property>
@@ -1676,6 +1769,9 @@ Direction</string>
              <layout class="QGridLayout" name="gridLayout_6">
               <item row="1" column="0">
                <widget class="QPushButton" name="saveButton">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Save</string>
                 </property>
@@ -1683,6 +1779,9 @@ Direction</string>
               </item>
               <item row="0" column="0">
                <widget class="QCheckBox" name="includePDBBox">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Include PDB</string>
                 </property>
@@ -1872,7 +1971,7 @@ Direction</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="atomicColorButtonGroup"/>
   <buttongroup name="routingColorButtonGroup"/>
+  <buttongroup name="atomicColorButtonGroup"/>
  </buttongroups>
 </ui>
