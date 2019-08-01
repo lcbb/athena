@@ -245,6 +245,8 @@ class AthenaWindow(QMainWindow):
         super().__init__(None)
         UiLoader.populateUI( self, ui_filepath )
 
+
+        self.setAttribute(Qt.WA_AcceptTouchEvents, False)
         self.toolresults = None
 
         self.statusMsg = QLabel("Ready.")

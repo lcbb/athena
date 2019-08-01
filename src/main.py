@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import sys
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QSurfaceFormat
 from PySide2.QtWidgets import QApplication
 from athena import athena_cleanup
@@ -68,6 +69,8 @@ f.setDepthBufferSize(24)
 f.setSamples(4)
 QSurfaceFormat.setDefaultFormat(f)
 app = QApplication(sys.argv)
+app.setAttribute(Qt.AA_SynthesizeMouseForUnhandledTouchEvents, False)
+app.setAttribute(Qt.AA_SynthesizeTouchForUnhandledMouseEvents, False)
 app.aboutToQuit.connect( athena_cleanup )
 window = AthenaWindow( )
 sys.exit(app.exec_())
