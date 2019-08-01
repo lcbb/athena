@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>709</height>
+    <width>894</width>
+    <height>614</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1291,7 +1291,7 @@ Direction</string>
               <enum>QFrame::Sunken</enum>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="tools_2D">
               <property name="sizePolicy">
@@ -1332,8 +1332,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>114</width>
-                    <height>28</height>
+                    <width>176</width>
+                    <height>69</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1408,8 +1408,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>122</width>
-                    <height>28</height>
+                    <width>176</width>
+                    <height>69</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1522,8 +1522,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>72</height>
+                    <width>176</width>
+                    <height>69</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1601,8 +1601,8 @@ Direction</string>
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>180</width>
-                    <height>147</height>
+                    <width>98</width>
+                    <height>28</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1804,8 +1804,8 @@ Direction</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>22</height>
+     <width>894</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAthena">
@@ -1971,7 +1971,7 @@ Direction</string>
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="routingColorButtonGroup"/>
   <buttongroup name="atomicColorButtonGroup"/>
+  <buttongroup name="routingColorButtonGroup"/>
  </buttongroups>
 </ui>
