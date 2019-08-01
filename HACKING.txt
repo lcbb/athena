@@ -1,0 +1,88 @@
+############# 
+## Setting up a development environment
+#############
+
+Athena requires a Python 3.7+ environment. Using virtualenv to manage
+dependencies is highly recommended.  After checking out the Athena 
+repository, run:
+
+( On OSX / Linux )
+
+> virtualenv env
+> source env/activate
+> pip install -r requirements.txt
+
+( On Windows )
+
+> virtualenv env
+> env\Scripts\activate
+> pip install -r requirements.txt
+
+Athena can then be invoked by calling `python src/main.py`
+
+#############
+## Preparing Athena releases
+#############
+
+
+Athena uses PyInstaller to prepare downloadable application bundles for Mac OS X
+and Windows.  Deployment convenience scripts are available for both platforms:
+
+( On OSX )
+> ./deploy_mac.sh
+
+( On Windows )
+> .\deploy_win.bat
+
+The result of running these scripts is a file dist/athena_{platform}_{version}.zip,
+which can be uploaded to Github or otherwise shared with collaborators.  This zip
+will include Athena's README and LICENSE files.
+
+The deploy_mac.sh script calls sign_mac.sh with the name of a signing key ("LCBB" by default).  
+To create your own self-signed key for this purpose, follow the instructions at
+https://github.com/pyinstaller/pyinstaller/wiki/Recipe-OSX-Code-Signing.  
+
+#############
+## Repository Layout
+#############
+
+
+The ui/ directory contains Qt ui files, which can be edited with Qt Creator or Qt Designer.
+Chief among these is AthenaMainWindow.ui.  Almost any GUI change will begin with editing
+this file.
+
+All other input code is under src/, as follows:
+
+* src/athena  -- Athena's GUI and graphics source code; see internal documentation within .py files
+* src/earcut  -- The earcut library, taken from https://github.com/joshuaskelly/earcut-python
+                 (If this had been conventionally available via pip it would be a pip dependency)
+* src/pdbgen  -- The PDBGen library
+* src/qml     -- QML files for Athena's graphical QMaterial classes
+* src/shaders -- GLSL shader code
+
+#############
+## Athena and Qt
+#############
+
+Athena uses PySide2 as an interface to the Qt5 libraries.
+
+In particular, it uses Qt3D for 3D graphics.  Qt3D's documentation
+is not great, so Athena has some idiosyncratic interactions with it.
+
+* QMaterials are defined in QML, but all other Qt3D structures (including scene
+  graphs and frame graphs) are set up manually in Python code.
+
+  * Even the QMaterials require support from Python to define paths to their
+    shader files, since QML can't reference files outside of a qrc file.
+
+#############
+## A note about dependencies
+#############
+
+Any Python dependencies introduced to Athena must be installable with pip on both Windows
+and Mac OS X without requiring any native library compilation.  This avoids dll hell
+on Windows, where we would have to be obsessive about ensuring compiled libraries
+are compatible with the Qt libraries in the PySide2 wheels.  It also ensure that users
+can build Athena without needing to set up native compilers.
+
+

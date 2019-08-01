@@ -64,24 +64,19 @@ other input PLY files (i.e., with any non-zero vertex Z-coordinate) will be
 treated as 3D by Athena.
 
 Please also note that all vertices listed within any input PLY file must be
-used in at least one polygon within the input, target 2D or 3D geometry. While
-Athena can display a PLY file that contains such vertices, these files cannot
-be processed by PERDIX, METIS, DAEDALUS, or TALOS to generate sequence designs,
-and will therefore be rejected by these sequence design tools.
+used in at least one polygon within the input. While Athena can display a PLY
+file that contains unused vertices, these files cannot be processed by PERDIX,
+METIS, DAEDALUS, or TALOS to generate sequence designs, and will therefore be
+rejected by these sequence design tools.
 
-############################################
-### Setting up a Development Environment ###
-############################################
+######################
+### For Developers ###
+######################
 
 Athena is provided as open source so that other developers can further build on
-its capabilities and tools. In order to run Athena from a working directory,
-please use the following commands:
+its capabilities and tools. Please refer to HACKING.txt for information on
+building and modifying Athena.
 
-> virtualenv env
-> source env/activate
-> pip install -r requirements.txt
-> python src/athena.py
-> ./build_win.bat <any additional arg for pyinstaller, e.g. --onefile>
 
 
 ########################
@@ -94,6 +89,18 @@ Mark Bathe is additionally grateful to both the National Science Foundation and
 the Office of Naval Research for providing the necessary funding to develop the
 sequence design algorithms that enable Athena, namely PERDIX, METIS, DAEDALUS,
 and TALOS.
+
+Athena includes an option to generate and save PDB files from the results of
+its sequence tools.  In output PDB files, atomic coordinates for nucleic acids
+are based on the standard reference frame designed for average A- and B-form
+DNA in Olsen et al. [7]
+
+[7] WK Olsen, M Bansal, SK Burley, RE Dickerson, M Gerstein, SC Harvey, U Heinemann,
+X-J Lu, S Neidle, Z Shakked, H Sklenar, M Suzuki, C-S Tung, E Westhof,
+C Wolberger, HM Berman. A standard reference frame for the description of 
+nucleic acid base-pair geometry. Journal of Molecular Biology 313, 229-237 
+(2001).
+
 
 ##########################
 ### End of README File ###
