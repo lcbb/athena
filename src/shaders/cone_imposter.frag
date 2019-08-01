@@ -22,18 +22,6 @@ out vec4 fragColor;
 uniform mat4 projectionMatrix;
 uniform float proj_orthographic;
 
-    //fragColor = fs_in.color;
-/*
- * Get the lowest bit from 'bits' and shift 'bits' to the right.
- * Equivalent to (if 'bits' would be int):
- * bit = bits & 0x1; bits >>= 1; return bit;
- */
-bool get_bit_and_shift(inout float bits) {
-  float bit = mod(bits, 2.0);
-  bits = (bits - bit) / 2.0;
-  return bit > 0.5;
-}
-
 void main(void)
 {
     vec3 ray_target = fs_in.surface_point;

@@ -75,6 +75,8 @@ All other input code is under src/, as follows:
 * src/pdbgen  -- The PDBGen library
 * src/qml     -- QML files for Athena's graphical QMaterial classes
 * src/shaders -- GLSL shader code
+                 (There's a lot of material here, because Athena draws spheres, cylinders,
+                 and cones using ray-traced imposter shaders.)
 
 #############
 ## Athena and Qt
