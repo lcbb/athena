@@ -14,13 +14,15 @@ from plyfile import PlyData, PlyElement
 
 from athena import ATHENA_SRC_DIR, plymesh, geom, decorations, screenshot
 
-ATHENA_GEOM_UP = geom.ATHENA_GEOM_UP
-
 class CameraController:
 
     @classmethod
     def createFrom( cls, cc ):
-        '''Copy constructor'''
+        '''Copy constructor
+
+        Used to switch between CameraController flavors (ortho or perspective) while
+        retaining the camera location and orientation.
+        '''
         ret = cls( cc.window, cc.camera, cc.mesh, cc.split )
         if( cc.mesh ):
             ret.camCenter = cc.camCenter
@@ -461,7 +463,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
                      'flat_color': QColor( 215, 72, 215),
                      'cool_color': QColor( 0, 0, 127 ),
                      'warm_color': QColor( 255, 0, 255),
-                     'line.width': 1.0,
+                     'line.width': 2.5,
                      'line.color': QColor( 0, 0, 255),
                      'light.position': vec3d( 0, 0, 100),
                      'athena_viewport': QMatrix4x4() # see function resizeViewport() for explanation
@@ -604,7 +606,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
     backgroundColorChanged = Signal( QColor )
 
-    # Override the automatically generated function to reset the viewport parameter,
+    # Override the automatically generated function to reset the viewport matrix parameter,
     # because it should never be reset
     def resetAthenaViewport(self): pass
 

@@ -8,6 +8,6 @@ python ./fix_app_qt_folder_names.py dist/Athena.app
 echo "Signing Athena.app with certificate" ${1}
 codesign -vvvv --deep -s "${1}" dist/Athena.app
 echo "Assessing signature of Athena.app"
-# Workaround for code signing issues: deploy_mac.sh won't build a zip unless this script succeeds,
-# so force a successful return here.
+# Test that signing went okay.
+# deploy_mac.sh won't build a zip unless this script succeeds.
 spctl --assess -vv dist/Athena.app

@@ -18,6 +18,8 @@ import PySide2.QtXml #Temporary pyinstaller workaround
 from athena import bildparser, viewer, screenshot, geom, ATHENA_DIR, ATHENA_OUTPUT_DIR, ATHENA_SRC_DIR, logwindow, __version__
 from pdbgen import pdbgen
 
+# Support widgets for AthenaWindow
+
 class SequenceToolBox( QToolBox ):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
@@ -186,7 +188,10 @@ def parseLCBBToolOutput( output ):
             line27b = next(iter_out)
             result['edge_length'] = float( line27a.split(':')[1].strip() )
             result['scale_factor'] = float( line27b.split(':')[1].strip() )
-            break
+        if line.strip().startswith('+=== error'):
+            errline = next(iter_out).strip().strip('|').strip()
+            print("found error", errline)
+            result['error'] = errline
     return result
 
 
@@ -224,10 +229,13 @@ def runLCBBTool( toolname, p2_input_file, p1_output_dir=Path('athena_tmp_output'
 
     print('Calling {} as follows'.format(tool), tool_call_strs)
     result = subprocess.run(tool_call_strs, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+    result.toolinfo= parseLCBBToolOutput( result.stdout )
+    if 'error' in result.toolinfo:
+        # Tool indicated error; override return code
+        result.returncode = 257
     if result.returncode == 0:
         result.bildfiles = list( p1_output_dir.glob('*.bild') )
         result.cndofile = next( p1_output_dir.glob('*.cndo') )
-        result.toolinfo= parseLCBBToolOutput( result.stdout )
         result.output_dir = p1_output_dir
     return result
 
@@ -507,6 +515,7 @@ class AthenaWindow(QMainWindow):
                 self.enable2DControls()
         self.toggleOutputControls(False)
         self.toolresults = None
+        self.updateStatus('Ready.', log=False)
 
     def newOutputs( self, toolresults ):
         if toolresults is None or toolresults.bildfiles is None: return
@@ -550,8 +559,8 @@ class AthenaWindow(QMainWindow):
         else:
             print("ERROR: No current results to save")
 
-    def updateStatus( self, msg ):
-        self.log( msg )
+    def updateStatus( self, msg, log=True ):
+        if log: self.log( msg )
         self.statusMsg.setText( msg )
 
     def _toolFilenames( self, toolname ):
@@ -573,6 +582,15 @@ class AthenaWindow(QMainWindow):
 
         self.toolMap[ toolkey ](self)
 
+    def _humanReadableReturnValue( self, process ):
+        if process.returncode == 0:
+            human_retval = 'success'
+        else:
+            msg = process.toolinfo.get('error', process.returncode)
+            human_retval = 'failure ({})'.format(msg)
+        return human_retval
+
+
     def runPERDIX( self ):
         self.updateStatus('Running PERDIX...')
         infile_path, outfile_dir_path = self._toolFilenames( 'PERDIX' )
@@ -581,9 +599,8 @@ class AthenaWindow(QMainWindow):
                                p2_input_file=infile_path,
                                p3_scaffold=self.scaffoldBox.currentData(),
                                p7_edge_length=self.perdixEdgeLengthSpinner.value())
-        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
-        self.updateStatus('PERDIX returned {}.'.format(human_retval))
+        self.updateStatus('PERDIX returned {}.'.format(self._humanReadableReturnValue(process)))
         self.newOutputs(process)
 
     def runTALOS( self ):
@@ -596,9 +613,8 @@ class AthenaWindow(QMainWindow):
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
                               p7_edge_length=self.talosEdgeLengthSpinner.value())
-        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
-        self.updateStatus('TALOS returned {}.'.format(human_retval))
+        self.updateStatus('TALOS returned {}.'.format(self._humanReadableReturnValue(process)))
         self.newOutputs(process)
 
     def runDAEDALUS2( self ):
@@ -610,9 +626,8 @@ class AthenaWindow(QMainWindow):
                               p3_scaffold=self.scaffoldBox.currentData(),
                               p4_edge_sections=1, p5_vertex_design=2,
                               p7_edge_length=self.daedalusEdgeLengthSpinner.value())
-        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
-        self.updateStatus('DAEDALUS returned {}.'.format(human_retval))
+        self.updateStatus('DAEDALUS returned {}.'.format(self._humanReadableReturnValue(process)))
         self.newOutputs(process)
 
 
@@ -625,9 +640,8 @@ class AthenaWindow(QMainWindow):
                                p3_scaffold=self.scaffoldBox.currentData(),
                                p4_edge_sections=3, p5_vertex_design=2,
                                p7_edge_length=self.metisEdgeLengthSpinner.value())
-        human_retval = 'success' if process.returncode == 0 else 'failure ({})'.format(process.returncode)
         self.log( process.stdout )
-        self.updateStatus('METIS returned {}.'.format(human_retval))
+        self.updateStatus('METIS returned {}.'.format(self._humanReadableReturnValue(process)))
         self.newOutputs(process)
 
     toolMap = { (0, 0): runPERDIX,

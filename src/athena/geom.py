@@ -14,7 +14,8 @@ from PySide2.QtQml import QQmlEngine, QQmlComponent
 
 from athena import plymesh
 
-ATHENA_GEOM_UP = vec3d(0, 0, 1)
+# Geometry utilities
+
 
 # The base types enumeration
 basetypes = Qt3DRender.QAttribute.VertexBaseType

@@ -7,6 +7,9 @@ from PySide2.QtGui import QColor, QVector3D as vec3d
 from PySide2.Qt3DCore import Qt3DCore
 from PySide2.Qt3DExtras import Qt3DExtras
 
+# A parser module for the subset of the bild file format used by LCBB
+# sequence design tools
+
 Sphere = namedtuple( 'Sphere', 'color, x, y, z, r' )
 Cylinder = namedtuple ( 'Cylinder', 'color, x1, y1, z1, x2, y2, z2, r' )
 # There are no cones in the input file, but we include a cone type for parity with cylinders

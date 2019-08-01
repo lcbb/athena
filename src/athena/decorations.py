@@ -8,6 +8,8 @@ from PySide2.Qt3DRender import Qt3DRender
 from athena.bildparser import Sphere, Cylinder, Arrow
 from athena import geom
 
+# QEntities for ray-traced output objects (spheres, cylinders, and cones),
+# and for any other small decorations drawn by Qt3D.
 
 class SphereDecorations(Qt3DCore.QEntity):
 

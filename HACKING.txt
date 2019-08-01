@@ -6,7 +6,7 @@ Athena requires a Python 3.7+ environment. Using virtualenv to manage
 dependencies is highly recommended.  After checking out the Athena 
 repository, run:
 
-( On OSX / Linux )
+( On OSX )
 
 > virtualenv env
 > source env/activate
@@ -18,7 +18,7 @@ repository, run:
 > env\Scripts\activate
 > pip install -r requirements.txt
 
-Athena can then be invoked by calling `python src/main.py`
+Athena can then be invoked by calling `python src/main.py` from the athena directory.
 
 #############
 ## Preparing Athena releases
@@ -41,6 +41,21 @@ will include Athena's README and LICENSE files.
 The deploy_mac.sh script calls sign_mac.sh with the name of a signing key ("LCBB" by default).  
 To create your own self-signed key for this purpose, follow the instructions at
 https://github.com/pyinstaller/pyinstaller/wiki/Recipe-OSX-Code-Signing.  
+Without at least a self-signed binary, Athena.app has startup problems if it is
+downloaded from the web, due to Apple's Gatekeeper features.
+
+#############
+## Platform Support
+#############
+
+As of this writing, the LCBB sequence tools are only available for Windows and Mac OSX.
+There's no reason Athena wouldn't also run fine on Windows, but it wouldn't be
+able to call sequence tools unless they were first compiled on that target.
+
+On OSX, PyInstaller creates binaries that are forward compatible with new versions
+of the OS, but not backward compatible.  So it is necessary to build Athena on the
+oldest version of OSX that we want to support for our users.  Athena's development
+through version 0.4.2 was done on OSX 10.12 Sierra.
 
 #############
 ## Repository Layout
@@ -49,7 +64,8 @@ https://github.com/pyinstaller/pyinstaller/wiki/Recipe-OSX-Code-Signing.
 
 The ui/ directory contains Qt ui files, which can be edited with Qt Creator or Qt Designer.
 Chief among these is AthenaMainWindow.ui.  Almost any GUI change will begin with editing
-this file.
+this file.  I have adhered to a convention of not setting up signals and slots in the
+ui file; all signal connections are set up manually in src/mainwindow.py
 
 All other input code is under src/, as follows:
 
@@ -64,25 +80,33 @@ All other input code is under src/, as follows:
 ## Athena and Qt
 #############
 
-Athena uses PySide2 as an interface to the Qt5 libraries.
+Athena uses PySide2 as an interface to the Qt5 API.
 
-In particular, it uses Qt3D for 3D graphics.  Qt3D's documentation
-is not great, so Athena has some idiosyncratic interactions with it.
+Within that API, it uses Qt3D for 3D graphics.  Qt3D's documentation
+is not great, so Athena has some idiosyncratic interactions with it:
 
 * QMaterials are defined in QML, but all other Qt3D structures (including scene
   graphs and frame graphs) are set up manually in Python code.
 
-  * Even the QMaterials require support from Python to define paths to their
-    shader files, since QML can't reference files outside of a qrc file.
+* Even those QMaterial subclassess require support from Python to define paths to their
+  shader files, since QML can't reference files outside of a qrc file.
+
+* I wanted to avoid using Qt3DWindow and implement a customized 3D widget, especially
+  for the purposes of controlling the format of the OpenGL depth buffer (see Athena
+  issue #6).  This was impossible due to https://bugreports.qt.io/browse/PYSIDE-753
+  but may become possible in the future if that bug is fixed or Athena migrates from
+  PySide2 to PyQt5.
+
+
 
 #############
 ## A note about dependencies
 #############
 
 Any Python dependencies introduced to Athena must be installable with pip on both Windows
-and Mac OS X without requiring any native library compilation.  This avoids dll hell
-on Windows, where we would have to be obsessive about ensuring compiled libraries
-are compatible with the Qt libraries in the PySide2 wheels.  It also ensure that users
-can build Athena without needing to set up native compilers.
+and Mac OS X without requiring any native library compilation.  This avoids dll
+hell on Windows, where we would have to ensure the compiled libraries are
+compatible with the Qt libraries in the PySide2 wheels.  It also ensures that
+users can build Athena without needing to set up native compilers.
 
 
