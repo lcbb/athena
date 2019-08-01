@@ -39,7 +39,11 @@ def sharedEdges(poly, vtx):
         elif vtx == b:
             yield a
 
-class PlyMesh2(Qt3DCore.QEntity):
+class PlyMesh(Qt3DCore.QEntity):
+    '''
+    QEntity for the 2D or 3D, wireframe-girt polygonal meshes
+    that are the main display object of Athena.
+    '''
     def __init__(self, parent, plydata):
         super().__init__(parent)
 
@@ -66,12 +70,26 @@ class PlyMesh2(Qt3DCore.QEntity):
             vertices.append( np.hstack( [v , a , b] ) )
             return len(vertices) - 1
 
+        # Each vertex in the mesh has nine coordinates:
+        # The xyz coordinates of the vertex itself, and
+        # the xyz coordinates of the two points adjacent to that
+        # vertex in the wireframe mesh.  (The vertex shader refers to these
+        # as wing1Vtx and wing2Vtx).  For a triangular face, a vertex's
+        # two wing vertices are simply the other two vertices of the triangle.
+        # add_simple_tri covers this case
+
         def add_simple_tri( *args ):
             A, B, C = vertex( args )
             i = add_vtx(A, B, C)
             j = add_vtx(B, A, C)
             k = add_vtx(C, A, B)
             triangles.append( (i, j, k) )
+
+        # For non-triangular faces, we generate triangles (in the loop below),
+        # and store each vertex with its adjacent edge vertices as its wing value.
+        # This assumes that all triangle vertices fall on the boundary of a polygon
+        # face, which seems to be a valid assumption for triangulations produced
+        # by the earcut library.
 
         def add_complex_tri( a, b, c, poly ):
             def add_vertex_with_edges( x ):

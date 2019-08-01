@@ -14,6 +14,9 @@ from plyfile import PlyData, PlyElement
 
 from athena import ATHENA_SRC_DIR, plymesh, geom, decorations, screenshot
 
+# This file defines the all-important AthenaViewer class, which implements
+# the graphical view.  Several support classes are defined first.
+
 class CameraController:
 
     @classmethod
@@ -199,6 +202,11 @@ class PerspectiveCamController(CameraController):
 
 
 class OffscreenRenderTarget( Qt3DRender.QRenderTarget ):
+    '''
+    This class supports taking screenshots in offscreen FBOs.
+    It was adapted from https://github.com/florianblume/Qt3D-OffscreenRenderer
+    '''
+
     def __init__(self, parent, size = QSize(500,500) ):
         super().__init__(parent)
         self.size = size
@@ -455,6 +463,8 @@ class _metaParameters(type(Qt3DExtras.Qt3DWindow)):
 
 class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
 
+    # Define parameters and their defaults - consumed by _metaParameters metaclass
+    # and used to auto-generate various attributes and methods for AthenaViewer
     _qparameters = { 'alpha': 1.0,
                      'face_enable': 1.0,
                      'wire_enable': 1.0,
@@ -548,7 +558,6 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.wireEnableChanged.connect( self.handleWireframeRenderChange )
 
         self.sphere_material = self._imposterMaterial('sphere')
-        #self.cylinder_material = Qt3DExtras.QPerVertexColorMaterial(self.rootEntity)
         self.cylinder_material = self._imposterMaterial('cylinder')
         self.cone_material = self._imposterMaterial('cone')
 
@@ -698,7 +707,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         self.meshFilepath = filepath
         self.plydata = PlyData.read(filepath)
         self.clearAllGeometry()
-        self.meshEntity = plymesh.PlyMesh2(self.meshEntityParent, self.plydata)
+        self.meshEntity = plymesh.PlyMesh(self.meshEntityParent, self.plydata)
         mesh_3d = self.meshEntity.dimensions == 3
         self.camControl.newMesh(self.meshEntity)
         if( mesh_3d ):
