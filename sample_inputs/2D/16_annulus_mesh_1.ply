@@ -4,7 +4,7 @@ element vertex 20
 property float32 x
 property float32 y
 property float32 z
-element face 11
+element face 10
 property list uint8 int32 vertex_indices
 end_header
         54.5946        -0.0000         0.0000
@@ -37,4 +37,3 @@ end_header
 4 15 17 16 14
 4 17 19 18 16
 4 19 3 0 18
-10 19 17 15 13 11 9 7 5 2 3
