@@ -57,7 +57,7 @@
         </property>
         <item>
          <widget class="QWidget" name="inputSidebar" native="true">
-          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0,0,0">
+          <layout class="QVBoxLayout" name="inputSidebarLayout" stretch="0,0,0,0,0,0">
            <property name="spacing">
             <number>10</number>
            </property>
@@ -799,32 +799,6 @@ Direction</string>
             </spacer>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_17">
-             <property name="spacing">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QPushButton" name="resetDisplayButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
-               </property>
-               <property name="text">
-                <string>Reset Display</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
             <widget class="QGroupBox" name="showResultsBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -1112,32 +1086,6 @@ Direction</string>
                 </item>
                </layout>
               </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_18">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <widget class="QPushButton" name="resetCameraButton">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="focusPolicy">
-                   <enum>Qt::NoFocus</enum>
-                  </property>
-                  <property name="text">
-                   <string>Reset Camera</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
              </layout>
             </widget>
            </item>
@@ -1409,7 +1357,7 @@ Direction</string>
                     <x>0</x>
                     <y>0</y>
                     <width>176</width>
-                    <height>117</height>
+                    <height>69</height>
                    </rect>
                   </property>
                   <property name="sizePolicy">
@@ -1830,6 +1778,7 @@ Direction</string>
      <bool>false</bool>
     </property>
     <addaction name="actionResetViewerOptions"/>
+    <addaction name="actionResetCamera"/>
     <addaction name="separator"/>
     <addaction name="actionOverlayResults"/>
     <addaction name="actionSeparateResults"/>
@@ -1941,6 +1890,11 @@ Direction</string>
   <action name="actionNew">
    <property name="text">
     <string>New Session</string>
+   </property>
+  </action>
+  <action name="actionResetCamera">
+   <property name="text">
+    <string>Reset Camera</string>
    </property>
   </action>
  </widget>
