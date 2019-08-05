@@ -268,9 +268,7 @@ class AthenaWindow(QMainWindow):
         self.actionOverlayResults.setShortcut( QKeySequence (Qt.CTRL + Qt.Key_1 ) )
         self.actionSeparateResults.setShortcut( QKeySequence(Qt.CTRL + Qt.Key_2 ) )
 
-        self.scaffoldBox.setItemText(0,"Default")
-        self.scaffoldBox.setItemData(0,"m13")
-        self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
+        self.resetScaffoldBox()
 
         self.geomView = viewer.AthenaViewer()
         self.viewerWidget_dummy.deleteLater()
@@ -382,10 +380,17 @@ class AthenaWindow(QMainWindow):
         self.show()
         self.log("Athena version {}".format(__version__))
 
+    def resetScaffoldBox( self ):
+        self.scaffoldBox.clear()
+        self.scaffoldBox.addItem( "Default", "m13" )
+        self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
+        self.scaffoldBox.setCurrentIndex(0)
 
     def newSession( self ):
+        self.resetScaffoldBox()
         self.newMesh(None)
         self.geometryList.clearSelection()
+        self.geometryList.topLevelItem(2).takeChildren()
         for idx in range(3):
             self.geometryList.collapseItem ( self.geometryList.topLevelItem(idx) )
         self.geomView.clearAllGeometry()
