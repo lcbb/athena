@@ -26,6 +26,20 @@ by Darsh Ranjan, licensed under the GNU GPL version 3.
 Binary distributions of Athena contain the NumPy package,
 Copyright (C) 2005-2019, NumPy Developers. [NumPy License]
 
+Binary distributions of Athena contain the Qt5 and PySide2 libraries.
+The Qt Toolkit is Copyright (C) 2018 The Qt Company Ltd. and other contributors.
+Licensed under the GNU Lesser General Public License (LGPL) version 3.
+
+Athena includes an option to generate and save PDB files from the results of
+its sequence tools.  In output PDB files, atomic coordinates for nucleic acids
+are based on the standard reference frame designed for average A- and B-form
+DNA in: WK Olsen, M Bansal, SK Burley, RE Dickerson, M Gerstein, SC Harvey, U
+Heinemann, X-J Lu, S Neidle, Z Shakked, H Sklenar, M Suzuki, C-S Tung, E
+Westhof, C Wolberger, HM Berman. A standard reference frame for the description
+of nucleic acid base-pair geometry. Journal of Molecular Biology 313, 229-237
+(2001).
+
+
 ===============================================================================
 
 ISC License (for earcut code)

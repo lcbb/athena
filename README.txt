@@ -91,17 +91,6 @@ the Office of Naval Research for providing the necessary funding to develop the
 sequence design algorithms that enable Athena, namely PERDIX, METIS, DAEDALUS,
 and TALOS.
 
-Athena includes an option to generate and save PDB files from the results of
-its sequence tools.  In output PDB files, atomic coordinates for nucleic acids
-are based on the standard reference frame designed for average A- and B-form
-DNA in Olsen et al. [7]
-
-[7] WK Olsen, M Bansal, SK Burley, RE Dickerson, M Gerstein, SC Harvey, U Heinemann,
-X-J Lu, S Neidle, Z Shakked, H Sklenar, M Suzuki, C-S Tung, E Westhof,
-C Wolberger, HM Berman. A standard reference frame for the description of 
-nucleic acid base-pair geometry. Journal of Molecular Biology 313, 229-237 
-(2001).
-
 
 ##########################
 ### End of README File ###
