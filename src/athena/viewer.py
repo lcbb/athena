@@ -30,7 +30,6 @@ class CameraController:
         if( cc.mesh ):
             ret.camCenter = cc.camCenter
             ret.camLoc = cc.camLoc
-            ret.upVector = cc.upVector
             ret.rightVector = cc.rightVector
             ret._apply()
             ret._setProjection()
@@ -77,17 +76,14 @@ class CameraController:
         camDistance = 2 * self.bounding_radius
         if( self.mesh.dimensions == 2 ):
             self.rightVector = vec3d(1, 0, 0)
-            self.upVector = vec3d(0, 1, 0)
             self.camLoc = self.camCenter + vec3d( 0, 0, camDistance )
         else:
             self.rightVector = vec3d( 0, 1, 0 )
-            self.upVector = vec3d( 0, 0, 1 )
             self.camLoc = self.camCenter + vec3d( camDistance, 0, 0 )
         self._apply()
         self._setProjection()
 
-    # Cross of right and forward vector -- the "true up" of the camera.
-    # self.upVector is immutable and used as the reference direction for rotations.
+    # Cross of right and forward vector
     def _currentUp(self):
         return vec3d.crossProduct( self.rightVector, self.camCenter - self.camLoc ).normalized()
 
@@ -115,7 +111,7 @@ class CameraController:
         self._apply()
 
     def rotate( self, dx, dy ):
-        up = self.upVector
+        up = self._currentUp()
         right = self.rightVector
         ctr = self.aabb.center
 
