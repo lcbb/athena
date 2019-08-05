@@ -268,6 +268,7 @@ class AthenaWindow(QMainWindow):
         self.actionOverlayResults.setShortcut( QKeySequence (Qt.CTRL + Qt.Key_1 ) )
         self.actionSeparateResults.setShortcut( QKeySequence(Qt.CTRL + Qt.Key_2 ) )
 
+        self.scaffoldBox.setItemText(0,"Default")
         self.scaffoldBox.setItemData(0,"m13")
         self.scaffoldBox.view().setTextElideMode(Qt.ElideRight)
 
@@ -611,7 +612,7 @@ class AthenaWindow(QMainWindow):
         process = runLCBBTool('TALOS',
                               p1_output_dir=outfile_dir_path,
                               p2_input_file=infile_path,
-                               p3_scaffold=self.scaffoldBox.currentData(),
+                              p3_scaffold=self.scaffoldBox.currentData(),
                               p4_edge_sections=self.talosEdgeSectionBox.currentIndex()+2,
                               p5_vertex_design=self.talosVertexDesignBox.currentIndex()+1,
                               p7_edge_length=self.talosEdgeLengthSpinner.value())
