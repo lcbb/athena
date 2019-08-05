@@ -1217,7 +1217,7 @@ Direction</string>
                </property>
                <item>
                 <property name="text">
-                 <string>m13</string>
+                 <string>Default</string>
                 </property>
                </item>
               </widget>
