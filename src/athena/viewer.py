@@ -151,7 +151,7 @@ class OrthoCamController(CameraController):
     def _setProjection(self, ratio = None):
         r = self.bounding_radius
         ratio = ratio if ratio else self._windowAspectRatio()
-        x = self.aabb.dimensions()[0] / 2 * self.margin
+        x = self.bounding_radius / 2 * self.margin
         y = x / ratio
         self.camera.lens().setOrthographicProjection( -x, x, -y, y, r, 3*r )
 
