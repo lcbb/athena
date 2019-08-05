@@ -32,7 +32,8 @@ M. Autonomously designed free-form 2D DNA origami. Science Advances, 5:
 eaav0655 (2019)
 
 Citing METIS:
-[3] Jun, H. et al., in preparation (2019)
+[3] Jun, H., Wang, X., Bricker, W., Bathe, M., Automated Sequence Design of
+2D Wireframe DNA Origami with Honeycomb Edges, in preparation (2019)
 
 Citing DAEDALUS:
 [4] Veneziano, R., Ratanalert, S., Zhang, K., Zhang, F., Yan, H., Chiu, W.,
