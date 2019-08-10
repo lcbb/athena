@@ -1,4 +1,4 @@
-PySide2==5.12.3
+PySide2==5.13.0
 setuptools_scm
 plyfile
 numpy>=1.16.2
