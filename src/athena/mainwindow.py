@@ -106,21 +106,28 @@ class FileSelectionTreeWidget( QTreeWidget ):
 class ColorButton(QPushButton):
     def __init__( self, *args, **kw ):
         super().__init__(*args, **kw)
+        self.color = QColor()
         self.clicked.connect( self.chooseColor )
         self.colorChosen.connect( self.setColor )
 
     colorChosen = Signal(QColor)
 
     def chooseColor( self ):
-        color = QColorDialog.getColor()
-        self.colorChosen.emit(color)
+        color = QColorDialog.getColor(self.color)
+        if( color.isValid() ):
+            self.colorChosen.emit(color)
 
     def setColor( self, color ):
+        self.color = color
         pixels = QPixmap(35, 12)
         pixels.fill(color)
         icon = QIcon(pixels)
         self.setIcon( icon )
         self.setIconSize(pixels.rect().size())
+
+    #def event( self, event ):
+        #print(event.type())
+        #return super().event(event)
 
 
 class UiLoader(QUiLoader):
@@ -180,6 +187,7 @@ def parseLCBBToolOutput( output ):
     # 2.7. Find the scale factor to adjust polyhedra size
     #   * The minumum edge length     : 42
     #   * Scale factor to adjust size : .196
+    # Also hunt for any show-stopping error message
     result = dict()
     iter_out = iter(output.split('\n'))
     for line in iter_out:
@@ -246,7 +254,8 @@ class AthenaWindow(QMainWindow):
         UiLoader.populateUI( self, ui_filepath )
 
 
-        self.setAttribute(Qt.WA_AcceptTouchEvents, False)
+        self.centralWidget().setAttribute(Qt.WA_AcceptTouchEvents, False)
+        #self.centralWidget().setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.toolresults = None
 
         self.statusMsg = QLabel("Ready.")
@@ -273,11 +282,12 @@ class AthenaWindow(QMainWindow):
         self.geomView = viewer.AthenaViewer()
         self.viewerWidget_dummy.deleteLater()
         del self.viewerWidget_dummy
-        self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self )
+        self.geomViewWidget = QWidget.createWindowContainer( self.geomView, self, Qt.SubWindow )
         self.upperLayout.insertWidget( 1, self.geomViewWidget )
         sizePolicy = QSizePolicy( QSizePolicy.Expanding, QSizePolicy.Expanding )
         sizePolicy.setHorizontalStretch(1)
         self.geomViewWidget.setSizePolicy(sizePolicy) 
+        self.geomViewWidget.setFocusPolicy( Qt.NoFocus )
 
         self.screenshotDialog = screenshot.ScreenshotDialog(self, self.geomView)
         self.actionScreenshot.triggered.connect( self.screenshotDialog.show )
@@ -664,3 +674,11 @@ class AthenaWindow(QMainWindow):
 
     def notifyScreenshotDone( self, path ):
         self.updateStatus('Saved screenshot to {}'.format(path))
+
+    #def event( self, event ):
+        #print("Window event", event.__class__, event.type())
+        #if hasattr(event, 'source'): print(event.source())
+        #if hasattr(event, 'queries'): print(int(event.queries()))
+        #return super().event(event)
+
+

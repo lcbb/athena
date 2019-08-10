@@ -2,7 +2,7 @@
 
 import sys
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QSurfaceFormat
+from PySide2.QtGui import QSurfaceFormat, QPaintEvent, QMouseEvent, QWindow
 from PySide2.QtWidgets import QApplication
 from athena import athena_cleanup
 from athena.mainwindow import AthenaWindow
@@ -68,6 +68,19 @@ f = QSurfaceFormat()
 f.setDepthBufferSize(24)
 f.setSamples(4)
 QSurfaceFormat.setDefaultFormat(f)
+
+class DebugApp(QApplication):
+
+    def notify( self, x, y ):
+        if( x.__class__ == QWindow and y.__class__ == QMouseEvent ):
+            x.event(y)
+            return True
+        if( y.__class__ == QMouseEvent ):
+            print('App:', x, y)
+            print(y.isAccepted(), int(y.buttons()), int(y.source()))
+        return super().notify(x,y)
+
+#app = DebugApp(sys.argv)
 app = QApplication(sys.argv)
 app.setAttribute(Qt.AA_SynthesizeMouseForUnhandledTouchEvents, False)
 app.setAttribute(Qt.AA_SynthesizeTouchForUnhandledMouseEvents, False)
