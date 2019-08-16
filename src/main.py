@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
 import sys
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QSurfaceFormat, QPaintEvent, QMouseEvent, QWindow
+from PySide2.QtCore import Qt, QObject, QEvent
+from PySide2.QtGui import QSurfaceFormat, QPaintEvent, QMouseEvent, QWindow, QCursor
 from PySide2.QtWidgets import QApplication
 from athena import athena_cleanup
 from athena.mainwindow import AthenaWindow
@@ -80,10 +80,39 @@ class DebugApp(QApplication):
             print(y.isAccepted(), int(y.buttons()), int(y.source()))
         return super().notify(x,y)
 
+class MacMouseReleaseFilter(QObject):
+    '''
+    Ugly workaround for an elusive bug in Mac OSX, wherein mouse release
+    events generated from touchpad taps are not properly dispatched.
+    This occurs only on fairly recent mac laptops with a force touch
+    trackpad and "Tap To Click" enabled.
+
+    Since the lost mouse release events do get delivered to the containing QWindow
+    object, this filter is installed on that object and manually dispatches
+    the events down to the widget under the mouse cursor.
+
+    This was bug #10 in the Athena github repository.  I am uncertain how
+    robust this fix will prove to be, but here's hoping it sticks.
+    '''
+
+    def eventFilter(self, receiver, event):
+        if( event.type() == QEvent.MouseButtonRelease ):
+            curs = QCursor.pos()
+            widget = QApplication.widgetAt(curs)
+            local = widget.mapFromGlobal(curs)
+            newEvent = QMouseEvent( event.type(), local, event.button(), event.buttons(), event.modifiers())
+            ret = widget.event(newEvent)
+            return ret and newEvent.isAccepted()
+        return False
+
+
 #app = DebugApp(sys.argv)
 app = QApplication(sys.argv)
 app.setAttribute(Qt.AA_SynthesizeMouseForUnhandledTouchEvents, False)
 app.setAttribute(Qt.AA_SynthesizeTouchForUnhandledMouseEvents, False)
 app.aboutToQuit.connect( athena_cleanup )
 window = AthenaWindow( )
+if sys.platform == "darwin":
+    mousefilter = MacMouseReleaseFilter()
+    app.topLevelWindows()[0].installEventFilter( mousefilter )
 sys.exit(app.exec_())
