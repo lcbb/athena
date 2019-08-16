@@ -555,6 +555,8 @@ class AthenaWindow(QMainWindow):
                 self.geomView.setRoutDisplay( bildparser.parseBildFile( path ), base_aabb, 1 )
         self.toggleOutputControls(True)
         self.toolresults = toolresults
+        # Request a redraw to avoid a bug where disabled entities might be visible at first
+        self.geomView.requestUpdate()
 
     def generatePDB( self ):
         if( self.toolresults and self.toolresults.cndofile ):

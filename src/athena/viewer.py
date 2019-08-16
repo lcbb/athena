@@ -711,6 +711,7 @@ class AthenaViewer(Qt3DExtras.Qt3DWindow, metaclass=_metaParameters):
         else:
             self.meshEntity.addComponent(self.flat_material)
         self.camControl.reset()
+        self.requestUpdate()
         return mesh_3d
 
     def setPerspectiveCam(self):
