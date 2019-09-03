@@ -1,7 +1,7 @@
 <h3 align="center">Athena</h3>
 
 <tt>
-<p>by Steve Jackson</p>
+<p>by Steve Jackson and Dr. Hyungmin Jun</p>
 
 <p> Version: {version} </p>
 
