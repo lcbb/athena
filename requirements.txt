@@ -1,4 +1,4 @@
-PySide2==5.13.0
+PySide2==5.12.3 # Do not upgrade to 5.13+ without resolving github issue #11
 setuptools_scm
 plyfile
 numpy>=1.16.2
