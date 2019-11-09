@@ -49,7 +49,7 @@ downloaded from the web, due to Apple's Gatekeeper features.
 #############
 
 As of this writing, the LCBB sequence tools are only available for Windows and Mac OSX.
-There's no reason Athena wouldn't also run fine on Windows, but it wouldn't be
+There's no reason Athena wouldn't also run fine on Linux, but it wouldn't be
 able to call sequence tools unless they were first compiled on that target.
 
 On OSX, PyInstaller creates binaries that are forward compatible with new versions
