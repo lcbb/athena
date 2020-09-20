@@ -46,6 +46,13 @@ Citing TALOS:
 M. Automated sequence design of 3D polyhedral wireframe DNA origami with
 honeycomb edges. ACS Nano, 13: 2083 (2019)
 
+
+GitHub Repositories for DAEDALUS, PERDIX, METIS, and TALOS:
+- DAEDALUS: https://github.com/lcbb/PERDIX.git
+- PERDIX: https://github.com/lcbb/DAEDALUS2.git
+- METIS: https://github.com/lcbb/TALOS.git
+- TALOS: https://github.com/lcbb/METIS.git
+
 #######################################################
 ### Important Notes on Wireframe Input Design Files ###
 #######################################################
