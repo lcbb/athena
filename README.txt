@@ -17,6 +17,9 @@ developed by the Laboratory of Prof. Mark Bathe in the Department of Biological
 Engineering at the Massachusetts Institute of Technology located in Cambridge,
 Massachusetts, USA.
 
+ATHENA is compatible with macOS versions up to Mojave 10.14. It is currently
+not compatible with 64-bit versions such as macOS Catalina or Big Sur. 
+
 After using Athena, please cite the following literature sources when
 incorporating any of its results or output files into any publication,
 presentation, or poster in order to attribute its developers and funding
