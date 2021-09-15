@@ -56,6 +56,10 @@ GitHub Repositories for DAEDALUS, PERDIX, METIS, and TALOS:
 - METIS: https://github.com/lcbb/TALOS.git
 - TALOS: https://github.com/lcbb/METIS.git
 
+ATHENA Video Tutorial 1. Basic 2D and 3D DNA Origami Structure Design Using ATHENA: https://youtu.be/NhPcCX7tWS4
+ATHENA Video Tutorial 2. DNA Origami Related USCF Chimera Basics: https://youtu.be/MUvtFiW-ODs
+ATHENA Video Tutorial 3. DNA Origami Structure Sizing: https://youtu.be/G4orhx2ggGc
+
 #######################################################
 ### Important Notes on Wireframe Input Design Files ###
 #######################################################
